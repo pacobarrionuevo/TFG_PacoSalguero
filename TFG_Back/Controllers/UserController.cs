@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.RegularExpressions;
 using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.Database.Repositorios;
 using TFG_Back.Models.DTO;
@@ -118,6 +119,57 @@ namespace TFG_Back.Controllers
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             string accessToken = tokenHandler.WriteToken(token);
             return Ok(new { StringToken = accessToken });
+        }
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserLoginDTO usuarioLoginDto)
+        {
+            string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            User user;
+
+            // Comprueba si el input del usuario es un email o un apodo
+            if (Regex.IsMatch(usuarioLoginDto.UserEmailOrNickname, emailPattern))
+            {
+                // Busca por email
+                user = _context.Users.FirstOrDefault(u => u.UserEmail == usuarioLoginDto.UserEmailOrNickname);
+            }
+            else
+            {
+                // Busca por apodo
+                user = _context.Users.FirstOrDefault(u => u.UserNickname == usuarioLoginDto.UserEmailOrNickname);
+            }
+
+            if (user == null)
+            {
+                return Unauthorized("Usuario no existe");
+            }
+
+            if (!PasswordHelper.Hash(usuarioLoginDto.UserPassword).Equals(user.UserPassword))
+            {
+                return Unauthorized("Contraseña incorrecta");
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Claims = new Dictionary<string, object>
+        {
+            {"id", user.UserId},
+            {"Apodo", user.UserNickname},
+            {"Email", user.UserEmail},
+            {"FotoPerfil",user.UserProfilePhoto},
+            {"Rol",user.Role},
+
+        },
+                Expires = DateTime.UtcNow.AddDays(5),
+                SigningCredentials = new SigningCredentials(
+                    _tokenParameters.IssuerSigningKey,
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string accessToken = tokenHandler.WriteToken(token);
+
+            return Ok(new { StringToken = accessToken, user.UserId });
         }
         private async Task StoreImageAsync(string relativePath, IFormFile file)
         {

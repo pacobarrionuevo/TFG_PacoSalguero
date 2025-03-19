@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using TFG_Back.Models.Database.Entidades;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace TFG_Back.Models.Database.Repositorios
+namespace TFG_Back.Models.Database
 {
     public class DBContext : DbContext
     {

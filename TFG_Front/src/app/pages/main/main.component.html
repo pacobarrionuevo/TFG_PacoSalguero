@@ -3,7 +3,8 @@
         <p>¡Bienvenido a Sanitarios App!</p>
     </div>
     <div class="botones">
-        <div>Menú</div>
-        <div>Inicia Sesión</div>
+        <button *ngIf="!isLoggedIn" [routerLink]="'/login'">Inicia Sesión</button>
+       <button *ngIf=" isLoggedIn" [routerLink]="'/menu'">Menú</button>
+      <button *ngIf="isLoggedIn" (click)="logout()">Cerrar Sesión</button>
     </div>
 </div>

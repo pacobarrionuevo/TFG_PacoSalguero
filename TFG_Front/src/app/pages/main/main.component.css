@@ -1,0 +1,31 @@
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(220, 232, 243);
+    text-align: center;
+    padding: 20px;
+}
+
+.titulo {
+    color: rgb(68, 152, 208);
+    width: 100%;
+}
+
+.botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.botones div {
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(68, 152, 208);
+    cursor: pointer;
+}

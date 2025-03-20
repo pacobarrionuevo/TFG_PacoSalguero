@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="Models\Mappers\" />
-    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
 </Project>

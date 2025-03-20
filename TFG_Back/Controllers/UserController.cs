@@ -105,10 +105,10 @@ namespace TFG_Back.Controllers
                 Claims = new Dictionary<string, object>
                 {
                     {"id", newUser.UserId},
-                    {"Nombre", newUser.UserNickname},
-                    {"Email", newUser.UserEmail},
-                    {"FotoPerfil", newUser.UserProfilePhoto},
-                    {"Rol", newUser.Role},
+                    {"nickname", newUser.UserNickname},
+                    {"email", newUser.UserEmail},
+                    {"profilephoto", newUser.UserProfilePhoto},
+                    {"role", newUser.Role},
                 },
                 Expires = DateTime.UtcNow.AddDays(5),
                 SigningCredentials = new SigningCredentials(
@@ -150,14 +150,14 @@ namespace TFG_Back.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
-        {
-            {"id", user.UserId},
-            {"Apodo", user.UserNickname},
-            {"Email", user.UserEmail},
-            {"FotoPerfil",user.UserProfilePhoto},
-            {"Rol",user.Role},
+                {
+                    {"id", user.UserId},
+                    {"nickname", user.UserNickname},
+                    {"email", user.UserEmail},
+                    {"profilephoto", user.UserProfilePhoto},
+                    {"role", user.Role},
 
-        },
+                },
                 Expires = DateTime.UtcNow.AddDays(5),
                 SigningCredentials = new SigningCredentials(
                     _tokenParameters.IssuerSigningKey,

@@ -8,11 +8,11 @@ import { User } from '../models/user';
   providedIn: 'root'
 })
 export class UserService {
-  private baseURL = `${environment_development.apiUrl}/api/Usuario`; 
+  private baseURL = `${environment_development.apiUrl}/User`; 
 
   constructor(private http: HttpClient) { }
 
   getUsuarios(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseURL}/api/ListaUsuario`);
+    return this.http.get<User[]>(`${this.baseURL}/users`);
   }
 }

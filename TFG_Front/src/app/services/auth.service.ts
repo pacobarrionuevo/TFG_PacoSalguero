@@ -18,7 +18,7 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   login(authData: AuthRequest, rememberMe: boolean): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/login`, authData).pipe(
+    return this.http.post<AuthResponse>(`${this.BASE_URL}/User/login`, authData).pipe(
       tap((response: AuthResponse) => {
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('accessToken');
@@ -27,10 +27,10 @@ export class AuthService {
   
         if (rememberMe) {
           localStorage.setItem('accessToken', response.stringToken);
-          localStorage.setItem('isAdmin', JSON.stringify(response.isadmin));
+          localStorage.setItem('isAdmin', JSON.stringify(response.isAdmin));
         } else {
           sessionStorage.setItem('accessToken', response.stringToken);
-          sessionStorage.setItem('isAdmin', JSON.stringify(response.isadmin));
+          sessionStorage.setItem('isAdmin', JSON.stringify(response.isAdmin));
         }
         
         this.loggedIn.next(true);
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   register(formData: FormData): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/api/Usuario/Registro`, formData, { headers: {} });
+    return this.http.post<AuthResponse>(`${this.BASE_URL}/User/register`, formData, { headers: {} });
   }
 
   logout(): void {
@@ -112,24 +112,27 @@ export class AuthService {
     }
     return null;
   }
+
   getUserData(): { 
     id: number, 
-    apodo: string, 
+    nickname: string, 
     email: string, 
-    fotoPerfil: string,
-    esAdmin: boolean 
+    profilephoto: string,
+    role: boolean 
   } | null {
+
     const token = localStorage.getItem('accessToken');
+
     if (!token) return null;
 
     try {
       const payload = this.decodeToken(token);
       return {
         id: payload.id,
-        apodo: payload.Apodo,
-        email: payload.Email,
-        fotoPerfil: payload.FotoPerfil,
-        esAdmin: payload.Rol === 'admin'
+        nickname: payload.nickname,
+        email: payload.email,
+        profilephoto: payload.profilephoto,
+        role: payload.Rol === 'admin'
       };
     } catch (e) {
       console.error('Error obteniendo datos del usuario:', e);

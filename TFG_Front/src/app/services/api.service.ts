@@ -16,7 +16,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
   
-  // Métodos existentes (get, post, put, delete, sendRequest, getHeader)
+  // Metodos existentes (get, post, put, delete, sendRequest, getHeader)
   async get<T = void>(path: string, params: any = {}, responseType: 'json' | 'text' | 'blob' | 'arraybuffer' = 'json'): Promise<Result<T>> {
     const url = `${this.BASE_URL}${path}`;
     const request$ = this.http.get(url, {

@@ -1,6 +1,6 @@
 export interface AuthResponse {
     stringToken: string;  
-    usuarioId: number;   
-    isadmin: boolean;
+    userId: number;   
+    isAdmin: boolean;
 }
   

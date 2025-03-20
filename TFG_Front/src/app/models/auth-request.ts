@@ -1,9 +1,9 @@
 export interface AuthRequest {
-    UsuarioEmail?: string;
-    UsuarioApodo?: string;
+    UserEmail?: string;
+    UserNickname?: string;
     UsuarioEmailOApodo?: string;
-    UsuarioContrasena: string;
-    UsuarioConfirmarContrasena?: string;
-    UsuarioFotoPerfil?: string;
+    UserPassword: string;
+    UserEmailOrNickname?: string;
+    UserProfilePhoto?: string;
     Remember?:boolean;
   }

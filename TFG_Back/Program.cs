@@ -19,7 +19,7 @@ builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Settings>>().
 builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-// Configuración de la base de datos
+// Configuracion de la base de datos
 builder.Services.AddScoped<DBContext>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<ImageRepository>();
@@ -29,6 +29,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 // CORS
 builder.Services.AddCors(options => {
     options.AddDefaultPolicy(builder => {
@@ -37,7 +38,8 @@ builder.Services.AddCors(options => {
                .AllowAnyHeader();
     });
 });
-// Autenticación JWT
+
+// Autenticacion JWT
 var jwtSettings = builder.Configuration.GetSection(Settings.SECTION_NAME).Get<Settings>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
@@ -68,6 +70,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseStaticFiles();
 app.UseCors();
 app.UseAuthentication();
@@ -77,7 +80,7 @@ app.MapControllers();
 app.UseHttpsRedirection();
 
 
-// Inicialización de base de datos
+// Inicializacion de base de datos
 await InitDatabaseAsync(app.Services);
 
 await app.RunAsync();

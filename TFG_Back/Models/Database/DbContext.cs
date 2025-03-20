@@ -7,16 +7,15 @@ namespace TFG_Back.Models.Database
 {
     public class DBContext : DbContext
     {
-        //Nombre de la base de datos y luego se llama ahi
+        // Nombre de la base de datos y luego se llama abajo
         private const string DATABASE_PATH = "TFG_Sanitarios.db";
 
-        //Tablas de la base de datos
+        // Tablas de la base de datos
         private readonly Settings _settings;
         public DbSet<User> Users { get; set; }
         public DbSet<Entidades.Image> Images { get; set; }
 
         // Configuramos el EntityFramework para crear un archivo de BBDD Sqlite
-
         public DBContext(IOptions<Settings> options)
         {
             _settings = options.Value;

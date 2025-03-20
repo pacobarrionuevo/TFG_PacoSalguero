@@ -1,9 +1,9 @@
 export interface User {
-    UsuarioId?: number;
-    UsuarioApodo?: string;
-    UsuarioEmail?: string;
-    UsuarioFotoPerfil?: string; 
-    UsuarioContrasena?: string; 
-    UsuarioConfirmarContrasena?: string;
-    Rol?: 'usuario' | 'admin';
+    UserId?: number;
+    UserNickname?: string;
+    UserEmail?: string;
+    UserProfilePhoto?: string; 
+    UserPassword?: string; 
+    UserConfirmPassword?: string;
+    Role?: 'user' | 'admin';
 }

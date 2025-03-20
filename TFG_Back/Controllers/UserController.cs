@@ -63,7 +63,7 @@ namespace TFG_Back.Controllers
                 })
                 .ToListAsync();
         }
-        [HttpPost("Registro")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)
         {
             if (_context.Users.Any(User => User.UserEmail == user.UserEmail))
@@ -81,7 +81,7 @@ namespace TFG_Back.Controllers
                 return BadRequest("No se ha elegido foto de perfil");
             }
                 
-            //Eso guarda la ruta
+            //Eso guarda la ruta de la foto
             string rutaFotoPerfil = $"{Guid.NewGuid()}_{user.UserProfilePhoto.FileName}";
             await StoreImageAsync("fotos/" + rutaFotoPerfil, user.UserProfilePhoto);
 
@@ -98,7 +98,8 @@ namespace TFG_Back.Controllers
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
             UserSignUpDTO userCreated = ToDtoRegistro(newUser);
-
+            
+            // Aqui es donde se hace el login dentro del registro //
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
@@ -120,21 +121,19 @@ namespace TFG_Back.Controllers
             string accessToken = tokenHandler.WriteToken(token);
             return Ok(new { StringToken = accessToken });
         }
+
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLoginDTO usuarioLoginDto)
         {
             string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             User user;
 
-            // Comprueba si el input del usuario es un email o un apodo
             if (Regex.IsMatch(usuarioLoginDto.UserEmailOrNickname, emailPattern))
             {
-                // Busca por email
                 user = _context.Users.FirstOrDefault(u => u.UserEmail == usuarioLoginDto.UserEmailOrNickname);
             }
             else
             {
-                // Busca por apodo
                 user = _context.Users.FirstOrDefault(u => u.UserNickname == usuarioLoginDto.UserEmailOrNickname);
             }
 
@@ -171,6 +170,8 @@ namespace TFG_Back.Controllers
 
             return Ok(new { StringToken = accessToken, user.UserId });
         }
+
+        // Método para crear guardar las imagenes en su formato correcto //
         private async Task StoreImageAsync(string relativePath, IFormFile file)
         {
             using Stream stream = file.OpenReadStream();

@@ -8,7 +8,7 @@ namespace TFG_Back.Models.Database
     public class DBContext : DbContext
     {
         //Nombre de la base de datos y luego se llama ahi
-        private const string DATABASE_PATH = "Dentista.db";
+        private const string DATABASE_PATH = "TFG_Sanitarios.db";
 
         //Tablas de la base de datos
         private readonly Settings _settings;

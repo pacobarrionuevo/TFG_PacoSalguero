@@ -61,7 +61,7 @@ export class AuthService {
     
     try {
       const payload = this.decodeToken(token);
-      return payload.Rol === 'admin';
+      return payload.role === 'admin';
     } catch (e) {
       console.error('Error decodificando el token:', e);
       return false;
@@ -101,9 +101,9 @@ export class AuthService {
         const payload = JSON.parse(payloadJson);
         return {
           id: payload.id || 'ID no disponible',
-          name: payload.Apodo || 'Nombre no disponible',
-          email: payload.Email || 'Correo no disponible',
-          profilePicture: payload.FotoPerfil || 'Foto no disponible'
+          name: payload.nickname || 'Nombre no disponible',
+          email: payload.email || 'Correo no disponible',
+          profilePicture: payload.profilephoto || 'Foto no disponible'
         };
       } catch (e) {
         console.error('Error al parsear el JSON del payload:', e);
@@ -132,7 +132,7 @@ export class AuthService {
         nickname: payload.nickname,
         email: payload.email,
         profilephoto: payload.profilephoto,
-        role: payload.Rol === 'admin'
+        role: payload.role === 'admin'
       };
     } catch (e) {
       console.error('Error obteniendo datos del usuario:', e);

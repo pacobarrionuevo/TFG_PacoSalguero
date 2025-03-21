@@ -12,8 +12,16 @@ import { AuthService } from '../../services/auth.service';
 })
 export class MainComponent {
   isLoggedIn: boolean = false;
+  isAdmin: boolean = false;
   constructor(private authService: AuthService, private router: Router) {}
-
+  ngOnInit(): void {
+    this.authService.isLoggedIn$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
+    this.authService.isAdmin$.subscribe(admin => {
+      this.isAdmin = admin;
+    });
+  }
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);

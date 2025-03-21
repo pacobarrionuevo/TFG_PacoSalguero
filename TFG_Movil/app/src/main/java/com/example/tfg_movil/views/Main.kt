@@ -40,7 +40,7 @@ import com.example.tfg_movil.model.authentication.DataStoreManager
 import com.example.tfg_movil.viewmodel.ViewModelAuth
 
 @Composable
-fun AplicacionPrincipal(
+fun Main(
     navController: NavHostController,
     authViewModel: ViewModelAuth
 ) {

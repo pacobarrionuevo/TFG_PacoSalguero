@@ -12,4 +12,11 @@
     <string name="Welcome">Bienvenido,</string>
     <string name="WelcomeNoLogin">Inicia sesión para acceder a la página entera</string>
     <string name="Logout">Cierra sesión</string>
+    <string name="Email">Correo</string>
+    <string name="Password">Contraseña</string>
+    <string name="ShowPassword">Mostrar Contraseña</string>
+    <string name="HidePassword">Esconder Contraseña</string>
+    <string name="CreateAccount">Crear Cuenta</string>
+    <string name="MessageToLogin">Si no tienes una cuenta... ¡Regístrate!</string>
+    <string name="MessageToRegister">Si ya tienes una cuenta... ¡Inicia Sesión!</string>
 </resources>

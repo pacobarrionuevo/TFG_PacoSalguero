@@ -22,7 +22,7 @@ import com.example.tfg_movil.model.navigation.NavigationDrawer
 import com.example.tfg_movil.ui.theme.TFG_MovilTheme
 import com.example.tfg_movil.viewmodel.ViewModelAuth
 
-class Main : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

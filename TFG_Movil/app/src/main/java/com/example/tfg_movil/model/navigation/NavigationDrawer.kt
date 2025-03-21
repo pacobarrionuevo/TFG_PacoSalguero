@@ -34,7 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,10 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.tfg_movil.model.navigation.NavigationItems
-import com.example.tfg_movil.model.navigation.RutasNavegacion
 import com.example.tfg_movil.R
-import com.google.android.gms.gcm.Task
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

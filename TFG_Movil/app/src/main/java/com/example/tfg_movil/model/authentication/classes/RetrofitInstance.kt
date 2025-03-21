@@ -1,4 +1,4 @@
-package com.example.tfg_movil.model.authentication
+package com.example.tfg_movil.model.authentication.classes
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

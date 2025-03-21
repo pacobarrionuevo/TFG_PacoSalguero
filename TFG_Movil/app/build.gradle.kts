@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     // las del proyecto
 
+    // punto de control II
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
     // punto de control IV
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")

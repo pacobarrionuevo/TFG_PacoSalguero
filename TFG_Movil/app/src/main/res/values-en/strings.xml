@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TFG_Movil</string>
+    <string name="Main">Main Page</string>
+    <string name="Login">Login</string>
+    <string name="Register">Register</string>
+    <string name="Menu">Menu</string>
+    <string name="Salir">Leave</string>
+    <string name="app_title">Sanitarios App</string>
+    <string name="ConfirmToLeave">Are you sure you want to leave?</string>
+    <string name="Accept">Accept</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Welcome">Welcome</string>
+    <string name="WelcomeNoLogin">Log in to unlock the page</string>
+    <string name="Logout">Logout</string>
+</resources>

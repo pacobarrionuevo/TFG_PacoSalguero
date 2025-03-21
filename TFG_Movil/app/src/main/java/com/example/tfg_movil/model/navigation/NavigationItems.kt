@@ -1,4 +1,4 @@
-package com.example.tfg_movil.navigation
+package com.example.tfg_movil.model.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

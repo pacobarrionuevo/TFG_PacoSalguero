@@ -399,3 +399,57 @@ FodyWeavers.xsd
 
 #gitignore pal build //Decir jose
 *build_property.ProjectDir
+ # Ignore Gradle files
+.gradle
+/local.properties
+/.idea/caches/
+/.idea/libraries/
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Ignore build directories
+/build/
+/.gradle/
+
+# Ignore APKs and generated files
+*.apk
+*.ap_  
+
+# Ignore Kotlin/Java build output
+/out/
+
+# Ignore dependency caches
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and crash reports
+*.log
+crashlytics/
+
+# Ignore Firebase files
+google-services.json
+
+# Ignore Keystore files (Security risk!)
+*.keystore
+*.jks
+
+# Ignore IntelliJ project-specific files
+/.idea/**
+
+# Ignore test reports
+/test-results/
+/test-output/
+
+# Ignore miscellaneous Android Studio files
+*.iml
+/.cache/
+/.settings/
+/.classpath
+/.project

@@ -413,3 +413,5 @@ FodyWeavers.xsd
 .externalNativeBuild
 .cxx
 local.properties
+TFG_Movil/.gradle/8.10.2/executionHistory/executionHistory.lock
+TFG_Movil/.gradle/buildOutputCleanup/buildOutputCleanup.lock

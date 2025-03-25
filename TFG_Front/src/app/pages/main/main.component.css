@@ -1,19 +1,31 @@
 
   
   
+ body {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    margin: 0; 
+    background-color: #DCE8F3; 
+  }
+  
   .overlay {
     background: linear-gradient(
-        180deg,      
-        #DCE8F3 0%,  
-        #7CC0FF 50%, 
-        #0B5BA4 100% 
-      );
+      180deg,      
+      #DCE8F3 0%,  
+      #7CC0FF 50%, 
+      #0B5BA4 100% 
+    );
+    position: relative;
     padding: 2rem;
     border-radius: 10px;
     text-align: center;
     max-width: 800px; 
-    margin: 2rem;    
+    width: 90%; 
+    margin: auto; 
   }
+  
   
  
   .overlay h1 {

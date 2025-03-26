@@ -101,7 +101,7 @@ fun Login(viewModelAuth: ViewModelAuth, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModelAuth.login(email, password, user_id ) },
+            onClick = { viewModelAuth.login(email, password ) },
             enabled = authState != AuthState.Loading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.onPrimaryContainer,

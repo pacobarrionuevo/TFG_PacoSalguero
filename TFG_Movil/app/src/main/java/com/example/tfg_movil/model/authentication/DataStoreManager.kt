@@ -2,6 +2,7 @@ package com.example.tfg_movil.model.authentication
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.firstOrNull
@@ -13,18 +14,16 @@ class DataStoreManager {
 
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
-        private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         private val EMAIL_KEY = stringPreferencesKey("email")
-        private val ID_KEY = stringPreferencesKey("id")
+        private val USER_ID_KEY  = intPreferencesKey("id")
 
         suspend fun saveCredentials(
-            context: Context, accessToken: String, refreshToken: String, email: String, id: String
+            context: Context, accessToken: String, email: String, userId: Int
         ) {
             context.dataStoreAuth.edit { preferences ->
                 preferences[ACCESS_TOKEN_KEY] = accessToken
-                preferences[REFRESH_TOKEN_KEY] = refreshToken
                 preferences[EMAIL_KEY] = email
-                preferences[ID_KEY] = id
+                preferences[USER_ID_KEY] = userId
             }
         }
 
@@ -38,10 +37,6 @@ class DataStoreManager {
             }.firstOrNull()
         }
 
-        fun getRefreshToken(context: Context) = context.dataStoreAuth.data.map { preferences ->
-            preferences[REFRESH_TOKEN_KEY]
-        }
-
         fun getEmail(context: Context) = context.dataStoreAuth.data.map { preferences ->
             preferences[EMAIL_KEY]
         }
@@ -50,8 +45,10 @@ class DataStoreManager {
             context.dataStoreAuth.edit { preferences -> preferences.clear() }
         }
 
-        fun getUserId(context: Context) = context.dataStoreAuth.data.map { preferences ->
-            preferences[ID_KEY]
+        suspend fun getUserId(context: Context): Int? {
+            return context.dataStoreAuth.data.map { preferences ->
+                preferences[USER_ID_KEY]
+            }.firstOrNull()
         }
     }
 }

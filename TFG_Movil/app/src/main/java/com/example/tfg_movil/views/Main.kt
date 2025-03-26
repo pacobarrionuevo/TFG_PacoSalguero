@@ -49,8 +49,6 @@ fun Main(
     val authState by authViewModel.authState.collectAsState()
     val userDetails by authViewModel.userDetails.collectAsState()
 
-    val refreshToken by DataStoreManager.getRefreshToken(context).collectAsState(initial = null)
-
     LaunchedEffect(Unit) {    }
 
     Scaffold { paddingValues ->

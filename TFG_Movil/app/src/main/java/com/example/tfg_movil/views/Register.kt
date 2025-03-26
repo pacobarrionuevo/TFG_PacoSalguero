@@ -100,7 +100,7 @@ fun Register(viewModelAuth: ViewModelAuth, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModelAuth.signUp(email, password, user_id) },
+            onClick = { viewModelAuth.signUp(email, password) },
             enabled = authState != AuthState.Loading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.onPrimaryContainer,

@@ -5,6 +5,6 @@ sealed class AuthState {
     object Loading : AuthState()
     data class Success(val message: String) : AuthState()
     data class Error(val message: String) : AuthState()
-    data class Authenticated(val accessToken: String, val refreshToken: String, val email: String) : AuthState()
+    data class Authenticated(val accessToken: String, val email: String, val userId: Int) : AuthState()
     object SignedOut : AuthState()
 }

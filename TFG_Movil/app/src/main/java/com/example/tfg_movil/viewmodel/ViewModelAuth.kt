@@ -30,7 +30,7 @@ class ViewModelAuth(
 
     private val appContext = context.applicationContext
 
-    fun login(email: String, password: String, user_id: String) {
+    fun login(email: String, password: String) {
         _authState.value = AuthState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -45,14 +45,13 @@ class ViewModelAuth(
                             DataStoreManager.saveCredentials(
                                 appContext,
                                 loginResponse.accessToken,
-                                loginResponse.refreshToken,
                                 email,
-                                user_id
+                                loginResponse.userId
                             )
                             _authState.value = AuthState.Authenticated(
                                 loginResponse.accessToken,
-                                loginResponse.refreshToken,
-                                email
+                                email,
+                                loginResponse.userId
                             )
 
                         } else {
@@ -75,7 +74,7 @@ class ViewModelAuth(
 
 
 
-    fun signUp(email: String, password: String, user_id: String) {
+    fun signUp(email: String, password: String) {
         _authState.value = AuthState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -83,7 +82,7 @@ class ViewModelAuth(
 
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
-                    login(email, password, user_id )
+                    login(email, password)
                     _authState.value = AuthState.Success("User registered successfully.")
                 } else {
                     val errorMessage = result.exceptionOrNull()?.message ?: "Registration failed."
@@ -105,17 +104,20 @@ class ViewModelAuth(
         _authState.value = AuthState.Idle
     }
 
-
-
     fun loadCredentials() {
         viewModelScope.launch {
-            val accessToken = DataStoreManager.getAccessToken(appContext).first()
-            val refreshToken = DataStoreManager.getRefreshToken(appContext).first()
-            val email = DataStoreManager.getEmail(appContext).first()
-            if (accessToken != null && refreshToken != null && email != null) {
-                _authState.value = AuthState.Authenticated(accessToken, refreshToken, email)
+            val accessToken = DataStoreManager.getAccessToken(appContext).firstOrNull()
+            val email = DataStoreManager.getEmail(appContext).firstOrNull()
+            val userId = DataStoreManager.getUserId(appContext)
+
+            if (accessToken != null && email != null && userId != null) {
+                _authState.value = AuthState.Authenticated(
+                    accessToken = accessToken,
+                    email = email,
+                    userId = userId
+                )
             } else {
-                _authState.value = AuthState.Idle
+                _authState.value = AuthState.SignedOut
             }
         }
     }

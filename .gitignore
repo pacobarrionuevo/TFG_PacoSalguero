@@ -413,9 +413,6 @@ FodyWeavers.xsd
 .externalNativeBuild
 .cxx
 local.properties
-TFG_Movil/.gradle
-TFG_Movil/.build
-TFG_Movil/.gradle/file-system.probe
-TFG_Movil/.gradle/8.10.2/executionHistory/executionHistory.lock
-TFG_Movil/.gradle/8.10.2/fileHashes/fileHashes.lock
-TFG_Movil/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+TFG_Movil/**/build/
+TFG_Movil/**/.gradle/
+TFG_Movil/.idea/

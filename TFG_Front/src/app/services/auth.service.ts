@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   register(formData: FormData): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/User/register`, formData, { headers: {} });
+    return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/register`, formData, { headers: {} });
   }
 
   logout(): void {

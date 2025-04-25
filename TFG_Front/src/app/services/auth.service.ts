@@ -18,7 +18,7 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   login(authData: AuthRequest, rememberMe: boolean): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/User/login`, authData).pipe(
+    return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/login`, authData).pipe(
       tap((response: AuthResponse) => {
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('accessToken');
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   register(formData: FormData): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/User/register`, formData, { headers: {} });
+    return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/register`, formData, { headers: {} });
   }
 
   logout(): void {

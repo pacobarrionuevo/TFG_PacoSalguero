@@ -77,30 +77,31 @@ export class RegisterComponent {
     const file = this.addOrEditForm.get('file')?.value as File;
   
     if (!file) {
-      alert("Por favor, selecciona una foto de perfil.");
-      return;
+        alert("Por favor, selecciona una foto de perfil.");
+        return;
     }
-  
+
     const formData = new FormData();
     formData.append('UserNickname', this.addOrEditForm.get('nickname')?.value);
     formData.append('UserEmail', this.addOrEditForm.get('email')?.value);
     formData.append('UserPassword', this.addOrEditForm.get('password')?.value);
     formData.append('UserConfirmPassword', this.addOrEditForm.get('confirm_password')?.value);
     formData.append('UserProfilePhoto', file);
-  
+
     try {
-      const result = await this.authService.register  (formData).toPromise();
-      if (result) {
-        localStorage.setItem('accessToken', result.stringToken);
-        this.jwt = result.stringToken;
-        console.log("Registro exitoso.");
-        // AQUÍ PROBAR QUE EN VEZ DE LLEVARTE AL LOGIN TE INICIE LA SESIÓN AUTOMÁTICAMENTE Y TE LLEVE AL MENÚ
-        this.router.navigate(['/login']);
-      } else {
-        console.error("No se recibió un token de acceso.");
-      }
+        const result = await this.authService.register(formData).toPromise();
+        if (result) {
+            localStorage.setItem('accessToken', result.stringToken);
+            this.jwt = result.stringToken;
+            
+            this.authService.updateAuthState();
+            
+            this.router.navigate(['/menu']);
+        } else {
+            console.error("No se recibió un token de acceso.");
+        }
     } catch (error) {
-      alert("Error al registrar:");
+        alert("Error al registrar: " + error.message);
     }
-  }
+}
 }

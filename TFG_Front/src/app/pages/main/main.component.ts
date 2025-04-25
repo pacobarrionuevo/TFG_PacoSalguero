@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-main',
@@ -11,9 +12,13 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './main.component.css'
 })
 export class MainComponent {
+  enfermeras: string;
   isLoggedIn: boolean = false;
   isAdmin: boolean = false;
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private imageService: ImageService,private authService: AuthService, private router: Router) {
+    this.enfermeras = this.imageService.getImageUrl('enfermeras.jpg');
+  }
+
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
@@ -22,6 +27,7 @@ export class MainComponent {
       this.isAdmin = admin;
     });
   }
+  
   logout() {
     this.authService.logout();
     // ?    

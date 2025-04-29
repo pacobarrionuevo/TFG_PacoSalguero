@@ -1,0 +1,95 @@
+/* Fondo del sidebar */
+.sidebar {
+    width: 220px;
+    background: linear-gradient(to bottom, #2a0066, #400080, #5f00b2);
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Sección del usuario */
+.usuario {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.usuario p {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.foto-usuario {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: white;
+}
+
+/* Navegación de secciones */
+.navegacion {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.navegacion a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.navegacion a:hover,
+.navegacion a.activo {
+    background-color: #4d0099;
+}
+
+/* Iconos ficticios por ahora */
+.icono {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 4px;
+}
+
+/* Cerrar sesión */
+.cerrar-sesion {
+    margin-top: 20px;
+}
+
+.cerrar-sesion a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #800000;
+    transition: background 0.3s ease;
+}
+
+.cerrar-sesion a:hover {
+    background-color: #990000;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+.contenido {
+    flex-grow: 1;
+    background: linear-gradient(to bottom, #ffffff, #cce0ff);
+    padding: 20px;
+    overflow-y: auto;
+}

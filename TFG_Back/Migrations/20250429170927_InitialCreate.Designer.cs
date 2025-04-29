@@ -11,7 +11,7 @@ using TFG_Back.Models.Database;
 namespace TFG_Back.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20250429120943_InitialCreate")]
+    [Migration("20250429170927_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

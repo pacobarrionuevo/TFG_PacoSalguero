@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './menu-agenda.component.html',
   styleUrl: './menu-agenda.component.css'
-})
+})  
 export class MenuAgendaComponent {
 
 }

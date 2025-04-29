@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+ï»¿using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 using TFG_Back;
 using TFG_Back.Models.Database.Repositorios;
@@ -11,7 +11,7 @@ Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración inicial
+// Configuraciï¿½n inicial
 builder.Services.Configure<Settings>(builder.Configuration.GetSection(Settings.SECTION_NAME));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Settings>>().Value);
 

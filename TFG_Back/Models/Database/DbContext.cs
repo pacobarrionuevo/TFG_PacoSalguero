@@ -14,6 +14,7 @@ namespace TFG_Back.Models.Database
         private readonly Settings _settings;
         public DbSet<User> Users { get; set; }
         public DbSet<Entidades.Image> Images { get; set; }
+        public DbSet<EntradaAgenda> EntradasAgenda { get; set; }
 
         // Configuramos el EntityFramework para crear un archivo de BBDD Sqlite
         public DBContext(IOptions<Settings> options)

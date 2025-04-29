@@ -1,4 +1,5 @@
-﻿    using TFG_Back.Models.Database.Entidades;
+﻿using Microsoft.EntityFrameworkCore;
+using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.Recursos;
 
 namespace TFG_Back.Models.Database
@@ -14,6 +15,8 @@ namespace TFG_Back.Models.Database
 
         public async Task SeedAsync()
         {
+
+            await _dBContext.Database.MigrateAsync();
             await SeedImagesAsync();
             await _dBContext.SaveChangesAsync();
         }
@@ -23,7 +26,8 @@ namespace TFG_Back.Models.Database
             // Todos los usuarios
             User usuario1 = new User()
             {
-                UserId = 1,
+                
+                //UserId = 1,
                 UserNickname = "Jose",
                 UserEmail = "jose777@gmail.com",
                 UserPassword = PasswordHelper.Hash("jose777"),

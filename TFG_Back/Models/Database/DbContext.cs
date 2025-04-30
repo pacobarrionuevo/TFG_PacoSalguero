@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TFG_Back.Models.Database.Entidades;
 using static System.Net.Mime.MediaTypeNames;
@@ -24,11 +25,16 @@ namespace TFG_Back.Models.Database
             _settings = options.Value;
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        protected override void OnConfiguring(DbContextOptionsBuilder options)            
         {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
-            //options.UseSqlite(_settings.DatabaseConnection);
+        #if DEBUG
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
+#else
+            string connection = "Server = db18491.databaseasp.net; Database = db18491; Uid = db18491; Pwd = 8Qj_Z-9r!2fL";
+            options.UseMySql(connection, ServerVersion.AutoDetect(connection));
+#endif
+
         }
     }
 }

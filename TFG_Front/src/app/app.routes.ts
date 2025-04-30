@@ -4,6 +4,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { MenuComponent } from './pages/menu/menu.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { AgendaComponent } from './pages/agenda/agenda.component';
 export const routes: Routes = [
     {
         path: '',
@@ -25,5 +26,9 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminComponent
     },
+    {
+        path: 'agenda',
+    component: AgendaComponent
+},
     
 ];

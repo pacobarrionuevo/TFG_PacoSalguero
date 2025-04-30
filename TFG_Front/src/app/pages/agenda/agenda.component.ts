@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { AgendaService } from '../../services/agenda.service';
 import { EntradaAgenda } from '../../models/entrada-agenda';
-
 @Component({
-  selector: 'app-menu-agenda',
-  templateUrl: './menu-agenda.component.html',
-  styleUrls: ['./menu-agenda.component.css']
+  selector: 'app-agenda',
+  standalone: true,
+  imports: [],
+  templateUrl: './agenda.component.html',
+  styleUrl: './agenda.component.css'
 })
-export class ListaAgendaComponent implements OnInit {
+export class AgendaComponent {
   entradas: EntradaAgenda[] = [];
 
   constructor(private agendaService: AgendaService) { }

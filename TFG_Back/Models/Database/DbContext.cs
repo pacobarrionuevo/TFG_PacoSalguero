@@ -16,6 +16,8 @@ namespace TFG_Back.Models.Database
         public DbSet<Entidades.Image> Images { get; set; }
         public DbSet<EntradaAgenda> EntradasAgenda { get; set; }
 
+        public DbSet<Service> Servicios { get; set; }
+
         // Configuramos el EntityFramework para crear un archivo de BBDD Sqlite
         public DBContext(IOptions<Settings> options)
         {

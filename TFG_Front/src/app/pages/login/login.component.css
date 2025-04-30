@@ -1,0 +1,78 @@
+/* Fondo general con degradado */
+.general {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to top, #cce6ff, #ffffff);
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor principal del formulario */
+.cuadradoFuera {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 400px;
+    text-align: center;
+}
+
+/* Título */
+#iniciarSesion {
+    color: #0077c2;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Inputs */
+.inputs input[type="text"],
+.inputs input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 14px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+/* Checkbox */
+.inputs label {
+    font-size: 14px;
+}
+
+/* Botón */
+#button {
+    margin-top: 10px;
+    background: linear-gradient(to right, orange, #ffcc00);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+}
+
+#button:hover {
+    background: linear-gradient(to right, #ff9900, #ffdb4d);
+}
+
+/* Enlace de registro */
+#llevarRegistro {
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+#llevarRegistro a {
+    color: #0077c2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#llevarRegistro a:hover {
+    text-decoration: underline;
+}

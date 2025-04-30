@@ -1,0 +1,82 @@
+/* Fondo general con degradado */
+.general {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to top, #cce6ff, #ffffff);
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor principal del formulario */
+.cuadradoFuera {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 500px;
+    text-align: center;
+}
+
+/* Título */
+#registrarse {
+    color: #0077c2;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Estilo de etiquetas y campos */
+.label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px auto;
+    width: 90%;
+    font-size: 14px;
+}
+
+.label input[type="text"],
+.label input[type="password"],
+.label input[type="file"] {
+    flex: 1;
+    margin-left: 10px;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Botón de confirmar */
+input[type="submit"] {
+    background: linear-gradient(to right, orange, #ffcc00);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background: linear-gradient(to right, #ff9900, #ffdb4d);
+}
+
+/* Enlace de navegación */
+#llevarRegistro {
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+#llevarRegistro a {
+    color: #0077c2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#llevarRegistro a:hover {
+    text-decoration: underline;
+}

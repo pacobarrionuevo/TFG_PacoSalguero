@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">TFG_Movil</string>
+    <string name="Main">Página Principal</string>
+    <string name="Login">Iniciar Sesión</string>
+    <string name="Register">Registrarse</string>
+    <string name="Menu">Menú</string>
+    <string name="Salir">Salir</string>
+    <string name="app_title">Sanitarios App</string>
+    <string name="ConfirmToLeave">¿Seguro que quieres salir?</string>
+    <string name="Accept">Aceptar</string>
+    <string name="Cancel">Cancelar</string>
+    <string name="Welcome">Bienvenido,</string>
+    <string name="WelcomeNoLogin">Inicia sesión para acceder a la página entera</string>
+    <string name="Logout">Cierra sesión</string>
+    <string name="Email">Correo</string>
+    <string name="Password">Contraseña</string>
+    <string name="ShowPassword">Mostrar Contraseña</string>
+    <string name="HidePassword">Esconder Contraseña</string>
+    <string name="CreateAccount">Crear Cuenta</string>
+    <string name="MessageToLogin">Si no tienes una cuenta... ¡Regístrate!</string>
+    <string name="MessageToRegister">Si ya tienes una cuenta... ¡Inicia Sesión!</string>
 </resources>

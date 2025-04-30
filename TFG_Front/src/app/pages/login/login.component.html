@@ -1,0 +1,29 @@
+<div class="general">
+    <div class="cuadradoFuera">
+        <div class="cajita">
+            <h1 id="iniciarSesion">
+                <u>INICIAR SESIÓN</u>
+            </h1>
+        </div>
+        <br>
+        <form (ngSubmit)="submit()">
+            <div class="inputs">
+                <input type="text" id="emailoapodo" [(ngModel)]="emailOrNickname" name="emailoapodo" required placeholder="Introduce tu email o apodo">
+            </div>
+            <br>
+            <div class="inputs">
+                <input type="password" id="contrasena" [(ngModel)]="password" name="contrasena" required placeholder="Introduce contraseña">
+            </div>
+            <br>
+            <div class="inputs">
+                <label>
+                <input type="checkbox" [(ngModel)]="remember" [ngModelOptions]="{standalone: true}"/>Recuérdame</label>
+            </div>
+            <br>
+            <button type="submit" id="button">CONFIRMAR</button>
+        </form>
+        <p id="llevarRegistro">
+            Si no tienes una cuenta, <b><u><a [routerLink]="'/register'">Regístrate aquí</a></u></b>
+        </p>
+    </div>
+</div>

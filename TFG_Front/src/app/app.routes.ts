@@ -1,3 +1,44 @@
 import { Routes } from '@angular/router';
-
-export const routes: Routes = [];
+import { MainComponent } from './pages/main/main.component';
+import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { MenuComponent } from './pages/menu/menu.component';
+import { AdminComponent } from './pages/admin/admin.component';
+import { AgendaComponent } from './pages/agenda/agenda.component';
+import { CrearentradaComponent } from './pages/crearentrada/crearentrada.component';
+import { FicherosComponent } from './pages/ficheros/ficheros.component';
+export const routes: Routes = [
+    {
+        path: '',
+        component: MainComponent
+    },
+    {
+        path: 'login',
+        component: LoginComponent
+    },
+    {
+        path: 'register',
+        component: RegisterComponent
+    },
+    {
+        path: 'menu',
+        component: MenuComponent
+    },
+    {
+        path: 'admin',
+        component: AdminComponent
+    },
+    {
+        path: 'agenda',
+        component: AgendaComponent
+    },
+    {
+        path: 'crearentrada',
+        component: CrearentradaComponent
+    },
+    {
+        path: 'ficheros',
+        component: FicherosComponent
+    }
+    
+];

@@ -398,14 +398,21 @@ FodyWeavers.xsd
 *.sln.iml
 
 #gitignore pal build //Decir jose
+<<<<<<< HEAD
 *build_property.ProjectDir
 
 # Android Studio
+=======
+>>>>>>> paco
 *.iml
 .gradle
 /local.properties
 /.idea/caches
+<<<<<<< HEAD
 /.idea/libraries
+=======
+/.idea/libraries    
+>>>>>>> paco
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
@@ -416,3 +423,9 @@ FodyWeavers.xsd
 .externalNativeBuild
 .cxx
 local.properties
+<<<<<<< HEAD
+=======
+TFG_Movil/**/build/
+TFG_Movil/**/.gradle/
+TFG_Movil/.idea/
+>>>>>>> paco

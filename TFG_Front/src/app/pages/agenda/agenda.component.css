@@ -103,3 +103,11 @@ h2 {
     opacity: 0.9;
     transform: translateY(-1px);
 }
+.action-buttons {
+    margin-top: 2rem;
+    text-align: right;
+  }
+  
+  .fa-plus {
+    margin-right: 0.5rem;
+  }

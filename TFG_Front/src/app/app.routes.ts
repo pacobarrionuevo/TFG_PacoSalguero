@@ -6,6 +6,7 @@ import { MenuComponent } from './pages/menu/menu.component';
 import { AdminComponent } from './pages/admin/admin.component';
 import { AgendaComponent } from './pages/agenda/agenda.component';
 import { CrearentradaComponent } from './pages/crearentrada/crearentrada.component';
+import { FicherosComponent } from './pages/ficheros/ficheros.component';
 export const routes: Routes = [
     {
         path: '',
@@ -29,10 +30,15 @@ export const routes: Routes = [
     },
     {
         path: 'agenda',
-    component: AgendaComponent
-},{
-    path: 'crearentrada',
-component: CrearentradaComponent
-},
+        component: AgendaComponent
+    },
+    {
+        path: 'crearentrada',
+        component: CrearentradaComponent
+    },
+    {
+        path: 'ficheros',
+        component: FicherosComponent
+    }
     
 ];

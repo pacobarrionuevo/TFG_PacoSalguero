@@ -1,1 +1,32 @@
-<p>ficheros works!</p>
+<div class="container">
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Abreviatura</th>
+            <th>Color</th>
+            <th>Modificar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let servicio of servicios">
+            <td>{{ servicio.nombre }}</td>
+            <td>{{ servicio.abreviatura }}</td>
+            <td>
+              <div class="color-box" [style.background]="servicio.color"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="formulario">
+      <h3>CREAR SERVICIO</h3>
+      <input type="text" placeholder="Nombre" [(ngModel)]="nuevoServicio.nombre" />
+      <input type="text" placeholder="Abreviatura" [(ngModel)]="nuevoServicio.abreviatura" />
+      <input type="color" placeholder="Color" [(ngModel)]="nuevoServicio.color" />
+      <button class="crear-btn" (click)="crearServicio()">CREAR</button>
+    </div>
+  </div>
+  

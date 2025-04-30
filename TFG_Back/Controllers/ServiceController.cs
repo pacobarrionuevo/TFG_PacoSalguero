@@ -18,14 +18,14 @@ namespace TFG_Back.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
+        [HttpGet("get_services")]
         public async Task<ActionResult<IEnumerable<Service>>> GetAll()
         {
             var servicios = await _services.GetAllAsync();
             return Ok(servicios);
         }
 
-        [HttpPost]
+        [HttpPost("post_services")]
         public async Task<ActionResult<Service>> Create([FromBody] Service servicio)
         {
             var nuevoServicio = await _services.CreateAsync(servicio);

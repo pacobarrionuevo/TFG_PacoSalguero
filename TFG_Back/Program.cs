@@ -6,6 +6,7 @@ using TFG_Back.Models.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TFG_Back.Services;
 
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
@@ -24,6 +25,9 @@ builder.Services.AddScoped<DBContext>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<ImageRepository>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ServiceRepository>();
+
+builder.Services.AddTransient<ServicesService>();
 
 
 builder.Services.AddControllers();

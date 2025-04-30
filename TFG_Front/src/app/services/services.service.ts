@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 })
 export class ServicesService {
 
-  private baseURL = 'https://localhost:7077/api/Service';
+  private baseURL = 'https://tfg-paco-salguero.runasp.net/api/Service';
+  //private baseURL = 'https://localhost:7077/api/Service';
 
   constructor(private http: HttpClient) {}
 

@@ -8,7 +8,9 @@ import { EntradaAgenda } from '../models/entrada-agenda';
   providedIn: 'root'
 })
 export class AgendaService {
-  private apiUrl = 'https://localhost:7077/api/agenda'; 
+
+  private apiUrl = 'https://tfg-paco-salguero.runasp.net/api/agenda';
+  //private apiUrl = 'https://localhost:7077/api/agenda'; 
 
   constructor(private http: HttpClient) { }
 

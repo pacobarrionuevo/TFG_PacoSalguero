@@ -13,10 +13,10 @@ export class ServicesService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Service[]> {
-    return this.http.get<Service[]>(`${this.baseURL}`);
+    return this.http.get<Service[]>(`${this.baseURL}/get_services`);
   }
 
   create(service: Service): Observable<Service> {
-    return this.http.post<Service>(`${this.baseURL}`, service);
+    return this.http.post<Service>(`${this.baseURL}/post_services`, service);
   }
 }

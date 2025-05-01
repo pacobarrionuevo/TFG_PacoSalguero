@@ -30,6 +30,13 @@ Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º
 
 ---
 
+### Figma
+
+- Aquí dejamos un [link para ver los diseños de la web.](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=0-1&t=v1YzdPGRU6amQ3YP-1).
+- Aún hay vistas por añadir
+
+---
+
 ## 📌 Estado Actual
 
 - La estructura general del sistema está implementada.

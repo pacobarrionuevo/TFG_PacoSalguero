@@ -17,6 +17,7 @@ namespace TFG_Back.Models.Database
         public DbSet<EntradaAgenda> EntradasAgenda { get; set; }
 
         public DbSet<Service> Servicios { get; set; }
+        public DbSet<PaymentMethod> Payments { get; set; }
 
         // Configuramos el EntityFramework para crear un archivo de BBDD Sqlite
         public DBContext(IOptions<Settings> options)

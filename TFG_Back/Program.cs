@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TFG_Back.Services;
+using TFG_Back.Servicios;
 
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
@@ -26,8 +27,10 @@ builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<ImageRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ServiceRepository>();
+builder.Services.AddScoped<PaymentMethodRepository>();
 
 builder.Services.AddTransient<ServicesService>();
+builder.Services.AddTransient<PaymentMethodService>();
 
 
 builder.Services.AddControllers();

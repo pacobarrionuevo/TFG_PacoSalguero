@@ -15,8 +15,6 @@ namespace TFG_Back.Models.Database
 
         public async Task SeedAsync()
         {
-
-            await _dBContext.Database.MigrateAsync();
             await SeedImagesAsync();
             await _dBContext.SaveChangesAsync();
         }

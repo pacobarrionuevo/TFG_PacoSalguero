@@ -25,9 +25,8 @@ export class PaymentMethodService {
     return this.http.put<PaymentMethod>(`${this.baseURL}`, paymentMethod);
   }
 
-  /*
-  delete(id: Number): Observable<PaymentMethod> {
-    return this.http.delete(`${this.baseURL}/${id}`);
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseURL}/${id}`);
   }
-  */
+
 }

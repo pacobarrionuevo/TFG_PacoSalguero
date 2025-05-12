@@ -24,11 +24,11 @@ export class FicherosComponent implements OnInit {
   };
 
   newPaymentMethod: PaymentMethod = {
-    Method: '',
-    Installments: 0,
-    FirstPaymentDays: 0,
-    DaysBetweenPayments: 0
-  }
+  method: '',
+  installments: 0,
+  firstPaymentDays: 0,
+  daysBetweenPayments: 0
+  };
 
   constructor(private servicioService: ServicesService, private paymentMethodService: PaymentMethodService) {}
 
@@ -78,16 +78,20 @@ export class FicherosComponent implements OnInit {
   }
 
   crearMetodoPago() {
-    if (!this.newPaymentMethod.Method || !this.newPaymentMethod.Installments ||
-      !this.newPaymentMethod.FirstPaymentDays || !this.newPaymentMethod.DaysBetweenPayments) {
-      alert("Todos los campos son obligatorios");
+    if (!this.newPaymentMethod.method ||
+        this.newPaymentMethod.installments < 1 ||
+        this.newPaymentMethod.firstPaymentDays < 0 ||
+        this.newPaymentMethod.daysBetweenPayments < 0) {
+      alert("Todos los campos son obligatorios y deben tener valores válidos");
       return;
     }
 
+
     this.paymentMethodService.create(this.newPaymentMethod).subscribe({
       next: (nuevo) => {
+        console.log('Método de pago creado:', nuevo);
         this.paymentMethods.push(nuevo);
-        this.newPaymentMethod = { Method: '', Installments: 0, FirstPaymentDays: 0, DaysBetweenPayments: 0}
+        this.newPaymentMethod = { method: '', installments: 0, firstPaymentDays: 0, daysBetweenPayments: 0}
       },
       error: (err) => {
         console.error('Error al crear método de pago:', err);

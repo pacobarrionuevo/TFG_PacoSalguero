@@ -1,7 +1,7 @@
 export interface PaymentMethod {
     id?: number;
-    Method: String;
-    Installments: number;
-    FirstPaymentDays: number;
-    DaysBetweenPayments: number;
+    method: String;
+    installments: number;
+    firstPaymentDays: number;
+    daysBetweenPayments: number;
 }

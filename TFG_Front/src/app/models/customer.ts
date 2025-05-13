@@ -1,6 +1,6 @@
 import { PaymentMethod } from "./payment-method";
 
-export interface Client {
+export interface Customer {
     id?: number;
     CIF: number;
     name: string;

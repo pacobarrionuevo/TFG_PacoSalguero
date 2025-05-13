@@ -33,6 +33,8 @@
     </div>
   </div>
 
+  <br>
+
   <!--Tabla y formulario para ver y añadir una forma de pago-->
   <div class="elemento2">
     <div class="tabla">
@@ -71,5 +73,44 @@
       <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
     </div>
   </div>
+
+  <!---->
+  <div class="elemento3">
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Número de Teléfono</th>
+            <th>Email</th>
+            <th>Dirección</th>
+            <th>Código Postal</th>
+            <th>Mostrar Datos Completos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let paymentMethod of paymentMethods">
+            <td>{{ paymentMethod.method }}</td>
+            <td>{{ paymentMethod.installments }}</td>
+            <td>{{ paymentMethod.firstPaymentDays }}</td>
+            <td>{{ paymentMethod.daysBetweenPayments }}</td>
+            <td>
+              <button>Modificar</button>
+              |
+              <button>Borrar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="formulario">
+      <h3>CREAR MÉTODO DE PAGO</h3>
+      <input type="text" [(ngModel)]="newPaymentMethod.method" placeholder="Método" />
+      <input type="number" [(ngModel)]="newPaymentMethod.installments" placeholder="Vencimientos" />
+      <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" placeholder="Primer pago" />
+      <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" placeholder="Días entre pagos" />
+      <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
+    </div>
 </div>
   

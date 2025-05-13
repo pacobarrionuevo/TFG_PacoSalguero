@@ -2,7 +2,7 @@
 export interface EntradaAgenda {
     id: number;
     fecha: Date;
-    hora: string; // O TimeSpan
+    hora: Date | string; 
     cliente: string;
     centroTrabajo: string;
     servicio: string;

@@ -11,13 +11,15 @@ import { RouterModule } from '@angular/router';
   styleUrl: './agenda.component.css'
 })
 export class AgendaComponent {
+  
   entradas: EntradaAgenda[] = [];
 
   constructor(private agendaService: AgendaService) { }
-
+  
   ngOnInit(): void {
     this.cargarEntradas();
   }
+  
 
   cargarEntradas(): void {
     this.agendaService.getEntradas().subscribe({

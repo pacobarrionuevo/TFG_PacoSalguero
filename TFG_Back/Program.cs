@@ -28,9 +28,11 @@ builder.Services.AddScoped<ImageRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ServiceRepository>();
 builder.Services.AddScoped<PaymentMethodRepository>();
+builder.Services.AddScoped<CustomerRepository>();
 
 builder.Services.AddTransient<ServicesService>();
 builder.Services.AddTransient<PaymentMethodService>();
+builder.Services.AddTransient<CustomerService>();
 
 
 builder.Services.AddControllers();

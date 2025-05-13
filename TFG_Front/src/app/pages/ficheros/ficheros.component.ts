@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentMethod } from '../../models/payment-method';
 import { PaymentMethodService } from '../../services/payment-method.service';
+import { Customer } from '../../models/customer';
+import { CustomerService } from '../../services/customer.service';
 
 @Component({
   selector: 'app-ficheros',
@@ -16,6 +18,7 @@ import { PaymentMethodService } from '../../services/payment-method.service';
 export class FicherosComponent implements OnInit {
   servicios: Service[] = [];
   paymentMethods: PaymentMethod[] = [];
+  customers: Customer[] = [];
 
   nuevoServicio: Service = {
     nombre: '',
@@ -24,17 +27,31 @@ export class FicherosComponent implements OnInit {
   };
 
   newPaymentMethod: PaymentMethod = {
-  method: '',
-  installments: 0,
-  firstPaymentDays: 0,
-  daysBetweenPayments: 0
+    method: '',
+    installments: 0,
+    firstPaymentDays: 0,
+    daysBetweenPayments: 0
   };
 
-  constructor(private servicioService: ServicesService, private paymentMethodService: PaymentMethodService) {}
+  newCustomer: Customer = {
+    CIF: 0,
+    name: '',
+    adress: '',
+    postalCode: 0,
+    placeOfResidence: '',
+    phoneNumber: 0,
+    email: '',
+    adminEmail: '',
+    paymentMethod: this.newPaymentMethod,
+  }
+
+  constructor(private servicioService: ServicesService, private paymentMethodService: PaymentMethodService,
+    private customerService: CustomerService) {}
 
   ngOnInit(): void {
     this.cargarServicios();
     this.cargarMetodosPago();
+    this.cargarClientes();
   }
 
   ///////////////////////////////////////////////////
@@ -99,4 +116,48 @@ export class FicherosComponent implements OnInit {
       }
     });
   }
+
+  ///////////////////////////////////////////////////
+  /////// Lógica relacionada con los clientes ///////
+  ///////////////////////////////////////////////////
+
+  cargarClientes() {
+    this.customerService.getAll().subscribe({
+      next: (data) => this.customers = data,
+      error: (err) => console.error('Error al obtener métodos de pago:', err)
+    });
+  }
+
+  crearClientes() {
+  const c = this.newCustomer;
+
+  if (!c.name || !c.email || !c.paymentMethod || c.CIF <= 0 || c.phoneNumber <= 0) {
+    alert("Faltan campos obligatorios o hay valores inválidos.");
+    return;
+  }
+
+  this.customerService.create(c).subscribe({
+    next: (clienteCreado) => {
+      console.log('Cliente creado:', clienteCreado);
+      this.customers.push(clienteCreado);
+      alert("Cliente creado correctamente");
+      // opcional: reiniciar formulario
+      this.newCustomer = {
+        CIF: 0,
+        name: '',
+        adress: '',
+        postalCode: 0,
+        placeOfResidence: '',
+        phoneNumber: 0,
+        email: '',
+        adminEmail: '',
+        paymentMethod: this.newPaymentMethod
+      };
+    },
+    error: (err) => {
+      console.error('Error al crear cliente:', err);
+      alert("Error al crear cliente");
+    }
+  });
+}
 }

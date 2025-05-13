@@ -74,7 +74,7 @@
     </div>
   </div>
 
-  <!---->
+  <!--Tabla y formulario para ver y añadir un cliente-->
   <div class="elemento3">
     <div class="tabla">
       <table>
@@ -89,28 +89,34 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let paymentMethod of paymentMethods">
-            <td>{{ paymentMethod.method }}</td>
-            <td>{{ paymentMethod.installments }}</td>
-            <td>{{ paymentMethod.firstPaymentDays }}</td>
-            <td>{{ paymentMethod.daysBetweenPayments }}</td>
-            <td>
-              <button>Modificar</button>
-              |
-              <button>Borrar</button>
-            </td>
-          </tr>
-        </tbody>
+        <tr *ngFor="let customer of customers">
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.phoneNumber }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.adress }}</td>
+          <td>{{ customer.postalCode }}</td>
+          <td>
+            <button>Modificar</button>
+            |
+            <button>Borrar</button>
+          </td>
+        </tr>
+      </tbody>
       </table>
     </div>
   
     <div class="formulario">
-      <h3>CREAR MÉTODO DE PAGO</h3>
-      <input type="text" [(ngModel)]="newPaymentMethod.method" placeholder="Método" />
-      <input type="number" [(ngModel)]="newPaymentMethod.installments" placeholder="Vencimientos" />
-      <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" placeholder="Primer pago" />
-      <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" placeholder="Días entre pagos" />
-      <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
-    </div>
+    <h3>CREAR CLIENTE</h3>
+    <input type="number" [(ngModel)]="newCustomer.CIF" placeholder="CIF" />
+    <input type="text" [(ngModel)]="newCustomer.name" placeholder="Nombre" />
+    <input type="text" [(ngModel)]="newCustomer.adress" placeholder="Dirección" />
+    <input type="number" [(ngModel)]="newCustomer.postalCode" placeholder="Código Postal" />
+    <input type="text" [(ngModel)]="newCustomer.placeOfResidence" placeholder="Lugar de residencia" />
+    <input type="number" [(ngModel)]="newCustomer.phoneNumber" placeholder="Teléfono" />
+    <input type="email" [(ngModel)]="newCustomer.email" placeholder="Email" />
+    <input type="email" [(ngModel)]="newCustomer.adminEmail" placeholder="Email Administrativo" />
+    <input type="text" [(ngModel)]="newCustomer.paymentMethod" placeholder="Método de pago (nombre)" />
+    <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
+  </div>
 </div>
   

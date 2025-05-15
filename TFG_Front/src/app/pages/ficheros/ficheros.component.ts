@@ -34,7 +34,7 @@ export class FicherosComponent implements OnInit {
   };
 
   newCustomer: Customer = {
-    CIF: 0,
+    cif: 0,
     name: '',
     adress: '',
     postalCode: 0,
@@ -129,21 +129,40 @@ export class FicherosComponent implements OnInit {
   }
 
   crearClientes() {
-  const c = this.newCustomer;
-
-  if (!c.name || !c.email || !c.paymentMethod || c.CIF <= 0 || c.phoneNumber <= 0) {
+  // Validación básica
+  if (
+    !this.newCustomer.name ||
+    !this.newCustomer.email ||
+    !this.newCustomer.paymentMethodId ||
+    this.newCustomer.cif <= 0 ||
+    this.newCustomer.phoneNumber <= 0
+  ) {
     alert("Faltan campos obligatorios o hay valores inválidos.");
     return;
   }
 
-  this.customerService.create(c).subscribe({
+  // Crear objeto con solo los campos que necesita el backend
+  const clienteDTO = {
+    cif: this.newCustomer.cif,
+    name: this.newCustomer.name,
+    adress: this.newCustomer.adress,
+    postalCode: this.newCustomer.postalCode,
+    placeOfResidence: this.newCustomer.placeOfResidence,
+    phoneNumber: this.newCustomer.phoneNumber,
+    email: this.newCustomer.email,
+    adminEmail: this.newCustomer.adminEmail,
+    paymentMethodId: this.newCustomer.paymentMethodId
+  };
+
+  this.customerService.create(clienteDTO).subscribe({
     next: (clienteCreado) => {
       console.log('Cliente creado:', clienteCreado);
       this.customers.push(clienteCreado);
       alert("Cliente creado correctamente");
-      // opcional: reiniciar formulario
+
+      // Reiniciar formulario
       this.newCustomer = {
-        CIF: 0,
+        cif: 0,
         name: '',
         adress: '',
         postalCode: 0,
@@ -151,7 +170,8 @@ export class FicherosComponent implements OnInit {
         phoneNumber: 0,
         email: '',
         adminEmail: '',
-        paymentMethod: this.newPaymentMethod
+        paymentMethodId: undefined,
+        paymentMethod: undefined
       };
     },
     error: (err) => {
@@ -160,4 +180,6 @@ export class FicherosComponent implements OnInit {
     }
   });
 }
+
+
 }

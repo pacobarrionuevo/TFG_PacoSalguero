@@ -150,9 +150,9 @@ export class FicherosComponent implements OnInit {
     placeOfResidence: this.newCustomer.placeOfResidence,
     phoneNumber: this.newCustomer.phoneNumber,
     email: this.newCustomer.email,
-    adminEmail: this.newCustomer.adminEmail,
-    paymentMethodId: this.newCustomer.paymentMethodId
-  };
+    adminEmail: this.newCustomer.adminEmail, 
+    paymentMethodId: this.newCustomer.paymentMethodId 
+};
 
   this.customerService.create(clienteDTO).subscribe({
     next: (clienteCreado) => {

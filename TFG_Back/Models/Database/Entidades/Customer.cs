@@ -10,7 +10,7 @@
         public string PlaceOfResidence { get; set; }
         public int PhoneNumber { get; set; }
         public string Email { get; set; }
-        public string AdminisEmail { get; set; }
+        public string AdminEmail { get; set; }
 
         public int PaymentMethodId { get; set; } //FK
         public PaymentMethod PaymentMethod { get; set; }

@@ -27,7 +27,7 @@ export class CrearentradaComponent {
     this.entradaForm = this.fb.group({
       cliente: ['', Validators.required],
       centroTrabajo: ['', Validators.required],
-      servicio: ['', Validators.required],
+      servicioId: ['', Validators.required],
       precio: [0, [Validators.required, Validators.min(0)]],
       paciente: [''],
       observaciones: [''],

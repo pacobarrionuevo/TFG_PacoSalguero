@@ -3,4 +3,5 @@ export interface Service {
     nombre: string;
     abreviatura: string;
     color: string;
+    editing?: boolean;
   }

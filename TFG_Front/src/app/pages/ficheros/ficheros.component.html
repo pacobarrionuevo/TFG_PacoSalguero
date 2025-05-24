@@ -14,12 +14,21 @@
         <tbody>
           <!--Añadir botón para poder editar o borrar algún servicio-->
           <tr *ngFor="let servicio of servicios">
-            <td>{{ servicio.nombre }}</td>
-            <td>{{ servicio.abreviatura }}</td>
-            <td>
-              <div class="color-box" [style.background]="servicio.color"></div>
-            </td>
-          </tr>
+  <td>
+    <input type="text" [(ngModel)]="servicio.nombre" [disabled]="!servicio.editing">
+  </td>
+  <td>
+    <input type="text" [(ngModel)]="servicio.abreviatura" [disabled]="!servicio.editing">
+  </td>
+  <td>
+    <input type="color" [(ngModel)]="servicio.color" [disabled]="!servicio.editing">
+  </td>
+  <td>
+    <button *ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
+    <button *ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
+    <button (click)="eliminarServicio(servicio.id)">🗑️</button>
+  </td>
+</tr>
         </tbody>
       </table>
     </div>

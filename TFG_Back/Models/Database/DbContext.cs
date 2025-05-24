@@ -19,6 +19,13 @@ namespace TFG_Back.Models.Database
         public DbSet<Service> Servicios { get; set; }
         public DbSet<PaymentMethod> Payments { get; set; }
         public DbSet <Customer> Customers { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EntradaAgenda>()
+                .HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId);
+        }
 
         // Configuramos el EntityFramework para crear un archivo de BBDD Sqlite
         public DBContext(IOptions<Settings> options)

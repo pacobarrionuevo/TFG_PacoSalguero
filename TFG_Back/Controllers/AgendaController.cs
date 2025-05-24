@@ -28,8 +28,16 @@ namespace TFG_Back.Controllers
         [HttpPost]
         public async Task<ActionResult<EntradaAgenda>> CrearEntrada([FromBody] EntradaAgenda entrada)
         {
+            // Validar que el servicio existe
+            var servicioExistente = await _context.Servicios.FindAsync(entrada.ServiceId);
+            if (servicioExistente == null)
+            {
+                return BadRequest("El servicio especificado no existe");
+            }
+
             entrada.Fecha = DateTime.Today;
             entrada.Hora = DateTime.Now.TimeOfDay;
+
             _context.EntradasAgenda.Add(entrada);
             await _context.SaveChangesAsync();
 

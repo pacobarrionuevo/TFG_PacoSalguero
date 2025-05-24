@@ -32,5 +32,24 @@ namespace TFG_Back.Controllers
             await _unitOfWork.SaveAsync();
             return CreatedAtAction(nameof(Create), new { id = nuevoServicio.Id }, nuevoServicio);
         }
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Service>> Update(int id, [FromBody] Service servicio)
+        {
+            if (id != servicio.Id) return BadRequest("ID mismatch");
+
+            var updated = await _services.UpdateAsync(servicio);
+            await _unitOfWork.SaveAsync();
+
+            return updated != null ? Ok(updated) : NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _services.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
+
+            return result ? NoContent() : NotFound();
+        }
     }
 }

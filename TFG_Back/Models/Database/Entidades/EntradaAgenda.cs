@@ -20,7 +20,7 @@ namespace TFG_Back.Models.Database.Entidades
         [Required]
         // Relacion con Service de paco
         public int ServiceId { get; set; }
-        public Service Service { get; set; }
+        public Service? Service { get; set; }
 
 
         [Required]

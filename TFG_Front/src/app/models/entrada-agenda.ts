@@ -1,12 +1,12 @@
 import { Service } from "./service";
 
 export interface EntradaAgenda {
-    id: number;
+    id?: number;
     fecha: Date;
     hora: Date | string;
     cliente: string;
     centroTrabajo: string;
-    servicioId: number;  
+    serviceId: number;  
     paciente?: string;
     precio: number;
     observaciones?: string;

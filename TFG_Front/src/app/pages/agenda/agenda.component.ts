@@ -23,7 +23,14 @@ export class AgendaComponent {
 
   cargarEntradas(): void {
     this.agendaService.getEntradas().subscribe({
-      next: (entradas) => this.entradas = entradas,
+      next: (data) => {
+        this.entradas = data.map(entrada => {
+          return {
+            ...entrada,
+            fecha: new Date(entrada.fecha) 
+          };
+        });
+      },
       error: (err) => console.error('Error al cargar entradas:', err)
     });
   }

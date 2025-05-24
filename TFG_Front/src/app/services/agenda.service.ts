@@ -20,7 +20,7 @@ export class AgendaService {
             this.servicesService.getAll().pipe(
                 map(servicios => entradas.map(e => ({
                     ...e,
-                    servicio: servicios.find(s => s.id === e.servicioId)
+                    servicio: servicios.find(s => s.id === e.serviceId)
                 })))
             )
         )

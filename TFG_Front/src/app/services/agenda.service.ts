@@ -29,4 +29,7 @@ export class AgendaService {
   crearEntrada(entrada: EntradaAgenda): Observable<EntradaAgenda> {
     return this.http.post<EntradaAgenda>(this.apiUrl, entrada);
   }
+  getEntradasPorMes(year: number, month: number): Observable<EntradaAgenda[]> {
+  return this.http.get<EntradaAgenda[]>(`${this.apiUrl}/mes/${year}/${month}`);
+}
 }

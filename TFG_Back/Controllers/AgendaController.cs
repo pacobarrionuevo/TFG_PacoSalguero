@@ -43,5 +43,18 @@ namespace TFG_Back.Controllers
 
             return CreatedAtAction(nameof(GetEntradas), new { id = entrada.Id }, entrada);
         }
+
+        [HttpGet("mes/{year}/{month}")]
+        public async Task<ActionResult<IEnumerable<EntradaAgenda>>> GetEntradasPorMes(int year, int month)
+        {
+            var entradas = await _context.EntradasAgenda
+                .Where(e => e.Fecha.Year == year && e.Fecha.Month == month)
+                .Include(e => e.Service) // Para incluir el servicio relacionado
+                .OrderBy(e => e.Fecha)
+                .ThenBy(e => e.Hora)
+                .ToListAsync();
+
+            return Ok(entradas);
+        }
     }
 }

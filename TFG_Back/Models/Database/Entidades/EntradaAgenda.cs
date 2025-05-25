@@ -7,7 +7,7 @@ namespace TFG_Back.Models.Database.Entidades
     {
         public int Id { get; set; }
 
-        [Required]
+         [Required]
         public DateTime Fecha { get; set; }
 
 

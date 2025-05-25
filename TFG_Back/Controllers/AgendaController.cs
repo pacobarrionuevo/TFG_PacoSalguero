@@ -47,14 +47,21 @@ namespace TFG_Back.Controllers
         [HttpGet("mes/{year}/{month}")]
         public async Task<ActionResult<IEnumerable<EntradaAgenda>>> GetEntradasPorMes(int year, int month)
         {
-            var entradas = await _context.EntradasAgenda
+            // 1. Consulta inicial con filtros
+            var query = _context.EntradasAgenda
                 .Where(e => e.Fecha.Year == year && e.Fecha.Month == month)
-                .Include(e => e.Service) // Para incluir el servicio relacionado
+                .Include(e => e.Service);
+
+            // 2. Ejecutar consulta en base de datos primero
+            var entradas = await query.ToListAsync();
+
+            // 3. Ordenar en memoria
+            var entradasOrdenadas = entradas
                 .OrderBy(e => e.Fecha)
                 .ThenBy(e => e.Hora)
-                .ToListAsync();
+                .ToList();
 
-            return Ok(entradas);
+            return Ok(entradasOrdenadas);
         }
     }
 }

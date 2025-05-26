@@ -32,7 +32,7 @@ export class CrearentradaComponent {
       precio: [0, [Validators.required, Validators.min(0)]],
       paciente: [''],
       observaciones: [''],
-      hora: ['', Validators.required]
+      fechaHora: ['', Validators.required],
     });
   }
 cargarServicios(): void {
@@ -63,8 +63,9 @@ cargarServicios(): void {
         precio: formValues.precio,
         paciente: formValues.paciente,
         observaciones: formValues.observaciones,
-        hora: horaFormateada, 
-        fecha: fechaObjeto 
+        fechaHora: new Date(formValues.fechaHora)
+        //hora: horaFormateada, 
+        //fecha: fechaObjeto 
       };
 
       this.agendaService.crearEntrada(nuevaEntrada).subscribe({

@@ -5,13 +5,13 @@
     <div class="entradas-list">
       <div *ngFor="let entrada of entradas" class="entrada-card">
         <div class="entrada-header">
-          <span class="fecha">
-  {{ entrada.fecha | date:'dd/MM/yyyy' }} 
-</span>
-          <span class="hora">
-  {{ entrada.hora | date:'HH:mm' }} 
-</span>
-        </div>
+    <span class="fecha">
+        {{ entrada.fechaHora | date:'dd/MM/yyyy' }} 
+    </span>
+    <span class="hora">
+        {{ entrada.fechaHora | date:'HH:mm' }} 
+    </span>
+</div>
         <div class="entrada-body">
           <p><strong>Cliente:</strong> {{ entrada.cliente }}</p>
           <p><strong>Centro:</strong> {{ entrada.centroTrabajo }}</p>

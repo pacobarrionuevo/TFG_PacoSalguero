@@ -7,11 +7,13 @@ namespace TFG_Back.Models.Database.Entidades
     {
         public int Id { get; set; }
 
-         [Required]
-        public DateTime Fecha { get; set; }
+         //[Required]
+        //public DateTime Fecha { get; set; }
 
 
         [Required]
+        [Column(TypeName = "datetime")] // Almacena fecha y hora juntas
+        public DateTime FechaHora { get; set; }
         public string Cliente { get; set; }
 
         [Required]
@@ -30,8 +32,8 @@ namespace TFG_Back.Models.Database.Entidades
         public string Paciente { get; set; }
         public string Observaciones { get; set; }
 
-        [Required]
-        public TimeSpan Hora { get; set; } //Uso TimeSpan para mejorar mejor las horas
+        //[Required]
+       // public TimeSpan Hora { get; set; } //Uso TimeSpan para mejorar mejor las horas
 
     }
 }

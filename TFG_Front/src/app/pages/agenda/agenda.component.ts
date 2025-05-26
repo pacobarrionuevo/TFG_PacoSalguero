@@ -27,7 +27,7 @@ export class AgendaComponent {
         this.entradas = data.map(entrada => {
           return {
             ...entrada,
-            fecha: new Date(entrada.fecha) 
+            fecha: new Date(entrada.fechaHora) 
           };
         });
       },

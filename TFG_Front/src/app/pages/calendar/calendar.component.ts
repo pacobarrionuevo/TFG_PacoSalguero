@@ -29,18 +29,18 @@ export class CalendarComponent implements OnInit {
 
   cargarEntradasMes(): void {
     const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1; // Los meses en JS son 0-11 por si Paco no lo sabe
-    
+    const month = this.currentDate.getMonth() + 1;
+
     this.agendaService.getEntradasPorMes(year, month).subscribe({
-      next: (entradas) => {
-        this.entradasMes = entradas.map(e => ({
-          ...e,
-          fecha: new Date(e.fecha)
-        }));
-      },
-      error: (err) => console.error('Error cargando entradas:', err)
+        next: (entradas) => {
+            this.entradasMes = entradas.map(e => ({
+                ...e,
+                fechaHora: new Date(e.fechaHora) // Usamos fecha y hora combinada
+            }));
+            console.log('Entradas procesadas:', this.entradasMes);
+        }
     });
-  }
+}
 
   generarCalendario(): void {
     const start = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
@@ -74,11 +74,11 @@ export class CalendarComponent implements OnInit {
 
   entradasDelDia(fecha: Date): EntradaAgenda[] {
     return this.entradasMes.filter(e => 
-      e.fecha.getFullYear() === fecha.getFullYear() &&
-      e.fecha.getMonth() === fecha.getMonth() &&
-      e.fecha.getDate() === fecha.getDate()
+        e.fechaHora.getFullYear() === fecha.getFullYear() &&
+        e.fechaHora.getMonth() === fecha.getMonth() &&
+        e.fechaHora.getDate() === fecha.getDate()
     );
-  }
+}
 
   esMesActual(fecha: Date): boolean {
     return fecha.getMonth() === this.currentDate.getMonth();

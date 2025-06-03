@@ -35,19 +35,7 @@ namespace TFG_Back.Controllers
                 UserProfilePhoto = null
             };
         }
-        private UserDTO ToDto(User users)
-        {
-            return new UserDTO()
-            {
-                UserId = users.UserId,
-                UserNickname = users.UserNickname,
-                UserEmail = users.UserEmail,
-                UserPassword = users.UserPassword,
-                UserConfirmPassword = users.UserConfirmPassword,
-                UserProfilePhoto = users.UserProfilePhoto,
-            
-            };
-        }
+
         [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsuarios()
         {

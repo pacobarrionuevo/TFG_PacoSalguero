@@ -19,4 +19,12 @@ export class ServicesService {
   create(service: Service): Observable<Service> {
     return this.http.post<Service>(`${this.baseURL}/post_services`, service);
   }
+  
+  update(service: Service): Observable<Service> {
+    return this.http.put<Service>(`${this.baseURL}/${service.id}`, service);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseURL}/${id}`);
+  }
 }

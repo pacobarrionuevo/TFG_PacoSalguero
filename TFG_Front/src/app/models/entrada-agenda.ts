@@ -1,12 +1,14 @@
+import { Service } from "./service";
 
 export interface EntradaAgenda {
-    id: number;
-    fecha: Date;
-    hora: string; // O TimeSpan
+    id?: number;
+    fechaHora: Date;
+    //hora: Date | string;
     cliente: string;
     centroTrabajo: string;
-    servicio: string;
-    precio: number;
+    serviceId: number;  
     paciente?: string;
+    precio: number;
     observaciones?: string;
-  }
+    servicio?: Service;     
+}

@@ -21,19 +21,37 @@ namespace TFG_Back.Controllers
         public async Task<ActionResult<IEnumerable<EntradaAgenda>>> GetEntradas()
         {
             return await _context.EntradasAgenda
-                .OrderByDescending(e => e.Fecha)
+                .OrderByDescending(e => e.FechaHora)
                 .ToListAsync();
         }
 
         [HttpPost]
         public async Task<ActionResult<EntradaAgenda>> CrearEntrada([FromBody] EntradaAgenda entrada)
         {
-            entrada.Fecha = DateTime.Today;
-            entrada.Hora = DateTime.Now.TimeOfDay;
+            // Validar que el servicio existe
+            var servicioExistente = await _context.Servicios.FindAsync(entrada.ServiceId);
+            if (servicioExistente == null)
+            {
+                return BadRequest("El servicio especificado no existe");
+            }
+            entrada.FechaHora = DateTime.Now;
+            //entrada.Fecha = DateTime.Today;
+            //entrada.Hora = DateTime.Now.TimeOfDay;
+
             _context.EntradasAgenda.Add(entrada);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetEntradas), new { id = entrada.Id }, entrada);
+        }
+
+        [HttpGet("mes/{year}/{month}")]
+        public async Task<ActionResult<IEnumerable<EntradaAgenda>>> GetEntradasPorMes(int year, int month)
+        {
+            return await _context.EntradasAgenda
+                .Where(e => e.FechaHora.Year == year && e.FechaHora.Month == month)
+                .Include(e => e.Service)
+                .OrderBy(e => e.FechaHora)
+                .ToListAsync();
         }
     }
 }

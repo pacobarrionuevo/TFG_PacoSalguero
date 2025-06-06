@@ -11,17 +11,26 @@ import { RouterModule } from '@angular/router';
   styleUrl: './agenda.component.css'
 })
 export class AgendaComponent {
+  
   entradas: EntradaAgenda[] = [];
 
   constructor(private agendaService: AgendaService) { }
-
+  
   ngOnInit(): void {
     this.cargarEntradas();
   }
+  
 
   cargarEntradas(): void {
     this.agendaService.getEntradas().subscribe({
-      next: (entradas) => this.entradas = entradas,
+      next: (data) => {
+        this.entradas = data.map(entrada => {
+          return {
+            ...entrada,
+            fecha: new Date(entrada.fechaHora) 
+          };
+        });
+      },
       error: (err) => console.error('Error al cargar entradas:', err)
     });
   }

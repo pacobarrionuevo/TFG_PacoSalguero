@@ -7,6 +7,7 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { AgendaComponent } from './pages/agenda/agenda.component';
 import { CrearentradaComponent } from './pages/crearentrada/crearentrada.component';
 import { FicherosComponent } from './pages/ficheros/ficheros.component';
+import { CalendarComponent } from './pages/calendar/calendar.component';
 export const routes: Routes = [
     {
         path: '',
@@ -39,6 +40,10 @@ export const routes: Routes = [
     {
         path: 'ficheros',
         component: FicherosComponent
+    },
+    {
+        path: 'calendar',
+        component: CalendarComponent
     }
     
 ];

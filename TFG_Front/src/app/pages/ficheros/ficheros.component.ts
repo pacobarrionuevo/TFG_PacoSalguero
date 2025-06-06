@@ -82,6 +82,27 @@ export class FicherosComponent implements OnInit {
       }
     });
   }
+  editarServicio(servicio: Service): void {
+    servicio.editing = true;
+  }
+  guardarServicio(servicio: Service): void {
+    this.servicioService.update(servicio).subscribe({
+      next: () => {
+        servicio.editing = false;
+        this.cargarServicios();
+      },
+      error: (err) => console.error('Error al actualizar servicio:', err)
+    });
+  }
+
+  eliminarServicio(id: number): void {
+    if (confirm('¿Estás seguro de eliminar este servicio?')) {
+      this.servicioService.delete(id).subscribe({
+        next: () => this.cargarServicios(),
+        error: (err) => console.error('Error al eliminar servicio:', err)
+      });
+    }
+  }
 
   ///////////////////////////////////////////////////
   /// Lógica relacionada con los Métodos de Pago ////

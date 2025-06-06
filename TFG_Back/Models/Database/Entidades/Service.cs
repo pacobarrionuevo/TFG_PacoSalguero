@@ -6,5 +6,6 @@
         public string Nombre { get; set; } = null!;
         public string Abreviatura { get; set; } = null!;
         public string Color { get; set; } = null!;
+
     }
 }

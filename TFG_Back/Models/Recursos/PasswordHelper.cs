@@ -9,7 +9,7 @@ namespace TFG_Back.Models.Recursos
         {
             byte[] inputBytes = Encoding.UTF8.GetBytes(password);
             byte[] inputHash = SHA256.HashData(inputBytes);
-            return Encoding.UTF8.GetString(inputHash);
+            return Convert.ToBase64String(inputHash);
         }
     }
 }

@@ -4,4 +4,5 @@ export interface PaymentMethod {
     installments: number;
     firstPaymentDays: number;
     daysBetweenPayments: number;
+    editing?: boolean;
 }

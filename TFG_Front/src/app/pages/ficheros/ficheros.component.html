@@ -19,21 +19,21 @@
         <tbody>
           <!--Añadir botón para poder editar o borrar algún servicio-->
           <tr *ngFor="let servicio of servicios">
-  <td>
-    <input type="text" [(ngModel)]="servicio.nombre" [disabled]="!servicio.editing">
-  </td>
-  <td>
-    <input type="text" [(ngModel)]="servicio.abreviatura" [disabled]="!servicio.editing">
-  </td>
-  <td>
-    <input type="color" [(ngModel)]="servicio.color" [disabled]="!servicio.editing">
-  </td>
-  <td>
-    <button *ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
-    <button *ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
-    <button (click)="eliminarServicio(servicio.id)">🗑️</button>
-  </td>
-</tr>
+          <td>
+            <input type="text" [(ngModel)]="servicio.nombre" [disabled]="!servicio.editing">
+          </td>
+          <td>
+            <input type="text" [(ngModel)]="servicio.abreviatura" [disabled]="!servicio.editing">
+          </td>
+          <td>
+            <input type="color" [(ngModel)]="servicio.color" [disabled]="!servicio.editing">
+          </td>
+          <td>
+            <button *ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
+            <button *ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
+            <button (click)="eliminarServicio(servicio.id)">🗑️</button>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
@@ -63,17 +63,26 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let paymentMethod of paymentMethods">
-            <td>{{ paymentMethod.method }}</td>
-            <td>{{ paymentMethod.installments }}</td>
-            <td>{{ paymentMethod.firstPaymentDays }}</td>
-            <td>{{ paymentMethod.daysBetweenPayments }}</td>
-            <td>
-              <button>Modificar</button>
-              |
-              <button>Borrar</button>
-            </td>
-          </tr>
+          <!-- Tabla de métodos de pago -->
+        <tr *ngFor="let paymentMethod of paymentMethods">
+          <td>
+            <input type="text" [(ngModel)]="paymentMethod.method" [disabled]="!paymentMethod.editing">
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="paymentMethod.installments" [disabled]="!paymentMethod.editing">
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="paymentMethod.firstPaymentDays" [disabled]="!paymentMethod.editing">
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="paymentMethod.daysBetweenPayments" [disabled]="!paymentMethod.editing">
+          </td>
+          <td>
+            <button *ngIf="!paymentMethod.editing" (click)="editarMetodoPago(paymentMethod)">✏️</button>
+            <button *ngIf="paymentMethod.editing" (click)="guardarMetodoPago(paymentMethod)">💾</button>
+            <button (click)="eliminarMetodoPago(paymentMethod.id)">🗑️</button>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
@@ -99,22 +108,40 @@
             <th>Email</th>
             <th>Dirección</th>
             <th>Código Postal</th>
-            <th>Mostrar Datos Completos</th>
+            <th>Método de pago</th>
+            <th>Modificar</th>
           </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let customer of customers">
-          <td>{{ customer.name }}</td>
-          <td>{{ customer.phoneNumber }}</td>
-          <td>{{ customer.email }}</td>
-          <td>{{ customer.adress }}</td>
-          <td>{{ customer.postalCode }}</td>
-          <td>
-            <button>Modificar</button>
-            |
-            <button>Borrar</button>
-          </td>
-        </tr>
+        <!-- Tabla de clientes -->
+          <tr *ngFor="let customer of customers">
+            <td>
+              <input type="text" [(ngModel)]="customer.name" [disabled]="!customer.editing">
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="customer.phoneNumber" [disabled]="!customer.editing">
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="customer.email" [disabled]="!customer.editing">
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="customer.adress" [disabled]="!customer.editing">
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="customer.postalCode" [disabled]="!customer.editing">
+            </td>
+            <td>
+              <select [(ngModel)]="customer.paymentMethodId" [disabled]="!customer.editing">
+                <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">{{ metodo.method }}</option>
+              </select>
+              <span *ngIf="!customer.editing">{{ customer.paymentMethod?.method }}</span>
+            </td>
+            <td>
+              <button *ngIf="!customer.editing" (click)="editarCliente(customer)">✏️</button>
+              <button *ngIf="customer.editing" (click)="guardarCliente(customer)">💾</button>
+              <button (click)="eliminarCliente(customer.id)">🗑️</button>
+            </td>
+          </tr>
       </tbody>
       </table>
     </div>
@@ -130,8 +157,9 @@
     <input type="text" [(ngModel)]="newCustomer.email" placeholder="Email" />
     <input type="text" [(ngModel)]="newCustomer.adminEmail" placeholder="Email Administrativo" />
     <select [(ngModel)]="newCustomer.paymentMethodId">
-      <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">{{ metodo.method }}</option>
+      <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">{{ metodo.id }}</option>
     </select>
+
 
     <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
   </div>

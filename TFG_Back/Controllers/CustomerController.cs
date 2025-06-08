@@ -43,7 +43,7 @@ namespace TFG_Back.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Customer>> Update(int id, Customer customer)
+        public async Task<ActionResult<Customer>> Update(int id, CustomerDTO customer)
         {
             if (id != customer.Id) return BadRequest("ID mismatch");
 

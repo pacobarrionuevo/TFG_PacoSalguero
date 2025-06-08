@@ -27,6 +27,7 @@ namespace TFG_Back.Services
 
             var customer = new Customer
             {
+                Id = dto.Id,
                 CIF = dto.CIF,
                 Name = dto.Name,
                 Adress = dto.Adress,
@@ -53,7 +54,7 @@ namespace TFG_Back.Services
             return true;
         }
 
-        public async Task<Customer?> UpdateAsync(Customer customer)
+        public async Task<Customer?> UpdateAsync(CustomerDTO customer)
         {
             var existing = await _unitOfWork._customerRepository.GetByIdAsync(customer.Id);
             if (existing == null) return null;

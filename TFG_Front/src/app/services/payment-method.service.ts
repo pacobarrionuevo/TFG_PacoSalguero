@@ -21,8 +21,8 @@ export class PaymentMethodService {
     return this.http.post<PaymentMethod>(`${this.baseURL}`, paymentMethod);
   }
 
-  edit(paymentMethod: PaymentMethod): Observable<PaymentMethod> {
-    return this.http.put<PaymentMethod>(`${this.baseURL}`, paymentMethod);
+  update(paymentMethod: PaymentMethod): Observable<any> {
+    return this.http.put(`${this.baseURL}/${paymentMethod.id}`, paymentMethod);
   }
 
   delete(id: number): Observable<void> {

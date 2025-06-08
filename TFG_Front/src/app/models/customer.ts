@@ -12,4 +12,5 @@ export interface Customer {
     adminEmail: string;
     paymentMethodId?: number;
     paymentMethod?: PaymentMethod;
+    editing?: boolean;
 }

@@ -139,6 +139,30 @@ export class FicherosComponent implements OnInit {
     });
   }
 
+  editarMetodoPago(paymentMethod: PaymentMethod): void {
+  paymentMethod.editing = true;
+}
+
+guardarMetodoPago(paymentMethod: PaymentMethod): void {
+  console.log(paymentMethod);
+  this.paymentMethodService.update(paymentMethod).subscribe({
+    next: () => {
+      paymentMethod.editing = false;
+      this.cargarMetodosPago();
+    },
+    error: (err) => console.error('Error al actualizar método de pago:', err)
+  });
+}
+
+eliminarMetodoPago(id: number): void {
+  if (confirm('¿Estás seguro de eliminar este método de pago?')) {
+    this.paymentMethodService.delete(id).subscribe({
+      next: () => this.cargarMetodosPago(),
+      error: (err) => console.error('Error al eliminar método de pago:', err)
+    });
+  }
+}
+
   ///////////////////////////////////////////////////
   /////// Lógica relacionada con los clientes ///////
   ///////////////////////////////////////////////////
@@ -150,58 +174,95 @@ export class FicherosComponent implements OnInit {
     });
   }
 
-  crearClientes() {
-  // Validación básica
-  if (
-    !this.newCustomer.name ||
-    !this.newCustomer.email ||
-    !this.newCustomer.paymentMethodId ||
-    this.newCustomer.cif <= 0 ||
-    this.newCustomer.phoneNumber <= 0
-  ) {
-    alert("Faltan campos obligatorios o hay valores inválidos.");
-    return;
+    crearClientes() {
+    // Validación básica
+    if (
+      !this.newCustomer.name ||
+      !this.newCustomer.email ||
+      !this.newCustomer.paymentMethodId ||
+      this.newCustomer.cif <= 0 ||
+      this.newCustomer.phoneNumber <= 0
+    ) {
+      alert("Faltan campos obligatorios o hay valores inválidos.");
+      return;
+    }
+
+    // Crear objeto con solo los campos que necesita el backend
+    const clienteDTO = {
+      cif: this.newCustomer.cif,
+      name: this.newCustomer.name,
+      adress: this.newCustomer.adress,
+      postalCode: this.newCustomer.postalCode,
+      placeOfResidence: this.newCustomer.placeOfResidence,
+      phoneNumber: this.newCustomer.phoneNumber,
+      email: this.newCustomer.email,
+      adminEmail: this.newCustomer.adminEmail, 
+      paymentMethodId: this.newCustomer.paymentMethodId 
+  };
+
+    this.customerService.create(clienteDTO).subscribe({
+      next: (clienteCreado) => {
+        console.log('Cliente creado:', clienteCreado);
+        this.customers.push(clienteCreado);
+        alert("Cliente creado correctamente");
+
+        // Reiniciar formulario
+        this.newCustomer = {
+          cif: 0,
+          name: '',
+          adress: '',
+          postalCode: 0,
+          placeOfResidence: '',
+          phoneNumber: 0,
+          email: '',
+          adminEmail: '',
+          paymentMethodId: undefined,
+          paymentMethod: undefined
+        };
+      },
+      error: (err) => {
+        console.error('Error al crear cliente:', err);
+        alert("Error al crear cliente");
+      }
+    });
   }
 
-  // Crear objeto con solo los campos que necesita el backend
-  const clienteDTO = {
-    cif: this.newCustomer.cif,
-    name: this.newCustomer.name,
-    adress: this.newCustomer.adress,
-    postalCode: this.newCustomer.postalCode,
-    placeOfResidence: this.newCustomer.placeOfResidence,
-    phoneNumber: this.newCustomer.phoneNumber,
-    email: this.newCustomer.email,
-    adminEmail: this.newCustomer.adminEmail, 
-    paymentMethodId: this.newCustomer.paymentMethodId 
-};
+  editarCliente(customer: Customer): void {
+    customer.editing = true;
+  }
 
-  this.customerService.create(clienteDTO).subscribe({
-    next: (clienteCreado) => {
-      console.log('Cliente creado:', clienteCreado);
-      this.customers.push(clienteCreado);
-      alert("Cliente creado correctamente");
+  guardarCliente(customer: Customer): void {
+    const clienteDTO = {
+      id: customer.id,
+      cif: customer.cif,
+      name: customer.name,
+      adress: customer.adress,
+      postalCode: customer.postalCode,
+      placeOfResidence: customer.placeOfResidence,
+      phoneNumber: customer.phoneNumber,
+      email: customer.email,
+      adminEmail: customer.adminEmail,
+      paymentMethodId: customer.paymentMethodId, 
+      paymentMethod: customer.paymentMethod
+    };
+    console.log(customer);
+    this.customerService.update(clienteDTO).subscribe({
+      next: () => {
+        customer.editing = false;
+        this.cargarClientes();
+      },
+      error: (err) => console.error('Error al actualizar cliente:', err)
+    });
+  }
 
-      // Reiniciar formulario
-      this.newCustomer = {
-        cif: 0,
-        name: '',
-        adress: '',
-        postalCode: 0,
-        placeOfResidence: '',
-        phoneNumber: 0,
-        email: '',
-        adminEmail: '',
-        paymentMethodId: undefined,
-        paymentMethod: undefined
-      };
-    },
-    error: (err) => {
-      console.error('Error al crear cliente:', err);
-      alert("Error al crear cliente");
+  eliminarCliente(id: number): void {
+    if (confirm('¿Estás seguro de eliminar este cliente?')) {
+      this.customerService.delete(id).subscribe({
+        next: () => this.cargarClientes(),
+        error: (err) => console.error('Error al eliminar cliente:', err)
+      });
     }
-  });
-}
+  }
 
 
 }

@@ -87,6 +87,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Middleware para mover token de query a header
+app.Use(async (context, next) => {
+    var token = context.Request.Query["token"];
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers["Authorization"] = $"Bearer {token}";
+    }
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseCors();
 app.UseAuthentication();
@@ -95,7 +105,6 @@ app.UseWebSockets();
 app.UseMiddleware<Middleware>();
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseHttpsRedirection();
 
 
 // Inicializacion de base de datos

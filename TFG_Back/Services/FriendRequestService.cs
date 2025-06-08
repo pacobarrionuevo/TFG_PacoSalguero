@@ -38,7 +38,7 @@ namespace TFG_Back.Services
             if (exists)
                 return new FriendRequestResult { Success = false };
 
-            var amistad = new Friendship() { IsAccepted = false };
+            var amistad = new FriendShip() { IsAccepted = false };
             _context.Friendships.Add(amistad);
             await _context.SaveChangesAsync();
 
@@ -144,7 +144,7 @@ namespace TFG_Back.Services
             }
             return friends;
         }
-        public async Task<List<Friendship>> GetPendingFriendRequests(int usuarioId)
+        public async Task<List<FriendShip>> GetPendingFriendRequests(int usuarioId)
         {
             var pendingRequests = await _context.Friendships
                 .Include(a => a.UserFriendship)

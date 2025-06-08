@@ -72,7 +72,7 @@ namespace TFG_Back.Controllers
 
 
         [HttpGet("pending")]
-        public async Task<ActionResult<List<Friendship>>> GetPendingFriendRequests()
+        public async Task<ActionResult<List<FriendShip>>> GetPendingFriendRequests()
         {
             if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var usuarioId))
                 return Unauthorized("Usuario no autenticado.");

@@ -32,6 +32,7 @@ namespace TFG_Back.Models.Database
                 UserConfirmPassword = PasswordHelper.Hash("jose777"),
                 UserProfilePhoto = "Perfil_Deffault.png",
                 Role = "admin",
+                UserStatus = "Connected"
             
             };    
 

@@ -1,6 +1,6 @@
 ﻿namespace TFG_Back.Models.Database.Entidades
 {
-    public class Friendship
+    public class FriendShip
     {
         public int FriendShipId { get; set; }
         public bool IsAccepted { get; set; } = false;

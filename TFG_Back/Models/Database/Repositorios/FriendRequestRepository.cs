@@ -7,7 +7,7 @@ using TFG_Back.Models.Database.Repositorios;
 
 namespace TFG_Back.Models.Database.Repositorios
 {
-    public class FriendRequestRepository : Repository<Friendship>
+    public class FriendRequestRepository : Repository<FriendShip>
     {
         private readonly DBContext _context;
 

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace TFG_Back.Models.Recursos
+namespace TFG_Back.Recursos
 {
     public class PasswordHelper
     {

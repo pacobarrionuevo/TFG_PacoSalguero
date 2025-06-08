@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using TFG_Back.Models.Database;
 using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.DTO;
-using TFG_Back.Models.Recursos;
+using TFG_Back.Recursos;
 
 namespace TFG_Back.Controllers
 {

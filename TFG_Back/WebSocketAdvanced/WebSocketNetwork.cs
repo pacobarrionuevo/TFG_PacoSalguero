@@ -243,7 +243,7 @@ namespace TFG_Back.WebSocketAdvanced
                     await receiver.SendAsync(JsonSerializer.Serialize(new
                     {
                         type = "friendRequest",
-                        requestId = result.AmistadId,
+                        requestId = result.FriendshipId,
                         senderId = handler.Id,
                         senderName = result.SenderName
                     }));
@@ -312,38 +312,11 @@ namespace TFG_Back.WebSocketAdvanced
 
             if (user != null)
             {
-                user.UsuarioEstado = status;
+                user.UserStatus = status;
                 await wsMethods.UpdateUserAsync(user);
             }
         }
-        private async Task HandleTurnTimeout(WebSocketHandler handler, TurnTimeoutMessage message)
-        {
-            var gameService = GetGameService();
-            gameService.HandleTurnTimeout(message.GameId, message.PlayerId);
-        }
 
-        private async Task HandleRematchResponse(WebSocketHandler handler, RematchResponseMessage message)
-        {
-            if (_activeGames.TryGetValue(message.GameId, out var session))
-            {
-                if (message.Accepted)
-                {
-                    session.RematchRequests.Add(handler.Id.ToString());
-                    if (session.RematchRequests.Count == session.Players.Count)
-                    {
-                        await StartRematch(session);
-                    }
-                }
-                else
-                {
-                    await handler.SendAsync(JsonSerializer.Serialize(new
-                    {
-                        type = "rematchDeclined",
-                        gameId = message.GameId
-                    }));
-                }
-            }
-        }
 
         private async Task NotifyFriendsAsync(WebSocketHandler handler, bool isConnected)
         {
@@ -357,7 +330,7 @@ namespace TFG_Back.WebSocketAdvanced
                 friendId = handler.Id
             });
 
-            foreach (var friend in _connectedPlayers.Where(p => friends.Any(f => f.UsuarioId == p.Id)))
+            foreach (var friend in _connectedPlayers.Where(p => friends.Any(f => f.UserId == p.Id)))
             {
                 await friend.SendAsync(message);
             }
@@ -371,56 +344,5 @@ namespace TFG_Back.WebSocketAdvanced
         {
             return _handlers.FirstOrDefault(h => h.Id == userId);
         }
-    }
-
-    public class MatchmakingMessage
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-
-        [JsonPropertyName("friendId")]
-        public int? FriendId { get; set; }
-
-        [JsonPropertyName("inviterId")]
-        public int? InviterId { get; set; }
-
-        [JsonPropertyName("receiverId")]
-        public int? ReceiverId { get; set; }
-
-        [JsonPropertyName("requestId")]
-        public int? RequestId { get; set; }
-    }
-
-    public class AbandonGameMessage : WebSocketMessage
-    {
-        [JsonPropertyName("gameId")]
-        public string GameId { get; set; }
-
-        [JsonPropertyName("playerId")]
-        public int PlayerId { get; set; }
-    }
-
-    public class RematchRequestMessage : WebSocketMessage
-    {
-        [JsonPropertyName("gameId")]
-        public string GameId { get; set; }
-    }
-
-    public class RematchResponseMessage : WebSocketMessage
-    {
-        [JsonPropertyName("gameId")]
-        public string GameId { get; set; }
-
-        [JsonPropertyName("accepted")]
-        public bool Accepted { get; set; }
-    }
-
-    public class TurnTimeoutMessage : WebSocketMessage
-    {
-        [JsonPropertyName("gameId")]
-        public string GameId { get; set; }
-
-        [JsonPropertyName("playerId")]
-        public int PlayerId { get; set; }
     }
 }

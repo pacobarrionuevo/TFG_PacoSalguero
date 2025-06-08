@@ -19,6 +19,9 @@ namespace TFG_Back.Models.Database
         public DbSet<Service> Servicios { get; set; }
         public DbSet<PaymentMethod> Payments { get; set; }
         public DbSet <Customer> Customers { get; set; }
+
+        public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<UserHasFriendship> UserHasFriendship { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<EntradaAgenda>()

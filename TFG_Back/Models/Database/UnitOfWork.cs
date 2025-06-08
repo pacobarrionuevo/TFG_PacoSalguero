@@ -12,10 +12,11 @@ namespace TFG_Back.Models.Database
         public ServiceRepository _serviceRepository { get; init; }
         public PaymentMethodRepository _paymentMethodRepository { get; init; }
         public CustomerRepository _customerRepository { get; init; }
+        public FriendRequestRepository _friendRequestRepository { get; init; }
 
         public UnitOfWork(DBContext context, ImageRepository imageRepository, UserRepository userRepository
                             ,ServiceRepository serviceRepository, PaymentMethodRepository paymentMethodRepository,
-                            CustomerRepository customerRepository)
+                            CustomerRepository customerRepository, FriendRequestRepository friendRequestRepository)
         {
             _context = context;
             _imageRepository = imageRepository;
@@ -23,6 +24,7 @@ namespace TFG_Back.Models.Database
             _serviceRepository = serviceRepository;
             _paymentMethodRepository = paymentMethodRepository;
             _customerRepository = customerRepository;
+            _friendRequestRepository = friendRequestRepository;
         }
 
         public async Task<bool> SaveAsync()

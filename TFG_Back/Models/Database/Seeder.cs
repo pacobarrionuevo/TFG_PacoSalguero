@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TFG_Back.Models.Database.Entidades;
-using TFG_Back.Models.Recursos;
+using TFG_Back.Recursos;
 
 namespace TFG_Back.Models.Database
 {

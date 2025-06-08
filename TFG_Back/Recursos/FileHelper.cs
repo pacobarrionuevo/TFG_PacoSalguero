@@ -1,4 +1,4 @@
-﻿namespace TFG_Back.Models.Recursos
+﻿namespace TFG_Back.Recursos
 {
     public class FileHelper
     {

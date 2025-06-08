@@ -10,7 +10,6 @@ namespace TFG_Back.WebSocketAdvanced
         private readonly WebSocket _webSocket;
         private readonly byte[] _buffer;
         public string Username { get; set; }
-        public MatchmakingMessage LastMessage { get; private set; }
 
         public DateTime LastActivity { get; set; }
         public int Id { get; init; }
@@ -86,12 +85,14 @@ namespace TFG_Back.WebSocketAdvanced
         {
             _webSocket.Dispose();
         }
+
         private async Task<string> ReceiveMessageAsync()
         {
             var buffer = new byte[1024];
             WebSocketReceiveResult result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             return Encoding.UTF8.GetString(buffer, 0, result.Count);
         }
+
         public async Task CloseAsync()
         {
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexión cerrada", CancellationToken.None);

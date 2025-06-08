@@ -9,5 +9,9 @@
         public string UserPassword { get; set; }
         public string UserConfirmPassword { get; set; }
         public string Role { get; set; } = "user";
+        public List<UserHasFriendship> UserFriendship { get; set; }
+
+        // Connected / Disconnected
+        public string UserStatus { get; set; }
     }
 }

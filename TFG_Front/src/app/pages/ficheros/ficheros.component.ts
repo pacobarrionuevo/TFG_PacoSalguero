@@ -7,11 +7,12 @@ import { PaymentMethod } from '../../models/payment-method';
 import { PaymentMethodService } from '../../services/payment-method.service';
 import { Customer } from '../../models/customer';
 import { CustomerService } from '../../services/customer.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-ficheros',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './ficheros.component.html',
   styleUrls: ['./ficheros.component.css']
 })

@@ -1,4 +1,7 @@
 <div class="calendar-container">
+  <a routerLink="/agenda" routerLinkActive="activo">
+      <i class="icono icon-ficheros"></i> Volver a la agenda
+  </a>
   <div class="calendar-header">
     <button (click)="cambiarMes(-1)">&lt;</button>
     <h2>{{ currentDate | date:'MMMM yyyy' | titlecase }}</h2>

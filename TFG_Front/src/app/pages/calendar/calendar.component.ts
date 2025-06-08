@@ -3,11 +3,12 @@ import { EntradaAgenda } from '../../models/entrada-agenda';
 import { AgendaService } from '../../services/agenda.service';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.css',
   providers: [DatePipe]

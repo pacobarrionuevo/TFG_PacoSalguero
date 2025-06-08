@@ -12,6 +12,6 @@
         public List<UserHasFriendship> UserFriendship { get; set; }
 
         // Connected / Disconnected
-        public string UserStatus { get; set; }
+        public string UserStatus { get; set; } = "disconnected";
     }
 }

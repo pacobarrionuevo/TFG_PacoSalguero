@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+ï»¿using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 using TFG_Back;
 using TFG_Back.Models.Database.Repositorios;
@@ -6,12 +6,14 @@ using TFG_Back.Models.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TFG_Back.Services;
+using TFG_Back.Servicios;
 
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración inicial
+// Configuraciï¿½n inicial
 builder.Services.Configure<Settings>(builder.Configuration.GetSection(Settings.SECTION_NAME));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Settings>>().Value);
 
@@ -24,6 +26,13 @@ builder.Services.AddScoped<DBContext>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<ImageRepository>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ServiceRepository>();
+builder.Services.AddScoped<PaymentMethodRepository>();
+builder.Services.AddScoped<CustomerRepository>();
+
+builder.Services.AddTransient<ServicesService>();
+builder.Services.AddTransient<PaymentMethodService>();
+builder.Services.AddTransient<CustomerService>();
 
 
 builder.Services.AddControllers();

@@ -1,0 +1,43 @@
+<!-- lista-agenda.component.html -->
+<div class="agenda-container">
+    <h2>AGENDA PROFESIONAL</h2>
+
+    <a routerLink="/menu" routerLinkActive="activo">
+      <i class="icono icon-ficheros"></i> Volver al menú
+    </a>
+    
+    <div class="entradas-list">
+      <div *ngFor="let entrada of entradas" class="entrada-card">
+        <div class="entrada-header">
+    <span class="fecha">
+        {{ entrada.fechaHora | date:'dd/MM/yyyy' }} 
+    </span>
+    <span class="hora">
+        {{ entrada.fechaHora | date:'HH:mm' }} 
+    </span>
+</div>
+        <div class="entrada-body">
+          <p><strong>Cliente:</strong> {{ entrada.cliente }}</p>
+          <p><strong>Centro:</strong> {{ entrada.centroTrabajo }}</p>
+          <p><strong>Servicio:</strong> 
+            {{ entrada.servicio?.nombre }}
+            <span class="color-tag" [style.background]="entrada.servicio?.color"></span>
+            </p>
+          <p><strong>Precio:</strong> {{ entrada.precio  }}</p>
+          <p *ngIf="entrada.paciente"><strong>Paciente:</strong> {{ entrada.paciente }}</p>
+          <p *ngIf="entrada.observaciones"><strong>Observaciones:</strong> {{ entrada.observaciones }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="action-buttons">
+        <button 
+          routerLink="/crearentrada" 
+          class="btn btn-primary"
+        >
+          <i class="fas fa-plus"></i> AÑADIR ENTRADA
+        </button>
+      </div>
+      <button  [routerLink]="'/calendar'">
+          Calendario
+        </button>
+    </div>

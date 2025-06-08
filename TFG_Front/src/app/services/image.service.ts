@@ -4,13 +4,14 @@ import { Result } from '../models/result';
 import { Image } from '../models/image';
 import { environment } from '../../environments/environment';
 import { CreateOrUpdateImageRequest } from '../models/create-update-image-request';
+import { environment_development } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
 
-  private baseURL = `${environment.apiUrl}/images`;
+  private baseURL = `${environment_development.apiUrl}/images`;
 
   constructor(private api: ApiService) { }
 

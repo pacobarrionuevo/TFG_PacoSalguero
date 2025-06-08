@@ -1,7 +1,7 @@
 body {
     margin: 0px;
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    background-image: url(https://localhost:7077/images/hospital_background.jpg);
+    font-family:'Trebuchet MS';
+    background-color: gainsboro;
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;

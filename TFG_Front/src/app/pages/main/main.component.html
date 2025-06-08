@@ -1,10 +1,35 @@
-<div class="container">
-    <div class="titulo">
-        <p>¡Bienvenido a Sanitarios App!</p>
-    </div>
-    <div class="botones">
-        <button *ngIf="!isLoggedIn" [routerLink]="'/login'">Inicia Sesión</button>
-       <button *ngIf=" isLoggedIn" [routerLink]="'/menu'">Menú</button>
-      <button *ngIf="isLoggedIn" (click)="logout()">Cerrar Sesión</button>
-    </div>
-</div>
+<div class="background">
+    <div class="overlay">
+      <h1>¡Bienvenidos a Sanitarios App!</h1>
+      <p class="subtitle">
+        Sanitarios App es una aplicación tanto web como móvil que ayuda a los sanitarios
+        a organizar sus clientes, reuniones y jornadas laborales.
+      </p>
+  
+      
+      <img class="enfermeras" [src]="enfermeras" alt="foto de enfermeras">
+  
+      
+      <div class="buttons">
+        
+        <button *ngIf="!isLoggedIn" [routerLink]="'/login'">
+          Inicia Sesión
+        </button>
+    
+        
+        <button *ngIf="isLoggedIn" [routerLink]="'/menu'">
+          Menú
+        </button>
+    
+       
+        <button *ngIf="isAdmin" [routerLink]="'/admin'">
+          Admin
+        </button>
+    
+
+        <button *ngIf="isLoggedIn" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+  </div>
+  

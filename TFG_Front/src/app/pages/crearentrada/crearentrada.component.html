@@ -1,0 +1,79 @@
+<div class="form-container">
+    <h2>AÑADIR ENTRADA A LA AGENDA</h2>
+    
+    <form [formGroup]="entradaForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Cliente:</label>
+        <input type="text" formControlName="cliente" required>
+        <div *ngIf="entradaForm.get('cliente')?.invalid && entradaForm.get('cliente')?.touched" 
+             class="error-message">
+          Cliente es requerido
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label>Centro de Trabajo:</label>
+        <input type="text" formControlName="centroTrabajo" required>
+        <div *ngIf="entradaForm.get('centroTrabajo')?.invalid && entradaForm.get('centroTrabajo')?.touched" 
+             class="error-message">
+          Centro de trabajo es requerido
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label>Servicio:</label>
+          <select formControlName="servicioId" required>
+            <option [ngValue]="null" disabled>Selecciona un servicio</option> 
+            <option *ngFor="let servicio of servicios" [ngValue]="servicio.id">
+            {{ servicio.nombre }} ({{ servicio.abreviatura }})
+            </option>
+        </select>
+        <div *ngIf="entradaForm.get('servicioId')?.invalid && entradaForm.get('servicioId')?.touched" 
+             class="error-message">
+          Servicio es requerido
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label>Precio (€):</label>
+        <input type="number" formControlName="precio" step="0.01" required>
+        <div *ngIf="entradaForm.get('precio')?.invalid && entradaForm.get('precio')?.touched" 
+             class="error-message">
+          Precio debe ser mayor o igual a 0
+        </div>
+      </div>
+  
+      <div class="form-group">
+    <label>Fecha y Hora:</label>
+    <input 
+    type="datetime-local" 
+    formControlName="fechaHora" 
+    [min]="todayISOString()"
+    required>
+</div>
+  
+      <div class="form-group">
+  <label>Paciente:</label>
+  <select formControlName="paciente">
+    <option [ngValue]="null">Selecciona un paciente</option>
+    <option *ngFor="let customer of customers" [ngValue]="customer.name">
+      {{ customer.name }} 
+    </option>
+  </select>
+</div>
+  
+      <div class="form-group">
+        <label>Observaciones (opcional):</label>
+        <textarea formControlName="observaciones" rows="3"></textarea>
+      </div>
+  
+      <div class="button-group">
+        <button type="submit" [disabled]="!entradaForm.valid" class="btn btn-primary">
+          CREAR ENTRADA
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="router.navigate(['/agenda'])">
+          CANCELAR
+        </button>
+      </div>
+    </form>
+  </div>

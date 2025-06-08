@@ -7,59 +7,71 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Service } from '../../models/service';
 import { ServicesService } from '../../services/services.service';
 import { EntradaAgenda } from '../../models/entrada-agenda';
+import { Customer } from '../../models/customer';
+import { CustomerService } from '../../services/customer.service';
 
 @Component({
   selector: 'app-crearentrada',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './crearentrada.component.html',
   styleUrl: './crearentrada.component.css'
 })
 export class CrearentradaComponent {
   entradaForm: FormGroup;
   servicios: Service[] = [];
+  customers: Customer[] = [];
   constructor(
     private servicesService: ServicesService,
+    private customerService: CustomerService,
     private fb: FormBuilder,
     private agendaService: AgendaService,
     public router: Router
   ) {
     this.cargarServicios();
+    this.cargarCustomers();
     this.entradaForm = this.fb.group({
       cliente: ['', Validators.required],
       centroTrabajo: ['', Validators.required],
       servicioId: [null, Validators.required],
       precio: [0, [Validators.required, Validators.min(0)]],
-      paciente: [''],
+      paciente: [null],
       observaciones: [''],
       fechaHora: ['', Validators.required],
     });
   }
-cargarServicios(): void {
+  cargarServicios(): void {
     this.servicesService.getAll().subscribe({
       next: (servicios) => this.servicios = servicios,
       error: (err) => console.error('Error al cargar servicios:', err)
     });
   }
+
+  cargarCustomers(): void {
+    this.customerService.getAll().subscribe({
+      next: (customers) => this.customers = customers,
+      error: (err) => console.error('Error al cargar clientes:', err)
+    });
+  }
   ngOnInit(): void {
     this.servicesService.getAll().subscribe(servicios => {
-        this.cargarServicios();
+      this.cargarServicios();
     });
-}
-   onSubmit(): void {
+  }
+  onSubmit(): void {
     if (this.entradaForm.valid) {
       const formValues = this.entradaForm.value;
 
-      const servicioIdNumerico = +formValues.servicioId; 
-      const horaFormateada = formValues.hora + ':00'; 
-      const fechaString = new Date().toISOString().split('T')[0]; 
-      const fechaObjeto = new Date(fechaString); 
+      const servicioIdNumerico = +formValues.servicioId;
+      const horaFormateada = formValues.hora + ':00';
+      const fechaString = new Date().toISOString().split('T')[0];
+      const fechaObjeto = new Date(fechaString);
 
 
       const nuevaEntrada: EntradaAgenda = {
         cliente: formValues.cliente,
         centroTrabajo: formValues.centroTrabajo,
-        serviceId: servicioIdNumerico, 
+        serviceId: servicioIdNumerico,
         precio: formValues.precio,
         paciente: formValues.paciente,
         observaciones: formValues.observaciones,
@@ -77,19 +89,19 @@ cargarServicios(): void {
           console.error('Error al crear entrada desde Angular:', err);
           let errorMessage = 'Error al crear la entrada.';
           if (err.error) {
-              if (typeof err.error === 'string') {
-                  errorMessage = err.error;
-              } else if (err.error.errors) {
-                  const validationErrors = err.error.errors;
-                  errorMessage += '\nDetalles de validación:';
-                  for (const key in validationErrors) {
-                      if (validationErrors.hasOwnProperty(key)) {
-                          errorMessage += `\n- ${key}: ${validationErrors[key].join(', ')}`;
-                      }
-                  }
+            if (typeof err.error === 'string') {
+              errorMessage = err.error;
+            } else if (err.error.errors) {
+              const validationErrors = err.error.errors;
+              errorMessage += '\nDetalles de validación:';
+              for (const key in validationErrors) {
+                if (validationErrors.hasOwnProperty(key)) {
+                  errorMessage += `\n- ${key}: ${validationErrors[key].join(', ')}`;
+                }
               }
+            }
           } else if (err.status) {
-              errorMessage += `\nCódigo de estado HTTP: ${err.status} - ${err.statusText}`;
+            errorMessage += `\nCódigo de estado HTTP: ${err.status} - ${err.statusText}`;
           }
           alert(errorMessage);
         }

@@ -59,56 +59,62 @@ export class CrearentradaComponent {
     });
   }
   onSubmit(): void {
-    if (this.entradaForm.valid) {
-      const formValues = this.entradaForm.value;
+  if (this.entradaForm.valid) {
+    const formValues = this.entradaForm.value;
 
-      const servicioIdNumerico = +formValues.servicioId;
-      const horaFormateada = formValues.hora + ':00';
-      const fechaString = new Date().toISOString().split('T')[0];
-      const fechaObjeto = new Date(fechaString);
+    console.log('Fecha del formulario:', formValues.fechaHora);
+    const fechaHora = new Date(formValues.fechaHora);
+    const fechaHoraUTC = new Date(fechaHora.getTime() - (fechaHora.getTimezoneOffset() * 60000));
+    
+    console.log('Fecha procesada:', fechaHoraUTC);
 
+    const nuevaEntrada: EntradaAgenda = {
+      cliente: formValues.cliente,
+      centroTrabajo: formValues.centroTrabajo,
+      serviceId: +formValues.servicioId, 
+      precio: formValues.precio,
+      paciente: formValues.paciente,
+      observaciones: formValues.observaciones,
+      fechaHora: fechaHoraUTC 
+    };
 
-      const nuevaEntrada: EntradaAgenda = {
-        cliente: formValues.cliente,
-        centroTrabajo: formValues.centroTrabajo,
-        serviceId: servicioIdNumerico,
-        precio: formValues.precio,
-        paciente: formValues.paciente,
-        observaciones: formValues.observaciones,
-        fechaHora: new Date(formValues.fechaHora)
-        //hora: horaFormateada, 
-        //fecha: fechaObjeto 
-      };
+    // Debug: Mostrar el objeto completo antes de enviar
+    console.log('Entrada a crear:', nuevaEntrada);
 
-      this.agendaService.crearEntrada(nuevaEntrada).subscribe({
-        next: () => {
-          this.router.navigate(['/agenda']);
-          alert("Entrada creada correctamente.");
-        },
-        error: (err) => {
-          console.error('Error al crear entrada desde Angular:', err);
-          let errorMessage = 'Error al crear la entrada.';
-          if (err.error) {
-            if (typeof err.error === 'string') {
-              errorMessage = err.error;
-            } else if (err.error.errors) {
-              const validationErrors = err.error.errors;
-              errorMessage += '\nDetalles de validación:';
-              for (const key in validationErrors) {
-                if (validationErrors.hasOwnProperty(key)) {
-                  errorMessage += `\n- ${key}: ${validationErrors[key].join(', ')}`;
-                }
+    this.agendaService.crearEntrada(nuevaEntrada).subscribe({
+      next: () => {
+        this.router.navigate(['/agenda']);
+        alert("Entrada creada correctamente.");
+      },
+      error: (err) => {
+        console.error('Error al crear entrada desde Angular:', err);
+        let errorMessage = 'Error al crear la entrada.';
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error.errors) {
+            const validationErrors = err.error.errors;
+            errorMessage += '\nDetalles de validación:';
+            for (const key in validationErrors) {
+              if (validationErrors.hasOwnProperty(key)) {
+                errorMessage += `\n- ${key}: ${validationErrors[key].join(', ')}`;
               }
             }
-          } else if (err.status) {
-            errorMessage += `\nCódigo de estado HTTP: ${err.status} - ${err.statusText}`;
           }
-          alert(errorMessage);
+        } else if (err.status) {
+          errorMessage += `\nCódigo de estado HTTP: ${err.status} - ${err.statusText}`;
         }
-      });
-    } else {
-      this.entradaForm.markAllAsTouched();
-      alert('Por favor, completa todos los campos requeridos y asegúrate de que los valores son válidos.');
-    }
+        alert(errorMessage);
+      }
+    });
+  } else {
+    this.entradaForm.markAllAsTouched();
+    alert('Por favor, completa todos los campos requeridos y asegúrate de que los valores son válidos.');
   }
+}
+todayISOString(): string {
+  const now = new Date();
+  // Convertir a formato YYYY-MM-DDTHH:MM
+  return now.toISOString().slice(0, 16);
+}
 }

@@ -43,32 +43,34 @@ export class CalendarComponent implements OnInit {
   }
 
   cargarEntradasMes(): void {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1;
+  const year = this.currentDate.getFullYear();
+  const month = this.currentDate.getMonth() + 1;
 
-    this.agendaService.getEntradasPorMes(year, month).subscribe({
-      next: (entradas) => {
-        this.entradasMes = entradas.map(e => {
-          const servicio = this.servicios.find(s => s.id === e.serviceId);
-          return {
-            ...e,
-            fechaHora: new Date(e.fechaHora),
-            servicio: servicio
-          };
-        });
-        console.log('Entradas procesadas:', this.entradasMes);
-      }
-    });
-  }
+  console.log(`Cargando entradas para ${month}/${year}`);
+
+  this.agendaService.getEntradasPorMes(year, month).subscribe({
+    next: (entradas) => {
+      console.log('Entradas recibidas:', entradas);
+      this.entradasMes = entradas.map(e => {
+        const servicio = this.servicios.find(s => s.id === e.serviceId);
+        const fecha = new Date(e.fechaHora);
+        console.log(`Entrada: ${e.id}, Fecha: ${fecha}`);
+        return {
+          ...e,
+          fechaHora: fecha,
+          servicio: servicio
+        };
+      });
+    }
+  });
+}
 
   generarCalendario(): void {
     const start = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
     const end = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
     
-    // Ajustar inicio a lunes
     start.setDate(start.getDate() - (start.getDay() || 7) + 1);
     
-    // Ajustar fin a domingo
     end.setDate(end.getDate() + (7 - end.getDay()));
 
     this.weeks = [];
@@ -86,17 +88,20 @@ export class CalendarComponent implements OnInit {
 
   cambiarMes(delta: number): void {
     this.currentDate.setMonth(this.currentDate.getMonth() + delta);
-    this.currentDate = new Date(this.currentDate); // Forzar actualización
+    this.currentDate = new Date(this.currentDate);
     this.generarCalendario();
     this.cargarEntradasMes();
   }
 
   entradasDelDia(fecha: Date): EntradaAgenda[] {
-    return this.entradasMes.filter(e => 
-        e.fechaHora.getFullYear() === fecha.getFullYear() &&
-        e.fechaHora.getMonth() === fecha.getMonth() &&
-        e.fechaHora.getDate() === fecha.getDate()
+  return this.entradasMes.filter(e => {
+    const entradaDate = new Date(e.fechaHora);
+    return (
+      entradaDate.getFullYear() === fecha.getFullYear() &&
+      entradaDate.getMonth() === fecha.getMonth() &&
+      entradaDate.getDate() === fecha.getDate()
     );
+  });
 }
 
   esMesActual(fecha: Date): boolean {

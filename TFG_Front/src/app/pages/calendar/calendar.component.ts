@@ -4,6 +4,8 @@ import { AgendaService } from '../../services/agenda.service';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { ServicesService } from '../../services/services.service';
+import { Service } from '../../models/service';
 
 @Component({
   selector: 'app-calendar',
@@ -17,15 +19,27 @@ export class CalendarComponent implements OnInit {
   currentDate: Date = new Date();
   weeks: Date[][] = [];
   entradasMes: EntradaAgenda[] = [];
+  servicios: Service[] = [];
 
   constructor(
     private agendaService: AgendaService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private servicesService: ServicesService,
   ) { }
 
   ngOnInit(): void {
+    this.cargarServicios();
     this.generarCalendario();
     this.cargarEntradasMes();
+  }
+
+  cargarServicios(): void {
+    this.servicesService.getAll().subscribe({
+      next: (servicios) => {
+        this.servicios = servicios;
+      },
+      error: (err) => console.error('Error al cargar servicios:', err)
+    });
   }
 
   cargarEntradasMes(): void {
@@ -33,15 +47,19 @@ export class CalendarComponent implements OnInit {
     const month = this.currentDate.getMonth() + 1;
 
     this.agendaService.getEntradasPorMes(year, month).subscribe({
-        next: (entradas) => {
-            this.entradasMes = entradas.map(e => ({
-                ...e,
-                fechaHora: new Date(e.fechaHora) // Usamos fecha y hora combinada
-            }));
-            console.log('Entradas procesadas:', this.entradasMes);
-        }
+      next: (entradas) => {
+        this.entradasMes = entradas.map(e => {
+          const servicio = this.servicios.find(s => s.id === e.serviceId);
+          return {
+            ...e,
+            fechaHora: new Date(e.fechaHora),
+            servicio: servicio
+          };
+        });
+        console.log('Entradas procesadas:', this.entradasMes);
+      }
     });
-}
+  }
 
   generarCalendario(): void {
     const start = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);

@@ -129,6 +129,8 @@ namespace TFG_Back.Controllers
             {
                 return Unauthorized("Usuario no existe");
             }
+            Console.WriteLine("Hashed input: " + PasswordHelper.Hash(usuarioLoginDto.UserPassword));
+            Console.WriteLine("Stored password: " + user.UserPassword);
 
             if (!PasswordHelper.Hash(usuarioLoginDto.UserPassword).Equals(user.UserPassword))
             {

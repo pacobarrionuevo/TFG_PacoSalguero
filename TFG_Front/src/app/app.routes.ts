@@ -9,6 +9,8 @@ import { CrearentradaComponent } from './pages/crearentrada/crearentrada.compone
 import { FicherosComponent } from './pages/ficheros/ficheros.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
 import { LayoutComponent } from './pages/layout/layout.component';
+import { FacturasComponent } from './pages/facturas/facturas.component';
+import { InformesComponent } from './pages/informes/informes.component';
 
 export const routes: Routes = [
     {
@@ -36,6 +38,8 @@ export const routes: Routes = [
             { path: 'agenda', component: AgendaComponent },
             { path: 'crearentrada', component: CrearentradaComponent },
             { path: 'calendar', component: CalendarComponent },
+            { path: 'facturas', component: FacturasComponent },
+            { path: 'informes', component: InformesComponent},
             { path: '', redirectTo: 'ficheros', pathMatch: 'full' }
         ]
     }   

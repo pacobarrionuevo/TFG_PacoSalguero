@@ -10,5 +10,6 @@ export interface EntradaAgenda {
     paciente?: string;
     precio: number;
     observaciones?: string;
-    servicio?: Service;     
+    servicio?: Service;
+    seleccionado?: boolean;     
 }

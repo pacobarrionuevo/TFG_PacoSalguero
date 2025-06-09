@@ -83,7 +83,7 @@ export class CrearentradaComponent {
 
     this.agendaService.crearEntrada(nuevaEntrada).subscribe({
       next: () => {
-        this.router.navigate(['/agenda']);
+        this.router.navigate(['/app/agenda']);
         alert("Entrada creada correctamente.");
       },
       error: (err) => {

@@ -47,7 +47,7 @@ export class LoginComponent {
         localStorage.removeItem('authData');
       }
 
-      this.router.navigate(['/menu']);
+      this.router.navigate(['/app/ficheros']);
     } catch (error: any) {
       if (error.status === 400 && error.error.message === "Usuario baneado") {
         alert("Usuario baneado: No puedes iniciar sesión.");

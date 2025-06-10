@@ -46,6 +46,7 @@ namespace TFG_Back.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            Console.WriteLine($"DELETE request para el  servicio {id}");
             var result = await _services.DeleteAsync(id);
             await _unitOfWork.SaveAsync();
 

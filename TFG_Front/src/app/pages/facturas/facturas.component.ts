@@ -4,6 +4,7 @@ import { AgendaService } from '../../services/agenda.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ServiceFacturado } from '../../models/service-facturado';
 
 @Component({
   selector: 'app-facturas',
@@ -15,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 export class FacturasComponent {
   
   entradas: EntradaAgenda[] = [];
-  serviciosSeleccionados: EntradaAgenda[] = [];
+  serviciosSeleccionados: ServiceFacturado[] = [];
 
   constructor(private agendaService: AgendaService) { }
 
@@ -29,7 +30,7 @@ export class FacturasComponent {
         this.entradas = data.map(entrada => ({
           ...entrada,
           fecha: new Date(entrada.fechaHora),
-          seleccionado: false // <-- se añade esta propiedad
+          seleccionado: false
         }));
       },
       error: (err) => console.error('Error al cargar entradas:', err)
@@ -41,7 +42,18 @@ export class FacturasComponent {
   }
 
   facturarSeleccionados(): void {
-    this.serviciosSeleccionados = this.entradas.filter(e => e.seleccionado);
-    console.log('Servicios seleccionados para facturar:', this.serviciosSeleccionados);
-  }
+  this.serviciosSeleccionados = this.entradas
+    .filter(e => e.seleccionado)
+    .map(e => ({
+      centro: e.centroTrabajo,
+      cliente: e.cliente,
+      fecha: e.fechaHora,
+      paciente: e.paciente,
+      servicio: e.servicio?.nombre || '(Sin nombre)',
+      observaciones: e.observaciones
+    }));
+
+  console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
+}
+
 }

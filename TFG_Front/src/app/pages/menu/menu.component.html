@@ -2,8 +2,8 @@
 <div class="layout">
     <div class="sidebar">
         <div class="usuario">
-            <p>Bienvenido, Usuario</p>
-            <img src="assets/user_placeholder.png" alt="Foto Usuario" class="foto-usuario">
+            <p>Bienvenido, {{ userNickname }}</p>
+            <img [src]="userProfilePhoto" alt="Foto de Perfil" class="perfil-foto">
         </div>
 
         <nav class="navegacion">

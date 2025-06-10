@@ -2,7 +2,7 @@ import { PaymentMethod } from "./payment-method";
 
 export interface Customer {
     id?: number;
-    CIF: number;
+    cif: number;
     name: string;
     adress: string;
     postalCode: number;
@@ -12,4 +12,5 @@ export interface Customer {
     adminEmail: string;
     paymentMethodId?: number;
     paymentMethod?: PaymentMethod;
+    editing?: boolean;
 }

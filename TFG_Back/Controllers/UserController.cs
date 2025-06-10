@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using TFG_Back.Models.Database;
 using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.DTO;
-using TFG_Back.Models.Recursos;
+using TFG_Back.Recursos;
 
 namespace TFG_Back.Controllers
 {
@@ -35,19 +35,7 @@ namespace TFG_Back.Controllers
                 UserProfilePhoto = null
             };
         }
-        private UserDTO ToDto(User users)
-        {
-            return new UserDTO()
-            {
-                UserId = users.UserId,
-                UserNickname = users.UserNickname,
-                UserEmail = users.UserEmail,
-                UserPassword = users.UserPassword,
-                UserConfirmPassword = users.UserConfirmPassword,
-                UserProfilePhoto = users.UserProfilePhoto,
-            
-            };
-        }
+
         [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsuarios()
         {

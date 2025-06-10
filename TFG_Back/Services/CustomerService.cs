@@ -20,13 +20,14 @@ namespace TFG_Back.Services
 
         public async Task<Customer?> CreateAsync(CustomerDTO dto)
         {
-            var paymentMethod = (await _unitOfWork._paymentMethodRepository.GetAllAsync())
-                .FirstOrDefault(pm => pm.Method == dto.PaymentMethodName);
+            // Verificar si existe el método de pago por ID
+            var paymentMethod = await _unitOfWork._paymentMethodRepository.GetByIdAsync(dto.PaymentMethodId);
 
             if (paymentMethod == null) return null;
 
             var customer = new Customer
             {
+                Id = dto.Id,
                 CIF = dto.CIF,
                 Name = dto.Name,
                 Adress = dto.Adress,
@@ -34,8 +35,8 @@ namespace TFG_Back.Services
                 PlaceOfResidence = dto.PlaceOfResidence,
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
-                AdminisEmail = dto.AdminisEmail,
-                PaymentMethodId = paymentMethod.Id
+                AdminEmail = dto.AdminEmail, // Nombre consistente
+                PaymentMethodId = dto.PaymentMethodId
             };
 
             var created = await _unitOfWork._customerRepository.InsertAsync(customer);
@@ -53,7 +54,7 @@ namespace TFG_Back.Services
             return true;
         }
 
-        public async Task<Customer?> UpdateAsync(Customer customer)
+        public async Task<Customer?> UpdateAsync(CustomerDTO customer)
         {
             var existing = await _unitOfWork._customerRepository.GetByIdAsync(customer.Id);
             if (existing == null) return null;
@@ -65,7 +66,7 @@ namespace TFG_Back.Services
             existing.PlaceOfResidence = customer.PlaceOfResidence;
             existing.PhoneNumber = customer.PhoneNumber;
             existing.Email = customer.Email;
-            existing.AdminisEmail = customer.AdminisEmail;
+            existing.AdminEmail = customer.AdminEmail;
             existing.PaymentMethodId = customer.PaymentMethodId;
 
             _unitOfWork._customerRepository.Update(existing);

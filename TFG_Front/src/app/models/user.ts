@@ -6,4 +6,5 @@ export interface User {
     UserPassword?: string; 
     UserConfirmPassword?: string;
     Role?: 'user' | 'admin';
+    UserStatus?: 'connected' | 'disconnected';
 }

@@ -34,9 +34,11 @@ namespace TFG_Back.Controllers
             {
                 return BadRequest("El servicio especificado no existe");
             }
-            entrada.FechaHora = DateTime.Now;
-            //entrada.Fecha = DateTime.Today;
-            //entrada.Hora = DateTime.Now.TimeOfDay;
+
+            if (entrada.FechaHora < DateTime.Now)
+            {
+                return BadRequest("No se pueden crear entradas con fechas pasadas");
+            }
 
             _context.EntradasAgenda.Add(entrada);
             await _context.SaveChangesAsync();

@@ -2,6 +2,7 @@
 {
     public class CustomerDTO
     {
+        public int Id { get; set; }
         public int CIF { get; set; }
         public string Name { get; set; }
         public string Adress { get; set; }
@@ -9,9 +10,9 @@
         public string PlaceOfResidence { get; set; }
         public int PhoneNumber { get; set; }
         public string Email { get; set; }
-        public string AdminisEmail { get; set; }
+        public string AdminEmail { get; set; }
 
-        public string PaymentMethodName { get; set; } // En vez del objeto entero
+        public int PaymentMethodId { get; set; }
     }
 
 }

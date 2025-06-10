@@ -1,4 +1,7 @@
 <div class="calendar-container">
+  <a routerLink="/app/agenda" routerLinkActive="activo">
+      <i class="icono icon-ficheros"></i> Volver a la agenda
+  </a>
   <div class="calendar-header">
     <button (click)="cambiarMes(-1)">&lt;</button>
     <h2>{{ currentDate | date:'MMMM yyyy' | titlecase }}</h2>
@@ -13,19 +16,19 @@
     </div>
 
     <div *ngFor="let week of weeks" class="week">
-      <div *ngFor="let day of week" class="day" 
-           [class.current-month]="esMesActual(day)"
-           [class.other-month]="!esMesActual(day)">
-        
-        <div class="day-number">{{ day.getDate() }}</div>
-        
-        <div class="entries">
-          <div *ngFor="let entrada of entradasDelDia(day)" class="entry"
-               [style.border-left]="'4px solid ' + entrada.servicio?.color">
-            <div class="entry-time">{{ entrada.fechaHora | date:'HH:mm' }}</div>
-            <div class="entry-client">{{ entrada.cliente }}</div>
-            <div class="entry-service">{{ entrada.servicio?.nombre }}</div>
-          </div>
+    <div *ngFor="let day of week" class="day" 
+         [class.current-month]="esMesActual(day)"
+         [class.other-month]="!esMesActual(day)">
+      
+      <div class="day-number">{{ day.getDate() }}</div>
+      
+      <div class="entries">
+        <div *ngFor="let entrada of entradasDelDia(day)" class="entry"
+             [style.background-color]="entrada.servicio?.color + '33'" 
+             [style.border-left]="'4px solid ' + entrada.servicio?.color">
+          <div class="entry-time">{{ entrada.fechaHora | date:'HH:mm' }}</div>
+          <div class="entry-client">{{ entrada.cliente }}</div>
+          <div class="entry-service">{{ entrada.servicio?.nombre }}</div>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TFG_Back.Services;
 using TFG_Back.Servicios;
+using TFG_Back.WebSocketAdvanced;
 
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
@@ -29,10 +30,16 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ServiceRepository>();
 builder.Services.AddScoped<PaymentMethodRepository>();
 builder.Services.AddScoped<CustomerRepository>();
+builder.Services.AddScoped<FriendRequestRepository>();
+builder.Services.AddScoped<WebSocketMethods>();
 
 builder.Services.AddTransient<ServicesService>();
 builder.Services.AddTransient<PaymentMethodService>();
 builder.Services.AddTransient<CustomerService>();
+builder.Services.AddTransient<ImageService>();
+builder.Services.AddTransient<FriendRequestService>();
+builder.Services.AddSingleton<WebSocketNetwork>();
+builder.Services.AddTransient<Middleware>();
 
 
 builder.Services.AddControllers();
@@ -80,13 +87,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Middleware para mover token de query a header
+app.Use(async (context, next) => {
+    var token = context.Request.Query["token"];
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers["Authorization"] = $"Bearer {token}";
+    }
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseWebSockets();
+app.UseMiddleware<Middleware>();
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseHttpsRedirection();
 
 
 // Inicializacion de base de datos

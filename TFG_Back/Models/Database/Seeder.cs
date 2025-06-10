@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TFG_Back.Models.Database.Entidades;
-using TFG_Back.Models.Recursos;
+using TFG_Back.Recursos;
 
 namespace TFG_Back.Models.Database
 {
@@ -32,6 +32,7 @@ namespace TFG_Back.Models.Database
                 UserConfirmPassword = PasswordHelper.Hash("jose777"),
                 UserProfilePhoto = "Perfil_Deffault.png",
                 Role = "admin",
+                UserStatus = "Connected"
             
             };    
 

@@ -3,6 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ImageService } from '../../services/image.service';
 import { AuthService } from '../../services/auth.service';
 import { environment_development } from '../../../environments/environment.development';
+import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-menu',
@@ -11,17 +12,27 @@ import { environment_development } from '../../../environments/environment.devel
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'
 })
-export class MenuComponent implements OnInit{
+export class MenuComponent implements OnInit {
   userProfilePhoto: string = '';
   userNickname: string = '';
   userId: number | null = null;
-
   private BASE_URL = environment_development.apiUrl;
 
-  constructor(private imageService: ImageService, private authService: AuthService, private router: Router,) {}
+  constructor(
+    private imageService: ImageService,
+    private authService: AuthService,
+    public webSocketService: WebsocketService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-      this.cargarInfoUsuario();
+    this.cargarInfoUsuario();
+    this.inicializarWebSockets();
+  }
+
+  private inicializarWebSockets(): void {
+    const token = localStorage.getItem('accessToken');
+    if (token) this.webSocketService.connectRxjs(token);
   }
 
   private cargarInfoUsuario(): void {
@@ -36,6 +47,6 @@ export class MenuComponent implements OnInit{
   }
 
   validarUrlImagen(fotoPerfil: string | null): string {
-    return fotoPerfil ? `${this.BASE_URL}/fotos/${fotoPerfil}` : ''
+    return fotoPerfil ? `${this.BASE_URL}/fotos/${fotoPerfil}` : '';
   }
 }

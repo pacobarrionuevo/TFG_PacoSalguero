@@ -160,6 +160,64 @@ namespace TFG_Back.Controllers
 
             return Ok(new { StringToken = accessToken, user.UserId });
         }
+        [HttpGet("usuarios/{id}")]
+        public async Task<ActionResult<UserDTO>> GetUsuarioById(int id)
+        {
+            var usuario = await _context.Users
+                .Include(u => u.UserFriendship)
+                .ThenInclude(ua => ua.Friendship)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (usuario == null)
+            {
+                return NotFound("Usuario no encontrado");
+            }
+
+            var usuarioDto = new UserDTO
+            {
+                UserId = usuario.UserId,
+                UserNickname = usuario.UserNickname,
+                UserEmail = usuario.UserEmail,
+                UserProfilePhoto = usuario.UserProfilePhoto,
+                UserStatus = usuario.UserStatus,
+                Role = usuario.Role,
+                IsFriend = usuario.UserFriendship.Any(ua => ua.Friendship.IsAccepted)
+            };
+
+            return Ok(usuarioDto);
+        }
+
+        [HttpPut("usuarios/{id}")]
+        public async Task<IActionResult> ActualizarUsuario(int id, [FromBody] UpdateUserDTO dto)
+        {
+            var usuario = await _context.Users.FindAsync(id);
+            if (usuario == null)
+            {
+                return NotFound("Usuario no encontrado");
+            }
+
+            if (!string.IsNullOrEmpty(dto.UserNickname))
+            {
+                usuario.UserNickname = dto.UserNickname;
+            }
+
+            if (!string.IsNullOrEmpty(dto.UserEmail))
+            {
+                usuario.UserEmail = dto.UserEmail;
+            }
+
+            if (!string.IsNullOrEmpty(dto.UserPassword))
+            {
+                if (dto.UserPassword != dto.UserPassword)
+                {
+                    return BadRequest("Las contraseñas no coinciden");
+                }
+                usuario.UserPassword = PasswordHelper.Hash(dto.UserPassword);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(usuario);
+        }
 
         // Método para crear guardar las imagenes en su formato correcto //
         private async Task StoreImageAsync(string relativePath, IFormFile file)

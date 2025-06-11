@@ -5,11 +5,12 @@ import { environment } from '../../environments/environment';
 import { SolicitudAmistad } from '../models/solicitud-amistad';
 import { SendFriendRequest } from '../models/send-friend-request';
 import { User } from '../models/user';
+import { environment_development } from '../../environments/environment.development';
 @Injectable({
   providedIn: 'root'
 })
 export class FriendService {
-  private apiUrl = `${environment.apiUrl}/api/FriendRequest`;
+  private apiUrl = `${environment_development.apiUrl}/FriendRequest`;
   
   constructor(private http: HttpClient) { }
 

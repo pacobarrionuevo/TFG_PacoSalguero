@@ -51,7 +51,7 @@ namespace TFG_Back.Services
 
             var receiverRelation = new UserHasFriendship()
             {
-                UserId = senderId,
+                UserId = receiverId,
                 FriendshipId = amistad.FriendShipId,
                 Requestor = false
             };

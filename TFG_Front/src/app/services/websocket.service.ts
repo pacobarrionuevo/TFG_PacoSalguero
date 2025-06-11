@@ -5,6 +5,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { environment_development } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +27,8 @@ export class WebsocketService {
   // Conexion ws
   private rxjsSocket: WebSocketSubject<string>;
 
-  private baseURL = environment.apiUrl;
-  private socketURL = environment.socketUrl;
+  private baseURL = environment_development.apiUrl;
+  private socketURL = environment_development.socketUrl;
 
   
 

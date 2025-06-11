@@ -67,10 +67,10 @@ namespace TFG_Back.Services
             }
 
             // 6. Ejecutar el merge de tabla
-            document.MailMerge.ExecuteWithDataTable(table);
+            // document.MailMerge.ExecuteWithDataTable(table);
 
             // 7. Guardar como PDF
-            document.SaveToFile(outputPath, FileFormat.PDF);
+            // document.SaveToFile(outputPath, FileFormat.PDF);
 
             return outputPath;
         }

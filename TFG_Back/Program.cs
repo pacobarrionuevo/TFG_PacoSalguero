@@ -9,6 +9,7 @@ using System.Text;
 using TFG_Back.Services;
 using TFG_Back.Servicios;
 using TFG_Back.WebSocketAdvanced;
+using Microsoft.OpenApi.Models;
 
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
@@ -44,7 +45,37 @@ builder.Services.AddTransient<Middleware>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TFG API", Version = "v1" });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Introduce 'Bearer' seguido de tu token JWT",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    var securityRequirement = new OpenApiSecurityRequirement
+    {
+        {
+            securityScheme,
+            Array.Empty<string>()
+        }
+    };
+
+    c.AddSecurityRequirement(securityRequirement);
+});
 
 // CORS
 builder.Services.AddCors(options => {

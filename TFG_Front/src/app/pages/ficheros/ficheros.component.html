@@ -24,9 +24,9 @@
             <input type="color" [(ngModel)]="servicio.color" [disabled]="!servicio.editing">
           </td>
           <td>
-            <button *ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
-            <button *ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
-            <button (click)="eliminarServicio(servicio.id)">🗑️</button>
+            <button type="button"*ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
+            <button type="button"*ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
+            <button type="button"(click)="eliminarServicio(servicio.id)">🗑️</button>
           </td>
         </tr>
         </tbody>
@@ -45,7 +45,7 @@
   <label>Color</label>
   <input type="color" [(ngModel)]="nuevoServicio.color" />
 
-  <button class="crear-btn" (click)="crearServicio()">CREAR</button>
+  <button type="button" class="crear-btn" (click)="crearServicio()">CREAR</button>
 </div>
   </div>
 
@@ -80,9 +80,9 @@
             <input type="number" [(ngModel)]="paymentMethod.daysBetweenPayments" [disabled]="!paymentMethod.editing">
           </td>
           <td>
-            <button *ngIf="!paymentMethod.editing" (click)="editarMetodoPago(paymentMethod)">✏️</button>
-            <button *ngIf="paymentMethod.editing" (click)="guardarMetodoPago(paymentMethod)">💾</button>
-            <button (click)="eliminarMetodoPago(paymentMethod.id)">🗑️</button>
+            <button type="button" *ngIf="!paymentMethod.editing" (click)="editarMetodoPago(paymentMethod)">✏️</button>
+            <button type="button" *ngIf="paymentMethod.editing" (click)="guardarMetodoPago(paymentMethod)">💾</button>
+            <button type="button" (click)="eliminarMetodoPago(paymentMethod.id)">🗑️</button>
           </td>
         </tr>
         </tbody>
@@ -104,7 +104,7 @@
   <label>Días Entre Pagos</label>
   <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" />
 
-  <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
+  <button type="button" class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
 </div>
   </div>
 
@@ -148,9 +148,9 @@
               <span *ngIf="!customer.editing">{{ customer.paymentMethod?.method }}</span>
             </td>
             <td>
-              <button *ngIf="!customer.editing" (click)="editarCliente(customer)">✏️</button>
-              <button *ngIf="customer.editing" (click)="guardarCliente(customer)">💾</button>
-              <button (click)="eliminarCliente(customer.id)">🗑️</button>
+              <button type="button" *ngIf="!customer.editing" (click)="editarCliente(customer)">✏️</button>
+              <button type="button" *ngIf="customer.editing" (click)="guardarCliente(customer)">💾</button>
+              <button type="button" (click)="eliminarCliente(customer.id)">🗑️</button>
             </td>
           </tr>
       </tbody>
@@ -191,7 +191,7 @@
     </option>
   </select>
 
-  <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
+  <button type="button" class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
 </div>
 </div>
   

@@ -10,7 +10,7 @@ import { environment_development } from '../../environments/environment.developm
   providedIn: 'root'
 })
 export class FriendService {
-  private apiUrl = `${environment_development.apiUrl}/FriendRequest`;
+  private apiUrl = `${environment_development.apiUrl}/api/FriendRequest`;
   
   constructor(private http: HttpClient) { }
 
@@ -34,21 +34,21 @@ export class FriendService {
     });
   }
   
-  aceptarSolicitud(amistadId: number | null): Observable<any> {
-    if (amistadId == null) {
+  aceptarSolicitud(friendshipId: number | null): Observable<any> {
+    if (friendshipId == null) {
       console.error('Error: amistadId es null o undefined');
       return throwError(() => new Error('amistadId es null o undefined'));
     }
     
-    const params = new HttpParams().set('amistadId', amistadId.toString());
+    const params = new HttpParams().set('amistadId', friendshipId.toString());
     return this.http.post(`${this.apiUrl}/accept`, null, {
       headers: this.getHeader(),
       params: params
     });
   }
   
-  rechazarSolicitud(amistadId: number): Observable<any> {
-    const params = new HttpParams().set('amistadId', amistadId.toString());
+  rechazarSolicitud(friendshipId: number): Observable<any> {
+    const params = new HttpParams().set('amistadId', friendshipId.toString());
     return this.http.post(`${this.apiUrl}/reject`, null, {
       headers: this.getHeader(),
       params: params

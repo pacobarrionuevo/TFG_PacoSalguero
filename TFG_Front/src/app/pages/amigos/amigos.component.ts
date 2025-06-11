@@ -126,10 +126,10 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   private manejarSolicitudAmistad(message: any): void {
     const nuevaSolicitud: SolicitudAmistad = {
-      amistadId: message.requestId,
-      usuarioId: message.senderId,
-      usuarioApodo: message.senderName,
-      usuarioFotoPerfil: this.validarUrlImagen(null)
+      friendshipId: message.requestId,
+      userId: message.senderId,
+      userNickname: message.senderName,
+      userprofilephoto: this.validarUrlImagen(null)
     };
     this.solicitudesPendientes = [...this.solicitudesPendientes, nuevaSolicitud];
   }
@@ -138,14 +138,16 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.actualizarListasCompletas();
     this.errorMessage = `¡Ahora eres amigo de ${message.friendName}!`;
     setTimeout(() => this.errorMessage = null, 5000);
+    this.actualizarListasCompletas();
   }
 
   private manejarSolicitudRechazada(message: any): void {
     this.solicitudesPendientes = this.solicitudesPendientes.filter(
-      s => s.amistadId !== message.requestId
+      s => s.friendshipId !== message.requestId
     );
     this.errorMessage = message.reason || 'Solicitud rechazada';
     setTimeout(() => this.errorMessage = null, 5000);
+    this.actualizarListasCompletas();
   }
 
   enviarSolicitud(receiverId: number): void {
@@ -153,20 +155,23 @@ export class AmigosComponent implements OnInit, OnDestroy {
       type: 'sendFriendRequest',
       receiverId
     }));
+    this.actualizarListasCompletas();
   }
 
   aceptarSolicitud(solicitud: SolicitudAmistad): void {
     this.webSocketService.sendRxjs(JSON.stringify({
       type: 'acceptFriendRequest',
-      requestId: solicitud.amistadId
+      requestId: solicitud.friendshipId
     }));
+    this.actualizarListasCompletas();
   }
 
   rechazarSolicitud(solicitud: SolicitudAmistad): void {
     this.webSocketService.sendRxjs(JSON.stringify({
       type: 'rejectFriendRequest',
-      requestId: solicitud.amistadId
+      requestId: solicitud.friendshipId
     }));
+    this.actualizarListasCompletas();
   }
 
   private cargarInfoUsuario(): void {
@@ -210,27 +215,27 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   private mapearUsuario(usuario: any): User {
     return {
-      UserId: usuario.usuarioId,
-      UserNickname: usuario.usuarioApodo,
-      UserProfilePhoto: this.validarUrlImagen(usuario.usuarioFotoPerfil)
+      UserId: usuario.userId,
+      UserNickname: usuario.userNickname,
+      UserProfilePhoto: this.validarUrlImagen(usuario.userProfilePhoto)
     };
   }
 
   private mapearAmigo(amigo: any): User {
     return {
-      UserId: amigo.UsuarioId || amigo.usuarioId,
-      UserNickname: amigo.UsuarioApodo || amigo.usuarioApodo,
-      UserProfilePhoto: this.validarUrlImagen(amigo.UsuarioFotoPerfil || amigo.usuarioFotoPerfil),
+      UserId: amigo.UsuarioId || amigo.userId,
+      UserNickname: amigo.UsuarioApodo || amigo.userNickname,
+      UserProfilePhoto: this.validarUrlImagen(amigo.UserProfilePhoto || amigo.userProfilePhoto),
       UserStatus: 'Desconectado'
     };
   }
 
   private mapearSolicitud(solicitud: any): SolicitudAmistad {
     return {
-      amistadId: solicitud.amistadId,
-      usuarioId: solicitud.usuarioId,
-      usuarioApodo: solicitud.usuarioApodo,
-      usuarioFotoPerfil: this.validarUrlImagen(solicitud.usuarioFotoPerfil)
+      friendshipId: solicitud.friendshipId,
+      userId: solicitud.usuarioId,
+      userNickname: solicitud.usuarioApodo,
+      userprofilephoto: this.validarUrlImagen(solicitud.usuarioFotoPerfil)
     };
   }
 

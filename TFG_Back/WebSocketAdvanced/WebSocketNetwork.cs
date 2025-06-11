@@ -264,7 +264,9 @@ namespace TFG_Back.WebSocketAdvanced
         {
             using var scope = _serviceProvider.CreateScope();
             var friendService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
+
             var request = await friendService.GetRequestDetails(requestId);
+            Console.WriteLine($"GetRequestDetails: sender={request?.SenderId}, receiver={request?.ReceiverId}, handler.Id={handler.Id}");
 
             if (request == null) return;
 
@@ -286,6 +288,7 @@ namespace TFG_Back.WebSocketAdvanced
             using var scope = _serviceProvider.CreateScope();
             var friendService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
             var requestDetails = await friendService.GetRequestDetails(requestId);
+            Console.WriteLine($"GetRequestDetails: sender={requestDetails?.SenderId}, receiver={requestDetails?.ReceiverId}, handler.Id={handler.Id}");
 
             if (requestDetails == null) return;
 

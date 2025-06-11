@@ -68,23 +68,48 @@ namespace TFG_Back.Services
                 SenderName = sender?.UserNickname
             };
         }
-        public async Task<FriendRequestDetails> GetRequestDetails(int requestId)
-        {
-            return await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .Where(a => a.FriendShipId == requestId)
-                .Select(a => new FriendRequestDetails
-                {
-                    SenderId = a.UserFriendship.First(ua => ua.Requestor).UserId,
-                    ReceiverId = a.UserFriendship.First(ua => !ua.Requestor).UserId
-                })
-                .FirstOrDefaultAsync();
-        }
+        
         public class FriendRequestDetails
         {
             public int SenderId { get; set; }
             public int ReceiverId { get; set; }
         }
+        public async Task<FriendRequestDetails?> GetRequestDetails(int requestId)
+        {
+            var amistad = await _context.Friendships
+                .Include(a => a.UserFriendship)
+                .FirstOrDefaultAsync(a => a.FriendShipId == requestId);
+
+            if (amistad == null)
+            {
+                Console.WriteLine($"[GetRequestDetails] No se encontró la amistad con ID: {requestId}");
+                return null;
+            }
+
+            if (amistad.UserFriendship == null || amistad.UserFriendship.Count < 2)
+            {
+                Console.WriteLine($"[GetRequestDetails] Relación incompleta para la amistad ID: {requestId}");
+                return null;
+            }
+
+            var sender = amistad.UserFriendship.FirstOrDefault(ua => ua.Requestor);
+            var receiver = amistad.UserFriendship.FirstOrDefault(ua => !ua.Requestor);
+
+            if (sender == null || receiver == null)
+            {
+                Console.WriteLine($"[GetRequestDetails] Faltan datos de sender o receiver para amistad ID: {requestId}");
+                return null;
+            }
+
+            Console.WriteLine($"[GetRequestDetails] OK - sender={sender.UserId}, receiver={receiver.UserId}");
+            return new FriendRequestDetails
+            {
+                SenderId = sender.UserId,
+                ReceiverId = receiver.UserId
+            };
+        }
+
+
         public async Task<bool> AcceptFriendRequest(int amistadId, int receiverId)
         {
             var amistad = await _context.Friendships

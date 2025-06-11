@@ -1,7 +1,7 @@
 export interface SolicitudAmistad {
-    amistadId: number;
-    usuarioId: number;
-    usuarioApodo: string;
-    usuarioFotoPerfil?: string;
+    friendshipId: number;
+    userId: number;
+    userNickname: string;
+    userprofilephoto?: string;
   }
   

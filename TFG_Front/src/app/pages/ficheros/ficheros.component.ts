@@ -208,12 +208,12 @@ eliminarMetodoPago(id: number): void {
 
         // Reiniciar formulario
         this.newCustomer = {
-          cif: 0,
+          cif: null,
           name: '',
           adress: '',
-          postalCode: 0,
+          postalCode: null,
           placeOfResidence: '',
-          phoneNumber: 0,
+          phoneNumber: null ,
           email: '',
           adminEmail: '',
           paymentMethodId: undefined,

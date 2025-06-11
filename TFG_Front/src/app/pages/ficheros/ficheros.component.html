@@ -143,12 +143,12 @@
   
     <div class="formulario">
     <h3>CREAR CLIENTE</h3>
-    <input type="number" [(ngModel)]="newCustomer.cif" placeholder="CIF" />
+    <input type="number" [(ngModel)]="newCustomer.cif" placeholder="CIF" [attr.value]="null" />
     <input type="text" [(ngModel)]="newCustomer.name" placeholder="Nombre" />
     <input type="text" [(ngModel)]="newCustomer.adress" placeholder="Dirección" />
-    <input type="number" [(ngModel)]="newCustomer.postalCode" placeholder="Código Postal" />
+    <input type="number" [(ngModel)]="newCustomer.postalCode" placeholder="Código Postal" [attr.value]="null"/>
     <input type="text" [(ngModel)]="newCustomer.placeOfResidence" placeholder="Lugar de residencia" />
-    <input type="number" [(ngModel)]="newCustomer.phoneNumber" placeholder="Teléfono" />
+    <input type="number" [(ngModel)]="newCustomer.phoneNumber" placeholder="Teléfono"[attr.value]="null"/>
     <input type="text" [(ngModel)]="newCustomer.email" placeholder="Email" />
     <input type="text" [(ngModel)]="newCustomer.adminEmail" placeholder="Email Administrativo" />
     <select [(ngModel)]="newCustomer.paymentMethodId">

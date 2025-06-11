@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../../models/user';
 import { environment_development } from '../../../environments/environment.development';
-import { interval, Subscription } from 'rxjs';
+import { forkJoin, interval, Subject, Subscription, takeUntil } from 'rxjs';
 import { SolicitudAmistad } from '../../models/solicitud-amistad';
 import { WebsocketService } from '../../services/websocket.service';
 import { AuthService } from '../../services/auth.service';
@@ -9,18 +9,19 @@ import { ApiService } from '../../services/api.service';
 import { Router, RouterModule } from '@angular/router';
 import { ImageService } from '../../services/image.service';
 import { FriendService } from '../../services/friend.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-amigos',
   standalone: true,
-  imports: [FormsModule, RouterModule, CommonModule],
+  imports: [FormsModule, RouterModule, CommonModule, DatePipe],
   templateUrl: './amigos.component.html',
   styleUrl: './amigos.component.css'
 })
 export class AmigosComponent implements OnInit, OnDestroy {
-  usuarios: User[] = [];
+  todosLosUsuarios: User[] = [];
   usuariosFiltrados: User[] = [];
   amigos: User[] = [];
   amigosFiltrados: User[] = [];
@@ -35,10 +36,13 @@ export class AmigosComponent implements OnInit, OnDestroy {
   perfil_default: string;
   solicitudesPendientes: SolicitudAmistad[] = [];
   errorMessage: string | null = null;
+  private friendIds = new Set<number>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     public webSocketService: WebsocketService,
     private apiService: ApiService,
+    private userService: UserService,
     private authService: AuthService,
     private router: Router,
     private imageService: ImageService,
@@ -55,10 +59,84 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.obtenerSolicitudesPendientes();
     this.suscribirseAWebSockets();
     this.inicializarActualizaciones();
+    this.usuarioId = this.authService.getUserData()?.id ?? null;
+    this.cargarDatosIniciales();
+    this.escucharCambiosDeEstado();
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(sub => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+cargarDatosIniciales(): void {
+    forkJoin({
+      amigos: this.friendService.getFriendsList(),
+      usuarios: this.userService.getUsuarios(),
+      solicitudes: this.friendService.getPendingRequests()
+    }).subscribe(({ amigos, usuarios, solicitudes }) => {
+      this.amigos = amigos;
+      this.todosLosUsuarios = usuarios;
+      this.solicitudesPendientes = solicitudes;
+
+      this.friendIds.clear();
+      this.amigos.forEach(amigo => this.friendIds.add(amigo.UserId!));
+
+      this.buscarUsuarios();
+    });
+  }
+
+  escucharCambiosDeEstado(): void {
+    this.webSocketService.userStatusChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(update => {
+        this.actualizarEstadoUsuario(this.amigos, update.userId, update.isOnline);
+        this.actualizarEstadoUsuario(this.todosLosUsuarios, update.userId, update.isOnline);
+        this.buscarUsuarios(); // Refresca la lista filtrada
+      });
+  }
+   private actualizarEstadoUsuario(lista: User[], userId: number, isOnline: boolean): void {
+    const usuario = lista.find(u => u.UserId === userId);
+    if (usuario) {
+      usuario.IsOnline = isOnline;
+      // Si se desconecta, el backend ya actualiza LastConnection, no es necesario aquí
+    }
+  }
+
+  buscarUsuarios(): void {
+    if (!this.terminoBusqueda) {
+      this.usuariosFiltrados = this.todosLosUsuarios;
+    } else {
+      this.usuariosFiltrados = this.todosLosUsuarios.filter(u =>
+        u.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase())
+      );
+    }
+  }
+
+  esAmigo(userId: number): boolean {
+    return this.friendIds.has(userId);
+  }
+
+  enviarSolicitud(receiverId?: number): void {
+    if (receiverId) {
+      this.friendService.sendFriendRequest(receiverId).subscribe(() => {
+        alert('Solicitud enviada');
+      });
+    }
+  }
+
+  aceptarSolicitud(solicitud: SolicitudAmistad): void {
+    this.friendService.aceptarSolicitud(solicitud.friendshipId).subscribe(() => {
+      alert('Solicitud aceptada');
+      this.cargarDatosIniciales(); // Recargar todo para actualizar las listas
+    });
+  }
+
+  rechazarSolicitud(solicitud: SolicitudAmistad): void {
+    this.friendService.rechazarSolicitud(solicitud.friendshipId).subscribe(() => {
+      alert('Solicitud rechazada');
+      this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.friendshipId !== solicitud.friendshipId);
+    });
   }
 
   private suscribirseAWebSockets(): void {
@@ -112,9 +190,9 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.amigosFiltrados = [...this.amigos];
   }
 
-  actualizarEstadoAmigo(friendId: number, estado: string) {
+  actualizarEstadoAmigo(friendId: number, estado: boolean) {
     const amigo = this.amigos.find(a => a.UserId === friendId);
-    if (amigo) amigo.UserStatus = estado;
+    if (amigo) amigo.IsOnline = estado;
   }
 
   private actualizarUsuariosConectados(): void {
@@ -150,29 +228,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.actualizarListasCompletas();
   }
 
-  enviarSolicitud(receiverId: number): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'sendFriendRequest',
-      receiverId
-    }));
-    this.actualizarListasCompletas();
-  }
-
-  aceptarSolicitud(solicitud: SolicitudAmistad): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'acceptFriendRequest',
-      requestId: solicitud.friendshipId
-    }));
-    this.actualizarListasCompletas();
-  }
-
-  rechazarSolicitud(solicitud: SolicitudAmistad): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'rejectFriendRequest',
-      requestId: solicitud.friendshipId
-    }));
-    this.actualizarListasCompletas();
-  }
+ 
 
   private cargarInfoUsuario(): void {
     const userInfo = this.authService.getUserData();
@@ -187,10 +243,10 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   obtenerUsuarios(): void {
     this.apiService.getUsuarios().subscribe(usuarios => {
-      this.usuarios = usuarios
+      this.todosLosUsuarios = usuarios
         .map(usuario => this.mapearUsuario(usuario))
         .filter(usuario => usuario.UserId !== this.usuarioId);
-      this.usuariosFiltrados = [...this.usuarios];
+      this.usuariosFiltrados = [...this.todosLosUsuarios];
     });
   }
 
@@ -226,7 +282,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
       UserId: amigo.UsuarioId || amigo.userId,
       UserNickname: amigo.UsuarioApodo || amigo.userNickname,
       UserProfilePhoto: this.validarUrlImagen(amigo.UserProfilePhoto || amigo.userProfilePhoto),
-      UserStatus: 'Desconectado'
+      IsOnline: false
     };
   }
 
@@ -243,13 +299,6 @@ export class AmigosComponent implements OnInit, OnDestroy {
     return fotoPerfil ? `${this.BASE_URL}/fotos/${fotoPerfil}` : this.perfil_default;
   }
 
-  buscarUsuarios(): void {
-    this.usuariosFiltrados = this.terminoBusqueda.trim()
-      ? this.usuarios.filter(usuario =>
-          usuario.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) &&
-          usuario.UserId !== this.usuarioId)
-      : [...this.usuarios].filter(usuario => usuario.UserId !== this.usuarioId);
-  }
 
   isUserOnline(userId: number): boolean {
     return this.onlineUserIds.has(userId);

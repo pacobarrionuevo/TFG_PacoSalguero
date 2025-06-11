@@ -141,3 +141,29 @@ h3 {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+.punto-verde {
+  height: 10px;
+  width: 10px;
+  background-color: #28a745;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.estado.conectado {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.estado.desconectado {
+  color: #6c757d;
+}
+
+.card-placeholder {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+}

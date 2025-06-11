@@ -19,8 +19,12 @@ namespace TFG_Back.Controllers
         private readonly DBContext _context;
         private readonly PasswordHelper passwordHelper;
         private readonly TokenValidationParameters _tokenParameters;
-        public UserController(DBContext _dbContext, IOptionsMonitor<JwtBearerOptions> jwtOptions)
+        private readonly UnitOfWork _unitOfWork;
+
+        public UserController(DBContext _dbContext, UnitOfWork unitOfWork, IOptionsMonitor<JwtBearerOptions> jwtOptions)
         {
+            _unitOfWork = unitOfWork;
+
             _context = _dbContext;
             _tokenParameters = jwtOptions.Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
         }
@@ -37,21 +41,24 @@ namespace TFG_Back.Controllers
         }
 
         [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            return await _context.Users
-                .Select(u => new UserDTO
-                {
-                    UserId = u.UserId,
-                    UserNickname = u.UserNickname,
-                    UserEmail = u.UserEmail,
-                    UserProfilePhoto = u.UserProfilePhoto,
-                    Role = u.Role
-                    
-                })
-                .ToListAsync();
+            var users = await _unitOfWork._userRepository.GetAllAsync();
+            var userDtos = users.Select(u => new UserDTO
+            {
+                UserId = u.UserId,
+                UserNickname = u.UserNickname,
+                UserEmail = u.UserEmail,
+                UserProfilePhoto = u.UserProfilePhoto,
+                Role = u.Role,
+                IsOnline = u.IsOnline,
+                LastConnection = u.LastConnection
+            }).ToList();
+
+            return Ok(userDtos);
         }
-        [HttpPost("register")]
+    
+[HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)
         {
             if (_context.Users.Any(User => User.UserEmail == user.UserEmail))
@@ -179,7 +186,7 @@ namespace TFG_Back.Controllers
                 UserNickname = usuario.UserNickname,
                 UserEmail = usuario.UserEmail,
                 UserProfilePhoto = usuario.UserProfilePhoto,
-                UserStatus = usuario.UserStatus,
+                IsOnline=usuario.IsOnline,
                 Role = usuario.Role,
                 IsFriend = usuario.UserFriendship.Any(ua => ua.Friendship.IsAccepted)
             };

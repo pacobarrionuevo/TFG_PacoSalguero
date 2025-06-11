@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TFG_Back.Models.Database.Entidades;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using TFG_Back.Models.DTO;
 
 namespace TFG_Back.Controllers
 {
@@ -61,13 +63,28 @@ namespace TFG_Back.Controllers
 
 
         [HttpGet("friends")]
-        public async Task<ActionResult<List<User>>> GetFriendsList()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetFriendsList()
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var usuarioId))
-                return Unauthorized("Usuario no autenticado.");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
 
-            var amigos = await _friendRequestService.GetFriendsList(usuarioId);
-            return Ok(amigos);
+            var friends = await _friendRequestService.GetFriendsList(userId);
+
+            var friendDtos = friends.Select(f => new UserDTO
+            {
+                UserId = f.UserId,
+                UserNickname = f.UserNickname,
+                UserProfilePhoto = f.UserProfilePhoto,
+                UserEmail = f.UserEmail,
+                IsOnline = f.IsOnline,
+                LastConnection = f.LastConnection,
+                IsFriend = true
+            }).ToList();
+
+            return Ok(friendDtos);
         }
 
 

@@ -10,9 +10,12 @@ using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.Database;
 using TFG_Back.Models.DTO;
 using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.AspNetCore.Mvc;
 using TFG_Back.Services;
 using static TFG_Back.WebSocketAdvanced.WebSocketNetwork;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace TFG_Back.WebSocketAdvanced
 {
@@ -26,19 +29,23 @@ namespace TFG_Back.WebSocketAdvanced
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _connectedSemaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _waitingSemaphore = new SemaphoreSlim(1, 1);
+        private readonly ConcurrentDictionary<int, WebSocket> _sockets = new();
+        private readonly ConcurrentDictionary<int, string> _users = new();
+        private readonly IServiceScopeFactory _scopeFactory;
 
+        public WebSocketNetwork(IServiceScopeFactory scopeFactory, IServiceProvider serviceProvider)
+        {
+            _scopeFactory = scopeFactory;
+            _serviceProvider = serviceProvider;
+            OnActiveConnectionsChanged += count => NotifyActiveConnectionsChanged(count);
+        }
         private readonly Dictionary<int, WebSocketHandler> _connectedUsers = new Dictionary<int, WebSocketHandler>();
 
         private readonly IServiceProvider _serviceProvider;
         private static int _activeConnections = 0;
         public event Action<int> OnActiveConnectionsChanged;
 
-        public WebSocketNetwork(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-            OnActiveConnectionsChanged += count => NotifyActiveConnectionsChanged(count);
-        }
-
+        
         public async Task BroadcastMessage(string message)
         {
             await _semaphore.WaitAsync();
@@ -80,27 +87,85 @@ namespace TFG_Back.WebSocketAdvanced
 
         public async Task HandleAsync(WebSocket webSocket, int userId, string username)
         {
-            Interlocked.Increment(ref _activeConnections);
-            OnActiveConnectionsChanged?.Invoke(_activeConnections);
+            _sockets.TryAdd(userId, webSocket);
+            _users.TryAdd(userId, username);
 
-            var handler = await CreateHandlerAsync(userId, webSocket, username);
-            await AddUser(userId, handler);
+            await UpdateUserStatus(userId, true);
+            await BroadcastStatusUpdate(userId, true);
 
             try
             {
-                await UpdateUserStatusAsync(handler, "Conectado");
-                await NotifyFriendsAsync(handler, true);
+                var buffer = new byte[1024 * 4];
+                WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-                await handler.HandleAsync();
+                while (!result.CloseStatus.HasValue)
+                {
+                    // Mantener la conexión viva, se pueden manejar mensajes entrantes aquí si es necesario.
+                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                }
+            }
+            catch (WebSocketException)
+            {
+                // El cliente se desconectó abruptamente.
             }
             finally
             {
-                await UpdateUserStatusAsync(handler, "Desconectado");
-                await NotifyFriendsAsync(handler, false);
+                _sockets.TryRemove(userId, out _);
+                _users.TryRemove(userId, out _);
+                if (webSocket.State != WebSocketState.Closed && webSocket.State != WebSocketState.Aborted)
+                {
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed", CancellationToken.None);
+                }
+
+                await UpdateUserStatus(userId, false);
+                await BroadcastStatusUpdate(userId, false);
+            }
+        }
+        private async Task UpdateUserStatus(int userId, bool isOnline)
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+                var user = await unitOfWork._userRepository.GetByIdAsync(userId);
+                if (user != null)
+                {
+                    user.IsOnline = isOnline;
+                    if (!isOnline)
+                    {
+                        user.LastConnection = DateTime.UtcNow;
+                    }
+                    unitOfWork._userRepository.Update(user);
+                    await unitOfWork.SaveAsync();
+                }
             }
         }
 
-        private async Task AddUser(int userId, WebSocketHandler handler)
+        private async Task BroadcastStatusUpdate(int userId, bool isOnline)
+        {
+            var messagePayload = new { type = "status_update", userId, isOnline };
+            var messageString = JsonSerializer.Serialize(messagePayload);
+            var bytes = Encoding.UTF8.GetBytes(messageString);
+            var messageSegment = new ArraySegment<byte>(bytes);
+
+            var broadcastTasks = _sockets.Values.Select(socket =>
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    return socket.SendAsync(messageSegment, WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+                return Task.CompletedTask;
+            });
+
+            await Task.WhenAll(broadcastTasks);
+        }
+
+        public IReadOnlyDictionary<int, string> GetConnectedUsers()
+        {
+            return _users;
+        }
+    
+
+private async Task AddUser(int userId, WebSocketHandler handler)
         {
             _connectedUsers[userId] = handler;
             Console.WriteLine($"Usuario {userId} conectado.");
@@ -139,7 +204,6 @@ namespace TFG_Back.WebSocketAdvanced
         private async Task OnDisconnectedHandler(WebSocketHandler handler)
         {
             Console.WriteLine($"Evento de desconexión disparado para el usuario {handler.Id}.");
-            await UpdateUserStatusAsync(handler, "Desconectado");
             await NotifyFriendsAsync(handler, false);
         }
         
@@ -307,18 +371,7 @@ namespace TFG_Back.WebSocketAdvanced
             }
         }
 
-        private async Task UpdateUserStatusAsync(WebSocketHandler handler, string status)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var wsMethods = scope.ServiceProvider.GetRequiredService<WebSocketMethods>();
-            var user = await wsMethods.GetUserById(handler.Id);
-
-            if (user != null)
-            {
-                user.UserStatus = status;
-                await wsMethods.UpdateUserAsync(user);
-            }
-        }
+        
 
 
         private async Task NotifyFriendsAsync(WebSocketHandler handler, bool isConnected)
@@ -339,7 +392,6 @@ namespace TFG_Back.WebSocketAdvanced
             }
         }
 
-        public List<int> GetConnectedUsers() => _connectedUsers.Keys.ToList();
 
         public int GetActiveConnections() => _activeConnections;
 

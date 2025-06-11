@@ -6,12 +6,18 @@ import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { environment_development } from '../../environments/environment.development';
-
+export interface UserStatusUpdate {
+  userId: number;
+  isOnline: boolean;
+}
 @Injectable({
   providedIn: 'root'
 })
 export class WebsocketService {
-
+  private socket?: WebSocket;
+  private userStatusChanged = new Subject<UserStatusUpdate>();
+  
+  public userStatusChanged$ = this.userStatusChanged.asObservable();
   // Variables para gestionar la conexión, si se ha recibido el mensaje, si se ha desconectado o si hay alguna conexión activa
   connected = new Subject<void>(); 
   messageReceived = new Subject<any>();
@@ -53,39 +59,38 @@ export class WebsocketService {
   }
 
   // Conecta el websocket usando el token de autenticación del usuario que inició sesión.
-  connectRxjs(token: string) {
-    console.log('WebSocketService: Conectando WebSocket con token:', token);
-
-    // Verificar que el token sea una cadena válida
-    if (typeof token !== 'string') {
-      console.error('WebSocketService: El token no es una cadena válida:', token);
+  public connectRxjs(token: string): void {
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      console.log('WebSocket connection already open or connecting.');
       return;
     }
 
-    // Almacenar el token para reconexiones futuras --> recargas de páginas
-    sessionStorage.setItem(this.tokenKey, token);
+    const url = `${environment_development.socketUrl}?token=${token}`;
+    this.socket = new WebSocket(url);
 
-    // Cerrar la conexión existente si hay una
-    if (this.rxjsSocket && !this.rxjsSocket.closed) {
-      console.log('WebSocketService: Cerrando conexión WebSocket existente...');
-      this.disconnectRxjs();
-    }
+    this.socket.onopen = () => {
+      console.log('WebSocket connection established');
+    };
 
-    // Crear una nueva conexión websocket
-    this.rxjsSocket = webSocket({
-      url: `${this.socketURL}?token=${token}`,
-      openObserver: { next: () => this.onConnected() },
-      closeObserver: { next: (event: CloseEvent) => this.onDisconnected() },
-      serializer: (value: string) => value,
-      deserializer: (event: MessageEvent) => event.data
-    });
+    this.socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'status_update') {
+          this.userStatusChanged.next({ userId: message.userId, isOnline: message.isOnline });
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
 
-    // Suscribirse a los mensajes del websocket
-    this.rxjsSocket.subscribe({
-      next: (message: string) => this.handleMessage(message),
-      error: (error) => this.onError(error),
-      complete: () => this.onDisconnected()
-    });
+    this.socket.onclose = (event) => {
+      console.log('WebSocket connection closed:', event.reason);
+      this.socket = undefined;
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
   }
 
   // Envía un mensaje a través del websocket
@@ -107,12 +112,20 @@ export class WebsocketService {
       this.rxjsSocket.unsubscribe();
     }
   }
+  
 
   // Muestra que se ha desconectado el websocket
   private onDisconnected() {
     console.log('WebSocketService: Desconectado del WebSocket');
     this.disconnected.next();
   }
+  public disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = undefined;
+    }
+  
+}
 
 // Maneja todos los posibles mensajes recibidos del websockets
 private handleMessage(message: string): void {

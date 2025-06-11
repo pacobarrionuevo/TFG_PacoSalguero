@@ -6,6 +6,7 @@ export interface User {
     UserPassword?: string; 
     UserConfirmPassword?: string;
     Role?: 'user' | 'admin';
-    UserStatus?: string;
+    IsOnline?: boolean;
+    LastConnection?: Date;
     EsAmigo?: boolean;
 }

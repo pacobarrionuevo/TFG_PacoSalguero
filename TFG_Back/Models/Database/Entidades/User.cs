@@ -13,7 +13,7 @@ namespace TFG_Back.Models.Database.Entidades
         public string Role { get; set; } = "user";
         public List<UserHasFriendship> UserFriendship { get; set; }
 
-        // Connected / Disconnected
-        public string UserStatus { get; set; } = "disconnected";
+        public bool IsOnline { get; set; } = false;
+        public DateTime? LastConnection { get; set; }
     }
 }

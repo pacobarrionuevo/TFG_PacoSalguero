@@ -34,12 +34,19 @@
     </div>
   
     <div class="formulario">
-      <h3>CREAR SERVICIO</h3>
-      <input type="text" placeholder="Nombre" [(ngModel)]="nuevoServicio.nombre" />
-      <input type="text" placeholder="Abreviatura" [(ngModel)]="nuevoServicio.abreviatura" />
-      <input type="color" placeholder="Color" [(ngModel)]="nuevoServicio.color" />
-      <button class="crear-btn" (click)="crearServicio()">CREAR</button>
-    </div>
+  <h3>CREAR SERVICIO</h3>
+
+  <label>Nombre</label>
+  <input type="text" [(ngModel)]="nuevoServicio.nombre" />
+
+  <label>Abreviatura</label>
+  <input type="text" [(ngModel)]="nuevoServicio.abreviatura" />
+
+  <label>Color</label>
+  <input type="color" [(ngModel)]="nuevoServicio.color" />
+
+  <button class="crear-btn" (click)="crearServicio()">CREAR</button>
+</div>
   </div>
 
   <br>
@@ -82,14 +89,23 @@
       </table>
     </div>
   
-    <div class="formulario">
-      <h3>CREAR MÉTODO DE PAGO</h3>
-      <input type="text" [(ngModel)]="newPaymentMethod.method" placeholder="Método" />
-      <input type="number" [(ngModel)]="newPaymentMethod.installments" placeholder="Vencimientos" />
-      <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" placeholder="Primer pago" />
-      <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" placeholder="Días entre pagos" />
-      <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
-    </div>
+   <div class="formulario">
+  <h3>CREAR MÉTODO DE PAGO</h3>
+
+  <label>Método</label>
+  <input type="text" [(ngModel)]="newPaymentMethod.method" />
+
+  <label>Nº Vencimientos</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.installments" />
+
+  <label>Días Primer Pago</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" />
+
+  <label>Días Entre Pagos</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" />
+
+  <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
+</div>
   </div>
 
   <!--Tabla y formulario para ver y añadir un cliente-->
@@ -142,21 +158,40 @@
     </div>
   
     <div class="formulario">
-    <h3>CREAR CLIENTE</h3>
-    <input type="number" [(ngModel)]="newCustomer.cif" placeholder="CIF" [attr.value]="null" />
-    <input type="text" [(ngModel)]="newCustomer.name" placeholder="Nombre" />
-    <input type="text" [(ngModel)]="newCustomer.adress" placeholder="Dirección" />
-    <input type="number" [(ngModel)]="newCustomer.postalCode" placeholder="Código Postal" [attr.value]="null"/>
-    <input type="text" [(ngModel)]="newCustomer.placeOfResidence" placeholder="Lugar de residencia" />
-    <input type="number" [(ngModel)]="newCustomer.phoneNumber" placeholder="Teléfono"[attr.value]="null"/>
-    <input type="text" [(ngModel)]="newCustomer.email" placeholder="Email" />
-    <input type="text" [(ngModel)]="newCustomer.adminEmail" placeholder="Email Administrativo" />
-    <select [(ngModel)]="newCustomer.paymentMethodId">
-      <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">{{ metodo.id }}</option>
-    </select>
+  <h3>CREAR CLIENTE</h3>
 
+  <label>CIF</label>
+  <input type="number" [(ngModel)]="newCustomer.cif" />
 
-    <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
-  </div>
+  <label>Nombre</label>
+  <input type="text" [(ngModel)]="newCustomer.name" />
+
+  <label>Dirección</label>
+  <input type="text" [(ngModel)]="newCustomer.adress" />
+
+  <label>Código Postal</label>
+  <input type="number" [(ngModel)]="newCustomer.postalCode" />
+
+  <label>Lugar de residencia</label>
+  <input type="text" [(ngModel)]="newCustomer.placeOfResidence" />
+
+  <label>Teléfono</label>
+  <input type="number" [(ngModel)]="newCustomer.phoneNumber" />
+
+  <label>Email</label>
+  <input type="text" [(ngModel)]="newCustomer.email" />
+
+  <label>Email Administrativo</label>
+  <input type="text" [(ngModel)]="newCustomer.adminEmail" />
+
+  <label>Método de Pago</label>
+  <select [(ngModel)]="newCustomer.paymentMethodId">
+    <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">
+      {{ metodo.method }}
+    </option>
+  </select>
+
+  <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
+</div>
 </div>
   

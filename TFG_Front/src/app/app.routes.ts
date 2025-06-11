@@ -11,6 +11,7 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
 import { LayoutComponent } from './pages/layout/layout.component';
 import { FacturasComponent } from './pages/facturas/facturas.component';
 import { InformesComponent } from './pages/informes/informes.component';
+import { AmigosComponent } from './pages/amigos/amigos.component';
 
 export const routes: Routes = [
     {
@@ -40,6 +41,7 @@ export const routes: Routes = [
             { path: 'calendar', component: CalendarComponent },
             { path: 'facturas', component: FacturasComponent },
             { path: 'informes', component: InformesComponent},
+            { path: 'amigos', component: AmigosComponent},
             { path: '', redirectTo: 'ficheros', pathMatch: 'full' }
         ]
     }   

@@ -1,1 +1,39 @@
-<p>amigos works!</p>
+<div class="elementosMenu">
+    <p class="titulo">Solicitudes de Amistad</p>
+    <div *ngFor="let solicitud of solicitudesPendientes" class="solicitud-container">
+      <span>{{ solicitud.usuarioApodo }} quiere ser tu amigo</span>&nbsp;
+      <div class="botones-solicitud">
+        <button class="perfilButton" (click)="aceptarSolicitud(solicitud)"><b>Aceptar</b></button>
+        <button class="cerrar-sesion-btn" (click)="rechazarSolicitud(solicitud)"><b>Rechazar</b></button>
+      </div>
+    </div>
+  </div> 
+
+  <br>
+
+  <div class="elementosMenu">
+    <p class="titulo">Amigos</p>
+    <input type="text" class="lista" [(ngModel)]="busquedaAmigos" placeholder="Buscar amigos..." />
+    <div class="lista" *ngFor="let amigo of amigosFiltrados">
+      <img *ngIf="amigo.UserProfilePhoto" [src]="amigo.UserProfilePhoto" alt="Foto de perfil" width="100"> &nbsp; 
+        <p><strong> {{ amigo.UserNickname || 'Sin apodo' }} </strong></p>&nbsp;
+        <p *ngIf="isUserOnline(amigo.UserId)" class="estado-conectado">🟢 Conectado 🟢</p>&nbsp;
+      <p *ngIf="!isUserOnline(amigo.UserId)" class="estado-desconectado">🔴 Desconectado 🔴</p>&nbsp;
+    </div>
+  </div>
+
+
+  <br>
+
+  <div class="elementosMenu">
+    <p class="titulo">Buscar Usuarios</p>
+    <input type="text" [(ngModel)]="terminoBusqueda" placeholder="Buscar usuarios..." />
+    <button (click)="buscarUsuarios()">Buscar</button>
+    <br>
+    <div *ngFor="let usuario of usuariosFiltrados">
+      <img [src]="usuario.UserProfilePhoto" alt="Foto de perfil" width="50" height="50">&nbsp;
+      <span>{{ usuario.UserNickname }}</span>&nbsp;
+      <button (click)="enviarSolicitud(usuario.UserId)">Enviar Solicitud</button>
+    </div>
+  </div>
+  

@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } 
 import { Result } from '../models/result';
 import { Observable, lastValueFrom } from 'rxjs';
 import { environment_development } from '../../environments/environment.development';
+import { User } from '../models/user';
 
 
 @Injectable({
@@ -15,6 +16,48 @@ export class ApiService {
   jwt: string | undefined;
 
   constructor(private http: HttpClient) { }
+   getUsuarios(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.BASE_URL}/api/User/users`);
+  }
+
+  getFriendsList(usuarioId: number): Observable<User[]> {
+    return this.http.get<User[]>(`${this.BASE_URL}/api/FriendRequest/friends/${usuarioId}`);
+  }
+
+  getPendingFriendRequests(usuarioId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.BASE_URL}/api/FriendRequest/pending/${usuarioId}`);
+  }
+
+  sendFriendRequest(receiverId: number): Observable<any> {
+    const params = new HttpParams().set('receiverId', receiverId.toString());
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/send`, {}, {
+      headers: this.getHeader(),
+      params: params
+    });
+  }
+  
+  
+  acceptFriendRequest(amistadId: number): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/accept`, { amistadId }, {
+      headers: this.getHeader()
+    });
+  }
+  
+  
+  rejectFriendRequest(amistadId: number): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/reject`, null, {
+      headers: this.getHeader(),
+      params: { amistadId: amistadId.toString() }
+    });
+  }
+
+  getUsuarioById(userId: number): Observable<User> {
+    return this.http.get<User>(`${this.BASE_URL}/api/User/users/${userId}`);
+  }
+
+  actualizarUsuario(userId: number, datos: any): Observable<any> {
+    return this.http.put(`${this.BASE_URL}/api/User/users/${userId}`, datos);
+  }
   
   // Metodos existentes (get, post, put, delete, sendRequest, getHeader)
   async get<T = void>(path: string, params: any = {}, responseType: 'json' | 'text' | 'blob' | 'arraybuffer' = 'json'): Promise<Result<T>> {

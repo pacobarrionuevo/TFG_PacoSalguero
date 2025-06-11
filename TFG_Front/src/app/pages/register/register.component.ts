@@ -87,6 +87,7 @@ export class RegisterComponent {
     formData.append('UserPassword', this.addOrEditForm.get('password')?.value);
     formData.append('UserConfirmPassword', this.addOrEditForm.get('confirm_password')?.value);
     formData.append('UserProfilePhoto', file);
+    console.log(formData);
 
     try {
         const result = await this.authService.register(formData).toPromise();
@@ -96,7 +97,7 @@ export class RegisterComponent {
             
             this.authService.updateAuthState();
             
-            this.router.navigate(['/menu']);
+            this.router.navigate(['/app/ficheros']);
         } else {
             console.error("No se recibió un token de acceso.");
         }

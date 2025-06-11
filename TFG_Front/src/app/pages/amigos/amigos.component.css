@@ -89,3 +89,55 @@ h3 {
   background-color: #ff3b30;
   color: white;
 }
+.divider {
+  margin: 30px 0;
+  border-top: 2px dashed #ccc;
+}
+
+.usuarios-section {
+  margin-top: 20px;
+}
+
+.usuarios-section h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.busqueda {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.usuario-card {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 12px;
+  background-color: #ffffff;
+  border: 1px solid #cce0ff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.usuario-card .info {
+  flex: 1;
+  margin-left: 12px;
+}
+
+.btn.enviar {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.enviar[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

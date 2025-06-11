@@ -2,7 +2,7 @@
   <h2>Lista de Amigos</h2>
 
   <div class="grid">
-    
+
     <div class="col">
       <h3>AMIGOS</h3>
       <div *ngFor="let amigo of amigosFiltrados" class="card amigo">
@@ -19,7 +19,7 @@
       </div>
     </div>
 
-¡    <div class="col">
+    <div class="col">
       <h3>SOLICITUDES</h3>
       <div *ngFor="let solicitud of solicitudesPendientes" class="card solicitud">
         <img [src]="solicitud.userprofilephoto || perfil_default" class="avatar" alt="Perfil" />
@@ -33,5 +33,23 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+<hr class="divider">
+
+<div class="usuarios-section">
+  <h3>Buscar Usuarios</h3>
+  <input type="text" [(ngModel)]="terminoBusqueda" (input)="buscarUsuarios()" placeholder="Buscar usuarios..." class="busqueda" />
+
+  <div class="usuario-card" *ngFor="let usuario of usuariosFiltrados">
+    <img [src]="usuario.UserProfilePhoto || perfil_default" class="avatar" alt="Perfil" />
+    <div class="info">
+      <strong>{{ usuario.UserNickname }}</strong>
+    </div>
+    <button 
+      *ngIf="usuario.UserId !== usuarioId"
+      (click)="enviarSolicitud(usuario.UserId)" 
+      class="btn enviar">
+    </button>
   </div>
 </div>

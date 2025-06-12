@@ -7,6 +7,7 @@ import { PaymentMethod } from '../models/payment-method';
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar las operaciones CRUD de los métodos de pago.
 export class PaymentMethodService {
 
   private baseURL = `${environment_development.apiUrl}/api/PaymentMethod`

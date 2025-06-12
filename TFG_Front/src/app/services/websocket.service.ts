@@ -7,21 +7,29 @@ import { SolicitudAmistad } from '../models/solicitud-amistad';
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar la conexión y comunicación por WebSocket.
 export class WebsocketService {
   private socket: WebSocket | null = null;
+  // Subjects de RxJS para emitir eventos a los componentes que se suscriban.
   private friendStatusUpdateSubject = new Subject<any>();
   private newFriendNotificationSubject = new Subject<User>();
+  private newFriendRequestSubject = new Subject<SolicitudAmistad>();
 
+  // Observables públicos para que los componentes se suscriban.
   public friendStatusUpdate$ = this.friendStatusUpdateSubject.asObservable();
   public newFriendNotification$ = this.newFriendNotificationSubject.asObservable();
-  private newFriendRequestSubject = new Subject<SolicitudAmistad>();  constructor() { }
-public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
+  public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
+
+  constructor() { }
+
+  // Establece la conexión WebSocket.
   public connectRxjs(token: string): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       console.log('[WS Service] Conexión ya existente.');
       return;
     }
 
+    // La URL incluye el token de autenticación en la query string.
     const url = `${environment_development.socketUrl}?token=${token}`;
     console.log(`[WS Service] Intentando conectar a: ${url}`);
     this.socket = new WebSocket(url);
@@ -30,6 +38,7 @@ public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
       console.log('[WS Service] Conexión WebSocket establecida con éxito.');
     };
 
+    // Maneja los mensajes entrantes del servidor.
     this.socket.onmessage = (event) => {
       console.log(`[WS Service] Mensaje recibido del servidor:`, event.data);
       try {
@@ -50,6 +59,7 @@ public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
     };
   }
 
+  // Envía un mensaje al servidor a través del WebSocket.
   public send(message: string): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       console.log(`[WS Service] Enviando mensaje al servidor:`, message);
@@ -59,6 +69,7 @@ public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
     }
   }
 
+  // Procesa los mensajes recibidos y emite eventos a través de los Subjects correspondientes.
   private handleMessage(message: any): void {
     if (!message.type || !message.payload) {
       console.warn('[WS Service] Mensaje recibido con formato incorrecto:', message);
@@ -82,6 +93,7 @@ public newFriendRequest$ = this.newFriendRequestSubject.asObservable();
     }
   }
 
+  // Cierra la conexión WebSocket.
   public disconnect(): void {
     if (this.socket) {
       console.log('[WS Service] Desconectando WebSocket.');

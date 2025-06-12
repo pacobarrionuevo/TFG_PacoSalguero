@@ -1,5 +1,3 @@
-// TFG_Front/src/app/services/image.service.ts
-
 import { Injectable } from '@angular/core';
 import { environment_development } from '../../environments/environment.development';
 import { ApiService } from './api.service';
@@ -10,21 +8,21 @@ import { CreateOrUpdateImageRequest } from '../models/create-update-image-reques
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar las operaciones relacionadas con imágenes.
 export class ImageService {
 
   private baseURL = environment_development.apiUrl; 
 
   constructor(private api: ApiService) { }
 
+  // Construye la URL completa para una imagen a partir de su ruta relativa.
   getImageUrl(imagePath: string | undefined | null): string {
     if (!imagePath) {
-      // Imagen por defecto si no hay ruta
+      // Devuelve una imagen por defecto si la ruta no está definida.
       return 'assets/img/perfil_default.png'; 
     }
 
-   
-    // Si la ruta no contiene una barra, asumimos que es una foto de perfil
-    // y le añadimos el prefijo "fotos/".
+    // Lógica para manejar rutas de fotos de perfil que no incluyen el prefijo de la carpeta.
     if (!imagePath.includes('/')) {
       imagePath = `fotos/${imagePath}`;
     }
@@ -32,6 +30,7 @@ export class ImageService {
     return `${this.baseURL}/${imagePath}`;
   }
 
+  // Los siguientes métodos son para un CRUD de imágenes genérico (actualmente no se usa en toda su capacidad).
   getAllImages(): Promise<Result<Image[]>> {
     return this.api.get<Image[]>('images');
   }

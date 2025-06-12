@@ -9,9 +9,11 @@ namespace TFG_Back.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    // Protegemos este controlador para que solo los usuarios con el rol "admin" puedan acceder.
     [Authorize(Roles = "admin")]
     public class AdminController : ControllerBase
     {
+        // Inyectamos el servicio de administración que contiene la lógica de negocio para las operaciones de admin.
         private readonly AdminService _adminService;
 
         public AdminController(AdminService adminService)
@@ -19,6 +21,7 @@ namespace TFG_Back.Controllers
             _adminService = adminService;
         }
 
+        // Endpoint para cambiar el rol de un usuario específico.
         [HttpPut("users/{id}/role")]
         public async Task<IActionResult> ChangeUserRole(int id, [FromBody] ChangeRoleDto dto)
         {
@@ -27,9 +30,10 @@ namespace TFG_Back.Controllers
             {
                 return NotFound("Usuario no encontrado o rol no válido.");
             }
-            return NoContent();
+            return NoContent(); // Devuelve 204 No Content si la operación fue exitosa.
         }
 
+        // Endpoint para que un administrador actualice los detalles básicos de un usuario.
         [HttpPut("users/{id}/details")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserByAdminDTO dto)
         {
@@ -41,7 +45,7 @@ namespace TFG_Back.Controllers
             return NoContent();
         }
 
-       ç
+        // Endpoint para actualizar el avatar de un usuario por parte de un administrador.
         [HttpPut("users/{id}/avatar")]
         public async Task<IActionResult> UpdateUserAvatar(int id, [FromForm] AvatarUploadDTO dto)
         {
@@ -56,9 +60,11 @@ namespace TFG_Back.Controllers
                 return NotFound("Usuario no encontrado.");
             }
 
+            // Devuelve la nueva ruta del archivo para que el frontend pueda actualizar la vista.
             return Ok(new { filePath = newPath });
         }
 
+        // Endpoint para eliminar un usuario del sistema.
         [HttpDelete("users/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -70,6 +76,7 @@ namespace TFG_Back.Controllers
             return NoContent();
         }
 
+        // Endpoint para obtener estadísticas clave para el dashboard del panel de administración.
         [HttpGet("dashboard-stats")]
         public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats()
         {

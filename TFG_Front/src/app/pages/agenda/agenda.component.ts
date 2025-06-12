@@ -20,10 +20,11 @@ export class AgendaComponent {
     this.cargarEntradas();
   }
   
-
+  // Carga las entradas de la agenda desde el servicio.
   cargarEntradas(): void {
     this.agendaService.getEntradas().subscribe({
       next: (data) => {
+        // Mapea los datos recibidos para asegurar que la fecha sea un objeto Date.
         this.entradas = data.map(entrada => {
           return {
             ...entrada,

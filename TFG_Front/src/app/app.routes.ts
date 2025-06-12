@@ -10,11 +10,12 @@ import { FicherosComponent } from './pages/ficheros/ficheros.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
 import { LayoutComponent } from './pages/layout/layout.component';
 import { FacturasComponent } from './pages/facturas/facturas.component';
-import { InformesComponent } from './pages/informes/informes.component';
 import { AmigosComponent } from './pages/amigos/amigos.component';
 
+// Definición de las rutas de la aplicación.
 export const routes: Routes = [
     {
+        // Ruta raíz, muestra el componente principal.
         path: '',
         component: MainComponent
     },
@@ -27,11 +28,13 @@ export const routes: Routes = [
         component: RegisterComponent
     },
     {
+        // Ruta para el panel de administración.
         path: 'admin',
         component: AdminComponent
     },
-    ,
     {
+        // Ruta base para la sección principal de la aplicación autenticada.
+        // Utiliza un componente Layout que contiene el menú lateral y un router-outlet para las vistas hijas.
         path: 'app',
         component: LayoutComponent,
         children: [
@@ -40,8 +43,8 @@ export const routes: Routes = [
             { path: 'crearentrada', component: CrearentradaComponent },
             { path: 'calendar', component: CalendarComponent },
             { path: 'facturas', component: FacturasComponent },
-            { path: 'informes', component: InformesComponent},
             { path: 'amigos', component: AmigosComponent},
+            // Redirige a 'ficheros' por defecto cuando se accede a '/app'.
             { path: '', redirectTo: 'ficheros', pathMatch: 'full' }
         ]
     }   

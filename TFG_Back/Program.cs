@@ -11,19 +11,23 @@ using TFG_Back.Servicios;
 using TFG_Back.WebSocketAdvanced;
 using Microsoft.OpenApi.Models;
 
+// Establece el directorio de trabajo actual al directorio base de la aplicación.
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuraci�n inicial
+// --- Configuración de Servicios ---
+
+// Carga la configuración desde appsettings.json en la clase Settings.
 builder.Services.Configure<Settings>(builder.Configuration.GetSection(Settings.SECTION_NAME));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Settings>>().Value);
 
-// Servicios principales
+// Configura los controladores y la serialización JSON para ignorar ciclos de referencia.
 builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-// Configuracion de la base de datos
+
+// --- Inyección de Dependencias (Scoped: una instancia por petición HTTP) ---
 builder.Services.AddScoped<DBContext>();
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<ImageRepository>();
@@ -34,23 +38,24 @@ builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<FriendRequestRepository>();
 builder.Services.AddScoped<WebSocketMethods>();
 
+// --- Inyección de Dependencias (Transient: una nueva instancia cada vez que se solicita) ---
 builder.Services.AddTransient<ServicesService>();
 builder.Services.AddTransient<PaymentMethodService>();
 builder.Services.AddTransient<CustomerService>();
 builder.Services.AddTransient<ImageService>();
 builder.Services.AddTransient<AdminService>();
 builder.Services.AddTransient<FriendRequestService>();
-builder.Services.AddScoped<WebSocketNetwork>();
+builder.Services.AddScoped<WebSocketNetwork>(); // Scoped para que haya una única instancia por petición (importante para WebSocket).
 builder.Services.AddTransient<Middleware>();
 
-
-
+// --- Configuración de Swagger/OpenAPI ---
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TFG API", Version = "v1" });
 
+    // Configura Swagger para que se pueda usar la autenticación JWT en la UI.
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -65,7 +70,6 @@ builder.Services.AddSwaggerGen(c =>
             Id = "Bearer"
         }
     };
-
     c.AddSecurityDefinition("Bearer", securityScheme);
 
     var securityRequirement = new OpenApiSecurityRequirement
@@ -75,11 +79,12 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     };
-
     c.AddSecurityRequirement(securityRequirement);
 });
 
-// CORS
+// --- Configuración de CORS ---
+// Se configura la política de CORS para permitir peticiones desde cualquier origen,
+// necesario para la comunicación con el frontend de Angular.
 builder.Services.AddCors(options => {
     options.AddDefaultPolicy(builder => {
         builder.AllowAnyOrigin()
@@ -88,20 +93,21 @@ builder.Services.AddCors(options => {
     });
 });
 
-// Autenticacion JWT
+// --- Configuración de Autenticación JWT ---
 var jwtSettings = builder.Configuration.GetSection(Settings.SECTION_NAME).Get<Settings>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            ValidateIssuer = false, // No se valida el emisor del token.
+            ValidateAudience = false, // No se valida la audiencia del token.
+            ValidateLifetime = true, // Se valida que el token no haya expirado.
+            ValidateIssuerSigningKey = true, // Se valida la firma del token.
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.JwtKey))
         };
 
-        // Soporte para token en query string
+        // Permite que el token JWT se envíe en la query string,
+        // lo cual es necesario para la autenticación de WebSockets.
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context => {
@@ -113,14 +119,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- Pipeline de Middlewares ---
+
+// Habilita Swagger solo en el entorno de desarrollo.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Middleware para mover token de query a header
+// Middleware para mover el token de la query string al header de Authorization.
+// Esto asegura que el middleware de autenticación estándar pueda procesarlo.
 app.Use(async (context, next) => {
     var token = context.Request.Query["token"];
     if (!string.IsNullOrEmpty(token))
@@ -130,29 +139,30 @@ app.Use(async (context, next) => {
     await next();
 });
 
-app.UseStaticFiles();
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseWebSockets();
-app.UseMiddleware<Middleware>();
-app.UseHttpsRedirection();
-app.MapControllers();
+app.UseStaticFiles(); // Permite servir archivos estáticos desde wwwroot.
+app.UseCors(); // Aplica la política de CORS.
+app.UseAuthentication(); // Habilita la autenticación.
+app.UseAuthorization(); // Habilita la autorización.
+app.UseWebSockets(); // Habilita el soporte para WebSockets.
+app.UseMiddleware<Middleware>(); // Middleware personalizado para WebSockets.
+app.UseHttpsRedirection(); // Redirige las peticiones HTTP a HTTPS.
+app.MapControllers(); // Mapea los controladores.
 
-
-// Inicializacion de base de datos
+// --- Inicialización de la Base de Datos ---
 await InitDatabaseAsync(app.Services);
 
 await app.RunAsync();
 
+// Método para asegurar que la base de datos esté creada y poblada con datos iniciales.
 static async Task InitDatabaseAsync(IServiceProvider serviceProvider)
 {
     using var scope = serviceProvider.CreateScope();
     using var dbContext = scope.ServiceProvider.GetService<DBContext>();
 
+    // EnsureCreated devuelve true si la base de datos fue creada, false si ya existía.
     if (dbContext.Database.EnsureCreated())
     {
         var seeder = new Seeder(dbContext);
-        await seeder.SeedAsync();
+        await seeder.SeedAsync(); // Llama al Seeder para poblar la BD.
     }
 }

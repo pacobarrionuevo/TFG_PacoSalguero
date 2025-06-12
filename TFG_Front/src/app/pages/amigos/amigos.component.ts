@@ -1,5 +1,3 @@
-// TFG_Front/src/app/pages/amigos/amigos.component.ts
-
 import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,10 +25,11 @@ export class AmigosComponent implements OnInit, OnDestroy {
   
   terminoBusqueda: string = '';
   usuarioId: number | null = null;
+  // Almacena los IDs de los usuarios a los que se ha enviado una solicitud para evitar duplicados.
   solicitudesEnviadas: number[] = [];
   
   private subscriptions: Subscription = new Subscription();
-  private refreshTimer: any; // Variable para el temporizador
+  private refreshTimer: any;
 
   constructor(
     private friendService: FriendService,
@@ -38,6 +37,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private websocketService: WebsocketService,
     public imageService: ImageService,
+    // NgZone se usa para asegurar que las actualizaciones de WebSocket se reflejen en la UI de Angular.
     private ngZone: NgZone
   ) {}
 
@@ -48,12 +48,12 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.cargarDatosIniciales();
     this.suscribirAEventosWebSocket();
 
-    // Tu lógica de refresco se mantiene
+    // Refresca periódicamente los datos para mantener la consistencia.
     this.refreshTimer = setInterval(() => {
       console.log('[Amigos Component] Refrescando datos de amigos y solicitudes...');
       this.cargarAmigos();
       this.cargarSolicitudes();
-    }, 1000);
+    }, 1000); // Refresca cada segundo.
   }
 
   ngOnDestroy(): void {
@@ -72,7 +72,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   cargarAmigos(): void {
     this.friendService.getFriendsList().subscribe(amigos => {
-      // Comparamos si es necesario actualizar para evitar parpadeos innecesarios
+      // Compara si es necesario actualizar para evitar parpadeos innecesarios en la UI.
       if (JSON.stringify(this.amigosFiltrados) !== JSON.stringify(amigos)) {
         this.amigosFiltrados = amigos;
       }
@@ -92,30 +92,34 @@ export class AmigosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Se suscribe a los eventos del WebSocket para recibir actualizaciones en tiempo real.
   private suscribirAEventosWebSocket(): void {
     console.log('[Amigos Component] Suscribiendo a eventos de WebSocket...');
     
+    // Suscripción a cambios de estado de amigos (online/offline).
     const statusSub = this.websocketService.friendStatusUpdate$.subscribe(update => {
       this.ngZone.run(() => {
         const amigoIndex = this.amigosFiltrados.findIndex(a => a.userId === update.userId);
         if (amigoIndex !== -1) {
           this.amigosFiltrados[amigoIndex].isOnline = update.isOnline;
           this.amigosFiltrados[amigoIndex].lastSeen = update.lastSeen;
-          // Forzamos la re-renderización creando una nueva referencia del array
-          this.amigosFiltrados = [...this.amigosFiltrados];
+          this.amigosFiltrados = [...this.amigosFiltrados]; // Crea una nueva referencia para forzar la detección de cambios.
         }
       });
     });
 
+    // Suscripción a notificaciones de nueva amistad (cuando se acepta una solicitud).
     const newFriendSub = this.websocketService.newFriendNotification$.subscribe(nuevoAmigo => {
       this.ngZone.run(() => {
         if (!this.amigosFiltrados.some(a => a.userId === nuevoAmigo.userId)) {
             this.amigosFiltrados = [...this.amigosFiltrados, nuevoAmigo];
         }
+        // Elimina la solicitud de la lista de pendientes.
         this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.userId !== nuevoAmigo.userId);
       });
     });
 
+    // Suscripción a nuevas solicitudes de amistad recibidas.
     const newRequestSub = this.websocketService.newFriendRequest$.subscribe(nuevaSolicitud => {
       this.ngZone.run(() => {
         if (!this.solicitudesPendientes.some(s => s.friendshipId === nuevaSolicitud.friendshipId)) {
@@ -129,6 +133,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.subscriptions.add(newRequestSub);
   }
 
+  // Envía un mensaje por WebSocket para aceptar una solicitud.
   aceptarSolicitud(solicitud: SolicitudAmistad): void {
     this.websocketService.send(JSON.stringify({
       type: 'acceptFriendRequest',
@@ -136,12 +141,14 @@ export class AmigosComponent implements OnInit, OnDestroy {
     }));
   }
 
+  // Envía una petición HTTP para rechazar una solicitud.
   rechazarSolicitud(solicitud: SolicitudAmistad): void {
     this.friendService.rechazarSolicitud(solicitud.friendshipId).subscribe(() => {
       this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.friendshipId !== solicitud.friendshipId);
     });
   }
 
+  // Envía un mensaje por WebSocket para enviar una nueva solicitud de amistad.
   enviarSolicitud(receiverId: number | undefined): void {
     if (receiverId === undefined) return;
     this.websocketService.send(JSON.stringify({
@@ -151,6 +158,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.solicitudesEnviadas.push(receiverId);
   }
 
+  // Filtra la lista de usuarios según el término de búsqueda.
   buscarUsuarios(): void {
     if (!this.terminoBusqueda) {
       this.usuariosFiltrados = this.todosLosUsuarios;
@@ -171,7 +179,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     return this.solicitudesEnviadas.includes(id);
   }
 
-  // --- FUNCIÓN CORREGIDA Y MEJORADA ---
+  // Calcula y formatea el texto del estado de conexión de un amigo.
   getStatusText(amigo: User): string {
     if (amigo.isOnline) {
       return 'Conectado';
@@ -189,21 +197,13 @@ export class AmigosComponent implements OnInit, OnDestroy {
     }
     
     const intervals: { [key: string]: number } = {
-      año: 31536000,
-      mes: 2592000,
-      día: 86400,
-      hora: 3600,
-      minuto: 60
+      año: 31536000, mes: 2592000, día: 86400, hora: 3600, minuto: 60
     };
 
     for (const part in intervals) {
       const interval = Math.floor(seconds / intervals[part]);
       if (interval >= 1) {
-        const plural = interval > 1 ? (part === 'mes' ? 'es' : 's') : 's';
-        // Corrección para que 'hora' y 'minuto' no lleven 's' en singular
-        if (interval === 1 && (part === 'hora' || part === 'minuto')) {
-            return `Hace ${interval} ${part}`;
-        }
+        const plural = interval > 1 ? (part === 'mes' ? 'es' : 's') : '';
         return `Hace ${interval} ${part}${plural}`;
       }
     }

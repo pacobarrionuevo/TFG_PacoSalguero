@@ -9,6 +9,7 @@ namespace TFG_Back.Controllers
     [Route("api/[controller]")]
     public class ServiceController : ControllerBase
     {
+        // Inyectamos el servicio de "Services" y UnitOfWork para las operaciones de base de datos.
         private readonly ServicesService _services;
         private readonly UnitOfWork _unitOfWork;
 
@@ -18,6 +19,7 @@ namespace TFG_Back.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        // Endpoint para obtener la lista de todos los servicios.
         [HttpGet("get_services")]
         public async Task<ActionResult<IEnumerable<Service>>> GetAll()
         {
@@ -25,13 +27,16 @@ namespace TFG_Back.Controllers
             return Ok(servicios);
         }
 
+        // Endpoint para crear un nuevo servicio.
         [HttpPost("post_services")]
         public async Task<ActionResult<Service>> Create([FromBody] Service servicio)
         {
             var nuevoServicio = await _services.CreateAsync(servicio);
-            await _unitOfWork.SaveAsync();
+            await _unitOfWork.SaveAsync(); // Guarda los cambios en la base de datos.
             return CreatedAtAction(nameof(Create), new { id = nuevoServicio.Id }, nuevoServicio);
         }
+
+        // Endpoint para actualizar un servicio existente.
         [HttpPut("{id}")]
         public async Task<ActionResult<Service>> Update(int id, [FromBody] Service servicio)
         {
@@ -43,6 +48,7 @@ namespace TFG_Back.Controllers
             return updated != null ? Ok(updated) : NotFound();
         }
 
+        // Endpoint para eliminar un servicio por su ID.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

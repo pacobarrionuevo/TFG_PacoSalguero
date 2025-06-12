@@ -1,17 +1,18 @@
-﻿
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 
 namespace TFG_Back.WebSocketAdvanced
 {
+    // Representa una única conexión WebSocket de un cliente.
     public class WebSocketHandler : IAsyncDisposable
     {
         private readonly WebSocket _webSocket;
-        public int Id { get; init; }
+        public int Id { get; init; } // ID del usuario asociado a esta conexión.
         public string Username { get; set; }
         public bool IsOpen => _webSocket.State == WebSocketState.Open;
 
+        // Eventos para notificar la recepción de mensajes y la desconexión.
         public event Func<WebSocketHandler, string, Task> MessageReceived;
         public event Func<WebSocketHandler, Task> Disconnected;
 
@@ -22,6 +23,7 @@ namespace TFG_Back.WebSocketAdvanced
             Username = username;
         }
 
+        // Bucle principal que escucha los mensajes entrantes del cliente.
         public async Task HandleAsync()
         {
             var buffer = new byte[1024 * 4];
@@ -33,6 +35,7 @@ namespace TFG_Back.WebSocketAdvanced
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
                         var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        // Invoca el evento MessageReceived si hay suscriptores.
                         if (MessageReceived != null)
                         {
                             await MessageReceived.Invoke(this, message);
@@ -40,20 +43,23 @@ namespace TFG_Back.WebSocketAdvanced
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        break;
+                        break; // Sale del bucle si el cliente solicita cerrar la conexión.
                     }
                 }
                 catch (WebSocketException)
                 {
+                    // Ocurre si la conexión se interrumpe abruptamente.
                     break;
                 }
             }
+            // Notifica que la conexión se ha cerrado.
             if (Disconnected != null)
             {
                 await Disconnected.Invoke(this);
             }
         }
 
+        // Envía un mensaje de texto al cliente.
         public async Task SendAsync(string message)
         {
             if (IsOpen)
@@ -63,19 +69,19 @@ namespace TFG_Back.WebSocketAdvanced
             }
         }
 
-        // --- CAMBIO: Método de limpieza asíncrono ---
+        // Método de limpieza para cerrar la conexión de forma segura y liberar recursos.
         public async ValueTask DisposeAsync()
         {
             if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseReceived)
             {
                 try
                 {
-                    // Notificar al cliente que cerramos la conexión de forma normal
+                    // Notifica al cliente que estamos cerrando la conexión de forma normal.
                     await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                 }
                 catch (WebSocketException)
                 {
-                    // Ignorar errores si el socket ya está cerrado o en un estado inválido
+                    // Ignora errores si el socket ya está cerrado o en un estado inválido.
                 }
             }
             _webSocket.Dispose();

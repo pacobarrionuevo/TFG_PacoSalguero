@@ -4,6 +4,8 @@ using TFG_Back.Recursos;
 
 namespace TFG_Back.Models.Database
 {
+    // Clase responsable de poblar la base de datos con datos iniciales (seeding).
+    // Es útil para tener datos de prueba al iniciar la aplicación por primera vez.
     public class Seeder
     {
         private readonly DBContext _dBContext;
@@ -19,67 +21,29 @@ namespace TFG_Back.Models.Database
             await _dBContext.SaveChangesAsync();
         }
 
+        // Método para crear usuarios y relaciones de amistad de prueba.
         private async Task SeedImagesAsync()
         {
-            // Todos los usuarios
+            // Crea dos usuarios de prueba.
             User usuario1 = new User()
             {
-                
-                //UserId = 1,
-                UserNickname = "Jose",
-                UserEmail = "jose777@gmail.com",
-                UserPassword = PasswordHelper.Hash("jose777"),
-                UserConfirmPassword = PasswordHelper.Hash("jose777"),
+                UserNickname = "Profe",
+                UserEmail = "profe@gmail.com",
+                UserPassword = PasswordHelper.Hash("profe777"),
+                UserConfirmPassword = PasswordHelper.Hash("profe777"),
                 UserProfilePhoto = "Perfil_Deffault.png",
                 UserFriendship = new List<UserHasFriendship>(),
-                Role = "admin",
+                Role = "admin", // Asigna el rol de administrador.
                 IsOnline = true
-
             };
-            User usuario2 = new User()
-            {
+            
 
-                //UserId = 1,
-                UserNickname = "prueba",
-                UserEmail = "prueba",
-                UserPassword = PasswordHelper.Hash("prueba"),
-                UserConfirmPassword = PasswordHelper.Hash("prueba"),
-                UserProfilePhoto = "Perfil_Deffault.png",
-                UserFriendship = new List<UserHasFriendship>(),
-                Role = "admin",
-                IsOnline = false
+            
 
-            };
-            FriendShip amistad1 = new FriendShip()
-            {
-                FriendShipId = 1,
-                IsAccepted = true,
-                UserFriendship = new List<UserHasFriendship>()
-            };
-            UserHasFriendship uhf1 = new UserHasFriendship()
-            {
-                UserId = usuario1.UserId,
-                FriendshipId = amistad1.FriendShipId,
-                User = usuario1,
-                Friendship = amistad1,
-                Requestor = true
-            };
-            UserHasFriendship uhf2 = new UserHasFriendship()
-            {
-                UserId = usuario2.UserId,
-                FriendshipId = amistad1.FriendShipId,
-                User = usuario2,
-                Friendship = amistad1,
-                Requestor = false
-            };
+           
 
-            amistad1.UserFriendship.Add(uhf1);
-            amistad1.UserFriendship.Add(uhf2);
-
-            usuario1.UserFriendship.Add(uhf1);
-            usuario2.UserFriendship.Add(uhf2);
-            // Insertar usuarios y relaciones en la base de datos
-            await _dBContext.AddRangeAsync(usuario1, usuario2, amistad1,uhf1,uhf2);
+            // Añade todas las nuevas entidades al contexto de la base de datos.
+            await _dBContext.AddRangeAsync(usuario1);
             await _dBContext.SaveChangesAsync();
         }
     }

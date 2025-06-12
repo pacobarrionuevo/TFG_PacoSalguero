@@ -148,14 +148,22 @@ export class AmigosComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Envía un mensaje por WebSocket para enviar una nueva solicitud de amistad.
+  // Envía una petición HTTP para crear la solicitud de amistad.
   enviarSolicitud(receiverId: number | undefined): void {
     if (receiverId === undefined) return;
-    this.websocketService.send(JSON.stringify({
-      type: 'sendFriendRequest',
-      receiverId: receiverId
-    }));
-    this.solicitudesEnviadas.push(receiverId);
+
+    this.friendService.sendFriendRequest(receiverId).subscribe({
+      next: (response) => {
+        console.log('Solicitud de amistad enviada con éxito', response);
+        // Marcamos la solicitud como enviada para actualizar la UI
+        this.solicitudesEnviadas.push(receiverId);
+        alert('Solicitud de amistad enviada.');
+      },
+      error: (err) => {
+        console.error('Error al enviar la solicitud de amistad:', err);
+        alert('No se pudo enviar la solicitud de amistad.');
+      }
+    });
   }
 
   // Filtra la lista de usuarios según el término de búsqueda.

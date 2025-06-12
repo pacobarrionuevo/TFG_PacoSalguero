@@ -52,7 +52,7 @@ Esta combinación de colores no solo busca un resultado estético agradable, sin
 La base de datos es el núcleo de la aplicación. Su diseño se ha estructurado para garantizar la integridad de los datos y la eficiencia en las consultas. A continuación se muestra el diagrama Entidad-Relación:
 
 
-![Diagrama Entidad-Relación](Entidad-Relación)
+![Diagrama Entidad-Relación](./Entidad-Relación.png)
 #### Entidades Principales:
 
 -   **User**: Almacena la información de los usuarios, incluyendo credenciales para la autenticación y su rol en el sistema (usuario o administrador).

@@ -1,8 +1,8 @@
+
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ImageService } from '../../services/image.service';
 import { AuthService } from '../../services/auth.service';
-import { environment_development } from '../../../environments/environment.development';
 import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
@@ -16,7 +16,6 @@ export class MenuComponent implements OnInit {
   userProfilePhoto: string = '';
   userNickname: string = '';
   userId: number | null = null;
-  private BASE_URL = environment_development.apiUrl;
 
   constructor(
     private imageService: ImageService,
@@ -39,14 +38,16 @@ export class MenuComponent implements OnInit {
     const userInfo = this.authService.getUserData();
     if (userInfo) {
       this.userNickname = userInfo.nickname;
-      this.userProfilePhoto = this.validarUrlImagen(userInfo.profilephoto);
+      this.userProfilePhoto = this.imageService.getImageUrl(userInfo.profilephoto);
       this.userId = userInfo.id;
     } else {
       this.router.navigate(['/login']);
     }
   }
 
-  validarUrlImagen(fotoPerfil: string | null): string {
-    return fotoPerfil ? `${this.BASE_URL}/fotos/${fotoPerfil}` : '';
+  logout(): void {
+    this.authService.logout();
+    this.webSocketService.disconnect(); 
+    this.router.navigate(['/login']);
   }
 }

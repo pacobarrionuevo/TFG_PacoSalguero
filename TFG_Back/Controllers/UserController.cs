@@ -18,7 +18,6 @@ namespace TFG_Back.Controllers
     public class UserController : Controller
     {
         private readonly DBContext _context;
-        private readonly PasswordHelper passwordHelper;
         private readonly TokenValidationParameters _tokenParameters;
         private readonly UnitOfWork _unitOfWork;
 
@@ -28,6 +27,7 @@ namespace TFG_Back.Controllers
             _tokenParameters = jwtOptions.Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
             _unitOfWork = unitOfWork;
         }
+
         private UserSignUpDTO ToDtoRegistro(User users)
         {
             return new UserSignUpDTO()
@@ -54,22 +54,23 @@ namespace TFG_Back.Controllers
             {
                 UserId = user.UserId,
                 UserNickname = user.UserNickname,
-                UserProfilePhoto = Path.GetFileName(user.UserProfilePhoto), 
+                UserProfilePhoto = user.UserProfilePhoto, // Devuelve ruta completa
                 UserEmail = user.UserEmail,
                 IsOnline = user.IsOnline,
                 LastSeen = user.LastSeen,
                 Role = user.Role
             };
         }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)
         {
-            if (_context.Users.Any(User => User.UserEmail == user.UserEmail))
+            if (_context.Users.Any(u => u.UserEmail == user.UserEmail))
             {
                 return BadRequest("El nombre del usuario ya está en uso");
             }
 
-            if (user.UserPassword!= user.UserConfirmPassword)
+            if (user.UserPassword != user.UserConfirmPassword)
             {
                 return BadRequest("Las contraseñas no coinciden");
             }
@@ -78,10 +79,11 @@ namespace TFG_Back.Controllers
             {
                 return BadRequest("No se ha elegido foto de perfil");
             }
-                
-            //Eso guarda la ruta de la foto
-            string rutaFotoPerfil = $"{Guid.NewGuid()}_{user.UserProfilePhoto.FileName}";
-            await StoreImageAsync("fotos/" + rutaFotoPerfil, user.UserProfilePhoto);
+
+            string nombreArchivo = $"{Guid.NewGuid()}_{user.UserProfilePhoto.FileName}";
+            string rutaRelativaCompleta = $"fotos/{nombreArchivo}";
+
+            await StoreImageAsync(rutaRelativaCompleta, user.UserProfilePhoto);
 
             User newUser = new User()
             {
@@ -89,15 +91,13 @@ namespace TFG_Back.Controllers
                 UserEmail = user.UserEmail,
                 UserPassword = PasswordHelper.Hash(user.UserPassword),
                 UserConfirmPassword = PasswordHelper.Hash(user.UserConfirmPassword),
-                UserProfilePhoto = rutaFotoPerfil,
-                
+                UserProfilePhoto = rutaRelativaCompleta,
+                Role = "user"
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            UserSignUpDTO userCreated = ToDtoRegistro(newUser);
-            
-            // Aqui es donde se hace el login dentro del registro //
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
@@ -117,7 +117,7 @@ namespace TFG_Back.Controllers
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             string accessToken = tokenHandler.WriteToken(token);
-            return Ok(new { StringToken = accessToken });
+            return Ok(new { StringToken = accessToken, UserId = newUser.UserId });
         }
 
         [HttpPost("login")]
@@ -139,8 +139,6 @@ namespace TFG_Back.Controllers
             {
                 return Unauthorized("Usuario no existe");
             }
-            Console.WriteLine("Hashed input: " + PasswordHelper.Hash(usuarioLoginDto.UserPassword));
-            Console.WriteLine("Stored password: " + user.UserPassword);
 
             if (!PasswordHelper.Hash(usuarioLoginDto.UserPassword).Equals(user.UserPassword))
             {
@@ -156,7 +154,6 @@ namespace TFG_Back.Controllers
                     {"email", user.UserEmail},
                     {"profilephoto", user.UserProfilePhoto},
                     {"role", user.Role},
-
                 },
                 Expires = DateTime.UtcNow.AddDays(5),
                 SigningCredentials = new SigningCredentials(
@@ -170,6 +167,7 @@ namespace TFG_Back.Controllers
 
             return Ok(new { StringToken = accessToken, user.UserId });
         }
+
         [HttpGet("usuarios/{id}")]
         public async Task<ActionResult<UserDTO>> GetUsuarioById(int id)
         {
@@ -189,7 +187,7 @@ namespace TFG_Back.Controllers
                 UserNickname = usuario.UserNickname,
                 UserEmail = usuario.UserEmail,
                 UserProfilePhoto = usuario.UserProfilePhoto,
-                IsOnline=usuario.IsOnline,
+                IsOnline = usuario.IsOnline,
                 Role = usuario.Role,
                 IsFriend = usuario.UserFriendship.Any(ua => ua.Friendship.IsAccepted)
             };
@@ -229,13 +227,10 @@ namespace TFG_Back.Controllers
             return Ok(usuario);
         }
 
-        // Método para crear guardar las imagenes en su formato correcto //
         private async Task StoreImageAsync(string relativePath, IFormFile file)
         {
             using Stream stream = file.OpenReadStream();
-
             await FileHelper.SaveAsync(stream, relativePath);
         }
     }
-
 }

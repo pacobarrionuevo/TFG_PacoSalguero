@@ -64,7 +64,7 @@ namespace TFG_Back.Controllers
                     FriendshipId = uf.FriendshipId,
                     UserId = uf.User.UserId,
                     UserNickname = uf.User.UserNickname,
-                    UserProfilePhoto = Path.GetFileName(uf.User.UserProfilePhoto)
+                    UserProfilePhoto = uf.User.UserProfilePhoto
                 })
                 .ToListAsync();
             return Ok(requests);
@@ -78,7 +78,7 @@ namespace TFG_Back.Controllers
             var friendDtos = friends.Select(f => new {
                 f.UserId,
                 f.UserNickname,
-                UserProfilePhoto = Path.GetFileName(f.UserProfilePhoto),
+                UserProfilePhoto = f.UserProfilePhoto,
                 f.IsOnline,
                 f.LastSeen
             }).ToList();

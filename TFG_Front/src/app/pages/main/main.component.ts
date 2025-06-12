@@ -1,3 +1,4 @@
+
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -15,8 +16,9 @@ export class MainComponent {
   enfermeras: string;
   isLoggedIn: boolean = false;
   isAdmin: boolean = false;
-  constructor(private imageService: ImageService,private authService: AuthService, private router: Router) {
-    this.enfermeras = this.imageService.getImageUrl('enfermeras.jpg');
+
+  constructor(private imageService: ImageService, private authService: AuthService, private router: Router) {
+    this.enfermeras = this.imageService.getImageUrl('images/enfermeras.jpg');
   }
 
   ngOnInit(): void {
@@ -30,7 +32,6 @@ export class MainComponent {
   
   logout() {
     this.authService.logout();
-    // ?    
     this.router.navigate(['/login']);
   }
 }

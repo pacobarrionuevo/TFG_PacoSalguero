@@ -1,9 +1,13 @@
-﻿using System.Net.WebSockets;
+﻿// TFG_Back/WebSocketAdvanced/WebSocketHandler.cs
+
+using System.Net.WebSockets;
 using System.Text;
+using System.Threading.Tasks; // Añadido para Task y ValueTask
 
 namespace TFG_Back.WebSocketAdvanced
 {
-    public class WebSocketHandler : IDisposable
+    // --- CAMBIO: Implementamos IAsyncDisposable en lugar de IDisposable ---
+    public class WebSocketHandler : IAsyncDisposable
     {
         private readonly WebSocket _webSocket;
         public int Id { get; init; }
@@ -61,8 +65,21 @@ namespace TFG_Back.WebSocketAdvanced
             }
         }
 
-        public void Dispose()
+        // --- CAMBIO: Método de limpieza asíncrono ---
+        public async ValueTask DisposeAsync()
         {
+            if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseReceived)
+            {
+                try
+                {
+                    // Notificar al cliente que cerramos la conexión de forma normal
+                    await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                }
+                catch (WebSocketException)
+                {
+                    // Ignorar errores si el socket ya está cerrado o en un estado inválido
+                }
+            }
             _webSocket.Dispose();
         }
     }

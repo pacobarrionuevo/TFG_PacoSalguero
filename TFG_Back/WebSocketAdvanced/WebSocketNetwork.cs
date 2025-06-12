@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿// TFG_Back/WebSocketAdvanced/WebSocketNetwork.cs
+
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -8,6 +10,7 @@ using TFG_Back.Services;
 using System.IO;
 using TFG_Back.Models.DTO;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization; // Asegúrate de que este using está presente
 
 namespace TFG_Back.WebSocketAdvanced
 {
@@ -26,6 +29,12 @@ namespace TFG_Back.WebSocketAdvanced
         {
             Console.WriteLine($"[WebSocket] HandleAsync: Intento de conexión para Usuario ID: {userId}, Username: {username}");
             var handler = new WebSocketHandler(userId, webSocket, username);
+
+            if (_handlers.TryRemove(userId, out var oldHandler))
+            {
+                await oldHandler.DisposeAsync();
+                Console.WriteLine($"[WebSocket] HandleAsync: Conexión antigua para Usuario ID: {userId} eliminada.");
+            }
 
             _handlers[userId] = handler;
             Console.WriteLine($"[WebSocket] HandleAsync: Conexión establecida. Usuario ID: {userId} añadido a los handlers. Total: {_handlers.Count}");
@@ -89,7 +98,7 @@ namespace TFG_Back.WebSocketAdvanced
                                 friendshipId = friendship.FriendShipId,
                                 userId = senderUser.UserId,
                                 userNickname = senderUser.UserNickname,
-                                userProfilePhoto = Path.GetFileName(senderUser.UserProfilePhoto)
+                                UserProfilePhoto = senderUser.UserProfilePhoto, 
                             }
                         };
                         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -153,7 +162,9 @@ namespace TFG_Back.WebSocketAdvanced
             }
 
             user.IsOnline = isOnline;
+            // --- ÚNICO CAMBIO IMPORTANTE AQUÍ ---
             user.LastSeen = isOnline ? null : DateTime.UtcNow;
+
             await unitOfWork.SaveAsync();
             Console.WriteLine($"[WebSocket] UpdateUserStatus: Estado de Usuario ID: {userId} guardado en DB.");
 
@@ -197,7 +208,7 @@ namespace TFG_Back.WebSocketAdvanced
             {
                 UserId = user.UserId,
                 UserNickname = user.UserNickname,
-                UserProfilePhoto = Path.GetFileName(user.UserProfilePhoto),
+                UserProfilePhoto = user.UserProfilePhoto,
                 UserEmail = user.UserEmail,
                 IsOnline = user.IsOnline,
                 LastSeen = user.LastSeen,

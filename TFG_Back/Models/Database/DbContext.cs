@@ -35,5 +35,20 @@ namespace TFG_Back.Models.Database
             options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
             //options.UseSqlite(_settings.DatabaseConnection);
         }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configurar la propiedad LastSeen para que siempre se trate como UTC
+            modelBuilder.Entity<User>()
+                .Property(u => u.LastSeen)
+                .HasConversion(
+                    // Conversor para guardar (no hace nada especial)
+                    v => v,
+                    // Conversor para leer: Especifica que el DateTime leído es UTC
+                    v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : (DateTime?)null
+                );
+        }
     }
 }

@@ -1,7 +1,9 @@
+// TFG_Front/src/app/pages/amigos/amigos.component.ts
+
 import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription, interval } from 'rxjs'; // Importar interval
+import { Subscription } from 'rxjs';
 import { User } from '../../models/user';
 import { SolicitudAmistad } from '../../models/solicitud-amistad';
 import { FriendService } from '../../services/friend.service';
@@ -43,25 +45,20 @@ export class AmigosComponent implements OnInit, OnDestroy {
     console.log('[Amigos Component] ngOnInit: Iniciando componente.');
     this.usuarioId = this.authService.getUserData()?.id ?? null;
     
-    // Carga inicial de datos
     this.cargarDatosIniciales();
-    
-    // Suscripción a eventos WebSocket
     this.suscribirAEventosWebSocket();
 
-    // --- IMPLEMENTACIÓN DE LA IDEA DE REFRESCO ---
-    // Iniciar un temporizador que recargue los datos cada 10 segundos (10000 ms)
+    // Tu lógica de refresco se mantiene
     this.refreshTimer = setInterval(() => {
       console.log('[Amigos Component] Refrescando datos de amigos y solicitudes...');
       this.cargarAmigos();
       this.cargarSolicitudes();
-    }, 10000);
+    }, 1000);
   }
 
   ngOnDestroy(): void {
     console.log('[Amigos Component] ngOnDestroy: Limpiando suscripciones y temporizador.');
     this.subscriptions.unsubscribe();
-    // Limpiar el temporizador para evitar fugas de memoria
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
     }
@@ -75,7 +72,10 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   cargarAmigos(): void {
     this.friendService.getFriendsList().subscribe(amigos => {
-      this.amigosFiltrados = amigos;
+      // Comparamos si es necesario actualizar para evitar parpadeos innecesarios
+      if (JSON.stringify(this.amigosFiltrados) !== JSON.stringify(amigos)) {
+        this.amigosFiltrados = amigos;
+      }
     });
   }
 
@@ -99,7 +99,9 @@ export class AmigosComponent implements OnInit, OnDestroy {
       this.ngZone.run(() => {
         const amigoIndex = this.amigosFiltrados.findIndex(a => a.userId === update.userId);
         if (amigoIndex !== -1) {
-          this.amigosFiltrados[amigoIndex] = { ...this.amigosFiltrados[amigoIndex], isOnline: update.isOnline, lastSeen: update.lastSeen };
+          this.amigosFiltrados[amigoIndex].isOnline = update.isOnline;
+          this.amigosFiltrados[amigoIndex].lastSeen = update.lastSeen;
+          // Forzamos la re-renderización creando una nueva referencia del array
           this.amigosFiltrados = [...this.amigosFiltrados];
         }
       });
@@ -169,6 +171,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
     return this.solicitudesEnviadas.includes(id);
   }
 
+  // --- FUNCIÓN CORREGIDA Y MEJORADA ---
   getStatusText(amigo: User): string {
     if (amigo.isOnline) {
       return 'Conectado';
@@ -176,13 +179,35 @@ export class AmigosComponent implements OnInit, OnDestroy {
     if (!amigo.lastSeen) {
       return 'Desconectado';
     }
+    
     const lastSeenDate = new Date(amigo.lastSeen);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - lastSeenDate.getTime()) / 1000);
-    let interval = seconds / 3600;
-    if (interval > 1) return `Hace ${Math.floor(interval)} horas`;
-    interval = seconds / 60;
-    if (interval > 1) return `Hace ${Math.floor(interval)} minutos`;
+    
+    if (seconds < 60) {
+      return 'Hace un momento';
+    }
+    
+    const intervals: { [key: string]: number } = {
+      año: 31536000,
+      mes: 2592000,
+      día: 86400,
+      hora: 3600,
+      minuto: 60
+    };
+
+    for (const part in intervals) {
+      const interval = Math.floor(seconds / intervals[part]);
+      if (interval >= 1) {
+        const plural = interval > 1 ? (part === 'mes' ? 'es' : 's') : 's';
+        // Corrección para que 'hora' y 'minuto' no lleven 's' en singular
+        if (interval === 1 && (part === 'hora' || part === 'minuto')) {
+            return `Hace ${interval} ${part}`;
+        }
+        return `Hace ${interval} ${part}${plural}`;
+      }
+    }
+    
     return 'Hace un momento';
   }
 }

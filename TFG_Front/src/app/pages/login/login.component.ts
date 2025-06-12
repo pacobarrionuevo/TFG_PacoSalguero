@@ -20,6 +20,7 @@ export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
+    // Carga las credenciales guardadas si el usuario marcó "Recuérdame".
     const savedAuthData = JSON.parse(localStorage.getItem('authData') || '{}');
     if (savedAuthData.recuerdame) {
       this.emailOrNickname = savedAuthData.emailOrNickname || '';
@@ -28,6 +29,7 @@ export class LoginComponent {
     }
   }
 
+  // Maneja el envío del formulario de login.
   async submit() {
     const authData: AuthRequest = { 
       UserEmailOrNickname: this.emailOrNickname, 
@@ -37,6 +39,7 @@ export class LoginComponent {
     try {
       await this.authService.login(authData, this.remember).toPromise();
 
+      // Guarda las credenciales si "Recuérdame" está activado.
       if (this.remember) {
         localStorage.setItem('authData', JSON.stringify({
           emailoapodo: this.emailOrNickname,
@@ -47,8 +50,10 @@ export class LoginComponent {
         localStorage.removeItem('authData');
       }
 
+      // Redirige al usuario a la página principal de la aplicación.
       this.router.navigate(['/app/ficheros']);
     } catch (error: any) {
+      // Manejo de errores específicos, como usuario baneado.
       if (error.status === 400 && error.error.message === "Usuario baneado") {
         alert("Usuario baneado: No puedes iniciar sesión.");
       } else {

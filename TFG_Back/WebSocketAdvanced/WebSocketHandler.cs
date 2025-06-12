@@ -1,101 +1,90 @@
-﻿using System.IO;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TFG_Back.WebSocketAdvanced
 {
-    public class WebSocketHandler : IDisposable
+    // Representa una única conexión WebSocket de un cliente.
+    public class WebSocketHandler : IAsyncDisposable
     {
-        private const int BufferSize = 4096;
         private readonly WebSocket _webSocket;
-        private readonly byte[] _buffer;
+        public int Id { get; init; } // ID del usuario asociado a esta conexión.
         public string Username { get; set; }
-
-        public DateTime LastActivity { get; set; }
-        public int Id { get; init; }
         public bool IsOpen => _webSocket.State == WebSocketState.Open;
 
+        // Eventos para notificar la recepción de mensajes y la desconexión.
         public event Func<WebSocketHandler, string, Task> MessageReceived;
         public event Func<WebSocketHandler, Task> Disconnected;
-        public string MessageType { get; set; }
+
         public WebSocketHandler(int userId, WebSocket webSocket, string username)
         {
             Id = userId;
             _webSocket = webSocket;
             Username = username;
-            LastActivity = DateTime.UtcNow;
-            _buffer = new byte[BufferSize];
         }
+
+        // Bucle principal que escucha los mensajes entrantes del cliente.
         public async Task HandleAsync()
         {
+            var buffer = new byte[1024 * 4];
             while (_webSocket.State == WebSocketState.Open)
             {
                 try
                 {
-                    string message = await ReadAsync();
-                    LastActivity = DateTime.UtcNow;
-
-                    if (!string.IsNullOrWhiteSpace(message) && MessageReceived != null)
+                    var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        await MessageReceived.Invoke(this, message);
+                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        // Invoca el evento MessageReceived si hay suscriptores.
+                        if (MessageReceived != null)
+                        {
+                            await MessageReceived.Invoke(this, message);
+                        }
+                    }
+                    else if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        break; // Sale del bucle si el cliente solicita cerrar la conexión.
                     }
                 }
                 catch (WebSocketException)
                 {
-                    Dispose();
+                    // Ocurre si la conexión se interrumpe abruptamente.
+                    break;
                 }
             }
-
+            // Notifica que la conexión se ha cerrado.
             if (Disconnected != null)
             {
                 await Disconnected.Invoke(this);
             }
         }
-        private async Task<string> ReadAsync()
-        {
-            using var memoryStream = new MemoryStream();
-            WebSocketReceiveResult receiveResult;
 
-            do
-            {
-                receiveResult = await _webSocket.ReceiveAsync(_buffer, CancellationToken.None);
-                if (receiveResult.MessageType == WebSocketMessageType.Text)
-                {
-                    memoryStream.Write(_buffer, 0, receiveResult.Count);
-                }
-                else if (receiveResult.CloseStatus.HasValue)
-                {
-                    await _webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription, CancellationToken.None);
-                }
-            } while (!receiveResult.EndOfMessage);
-
-            return Encoding.UTF8.GetString(memoryStream.ToArray());
-        }
-
+        // Envía un mensaje de texto al cliente.
         public async Task SendAsync(string message)
         {
             if (IsOpen)
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(message);
-                await _webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+                var buffer = Encoding.UTF8.GetBytes(message);
+                await _webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
 
-        public void Dispose()
+        // Método de limpieza para cerrar la conexión de forma segura y liberar recursos.
+        public async ValueTask DisposeAsync()
         {
+            if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseReceived)
+            {
+                try
+                {
+                    // Notifica al cliente que estamos cerrando la conexión de forma normal.
+                    await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                }
+                catch (WebSocketException)
+                {
+                    // Ignora errores si el socket ya está cerrado o en un estado inválido.
+                }
+            }
             _webSocket.Dispose();
-        }
-
-        private async Task<string> ReceiveMessageAsync()
-        {
-            var buffer = new byte[1024];
-            WebSocketReceiveResult result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            return Encoding.UTF8.GetString(buffer, 0, result.Count);
-        }
-
-        public async Task CloseAsync()
-        {
-            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexión cerrada", CancellationToken.None);
         }
     }
 }

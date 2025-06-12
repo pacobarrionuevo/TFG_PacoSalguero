@@ -24,9 +24,9 @@
             <input type="color" [(ngModel)]="servicio.color" [disabled]="!servicio.editing">
           </td>
           <td>
-            <button *ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
-            <button *ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
-            <button (click)="eliminarServicio(servicio.id)">🗑️</button>
+            <button type="button"*ngIf="!servicio.editing" (click)="editarServicio(servicio)">✏️</button>
+            <button type="button"*ngIf="servicio.editing" (click)="guardarServicio(servicio)">💾</button>
+            <button type="button"(click)="eliminarServicio(servicio.id)">🗑️</button>
           </td>
         </tr>
         </tbody>
@@ -34,12 +34,19 @@
     </div>
   
     <div class="formulario">
-      <h3>CREAR SERVICIO</h3>
-      <input type="text" placeholder="Nombre" [(ngModel)]="nuevoServicio.nombre" />
-      <input type="text" placeholder="Abreviatura" [(ngModel)]="nuevoServicio.abreviatura" />
-      <input type="color" placeholder="Color" [(ngModel)]="nuevoServicio.color" />
-      <button class="crear-btn" (click)="crearServicio()">CREAR</button>
-    </div>
+  <h3>CREAR SERVICIO</h3>
+
+  <label>Nombre</label>
+  <input type="text" [(ngModel)]="nuevoServicio.nombre" />
+
+  <label>Abreviatura</label>
+  <input type="text" [(ngModel)]="nuevoServicio.abreviatura" />
+
+  <label>Color</label>
+  <input type="color" [(ngModel)]="nuevoServicio.color" />
+
+  <button type="button" class="crear-btn" (click)="crearServicio()">CREAR</button>
+</div>
   </div>
 
   <br>
@@ -73,23 +80,32 @@
             <input type="number" [(ngModel)]="paymentMethod.daysBetweenPayments" [disabled]="!paymentMethod.editing">
           </td>
           <td>
-            <button *ngIf="!paymentMethod.editing" (click)="editarMetodoPago(paymentMethod)">✏️</button>
-            <button *ngIf="paymentMethod.editing" (click)="guardarMetodoPago(paymentMethod)">💾</button>
-            <button (click)="eliminarMetodoPago(paymentMethod.id)">🗑️</button>
+            <button type="button" *ngIf="!paymentMethod.editing" (click)="editarMetodoPago(paymentMethod)">✏️</button>
+            <button type="button" *ngIf="paymentMethod.editing" (click)="guardarMetodoPago(paymentMethod)">💾</button>
+            <button type="button" (click)="eliminarMetodoPago(paymentMethod.id)">🗑️</button>
           </td>
         </tr>
         </tbody>
       </table>
     </div>
   
-    <div class="formulario">
-      <h3>CREAR MÉTODO DE PAGO</h3>
-      <input type="text" [(ngModel)]="newPaymentMethod.method" placeholder="Método" />
-      <input type="number" [(ngModel)]="newPaymentMethod.installments" placeholder="Vencimientos" />
-      <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" placeholder="Primer pago" />
-      <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" placeholder="Días entre pagos" />
-      <button class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
-    </div>
+   <div class="formulario">
+  <h3>CREAR MÉTODO DE PAGO</h3>
+
+  <label>Método</label>
+  <input type="text" [(ngModel)]="newPaymentMethod.method" />
+
+  <label>Nº Vencimientos</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.installments" />
+
+  <label>Días Primer Pago</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.firstPaymentDays" />
+
+  <label>Días Entre Pagos</label>
+  <input type="number" [(ngModel)]="newPaymentMethod.daysBetweenPayments" />
+
+  <button type="button" class="crear-btn" (click)="crearMetodoPago()">CREAR</button>
+</div>
   </div>
 
   <!--Tabla y formulario para ver y añadir un cliente-->
@@ -132,9 +148,9 @@
               <span *ngIf="!customer.editing">{{ customer.paymentMethod?.method }}</span>
             </td>
             <td>
-              <button *ngIf="!customer.editing" (click)="editarCliente(customer)">✏️</button>
-              <button *ngIf="customer.editing" (click)="guardarCliente(customer)">💾</button>
-              <button (click)="eliminarCliente(customer.id)">🗑️</button>
+              <button type="button" *ngIf="!customer.editing" (click)="editarCliente(customer)">✏️</button>
+              <button type="button" *ngIf="customer.editing" (click)="guardarCliente(customer)">💾</button>
+              <button type="button" (click)="eliminarCliente(customer.id)">🗑️</button>
             </td>
           </tr>
       </tbody>
@@ -142,21 +158,40 @@
     </div>
   
     <div class="formulario">
-    <h3>CREAR CLIENTE</h3>
-    <input type="number" [(ngModel)]="newCustomer.cif" placeholder="CIF" />
-    <input type="text" [(ngModel)]="newCustomer.name" placeholder="Nombre" />
-    <input type="text" [(ngModel)]="newCustomer.adress" placeholder="Dirección" />
-    <input type="number" [(ngModel)]="newCustomer.postalCode" placeholder="Código Postal" />
-    <input type="text" [(ngModel)]="newCustomer.placeOfResidence" placeholder="Lugar de residencia" />
-    <input type="number" [(ngModel)]="newCustomer.phoneNumber" placeholder="Teléfono" />
-    <input type="text" [(ngModel)]="newCustomer.email" placeholder="Email" />
-    <input type="text" [(ngModel)]="newCustomer.adminEmail" placeholder="Email Administrativo" />
-    <select [(ngModel)]="newCustomer.paymentMethodId">
-      <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">{{ metodo.id }}</option>
-    </select>
+  <h3>CREAR CLIENTE</h3>
 
+  <label>CIF</label>
+  <input type="number" [(ngModel)]="newCustomer.cif" />
 
-    <button class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
-  </div>
+  <label>Nombre</label>
+  <input type="text" [(ngModel)]="newCustomer.name" />
+
+  <label>Dirección</label>
+  <input type="text" [(ngModel)]="newCustomer.adress" />
+
+  <label>Código Postal</label>
+  <input type="number" [(ngModel)]="newCustomer.postalCode" />
+
+  <label>Lugar de residencia</label>
+  <input type="text" [(ngModel)]="newCustomer.placeOfResidence" />
+
+  <label>Teléfono</label>
+  <input type="number" [(ngModel)]="newCustomer.phoneNumber" />
+
+  <label>Email</label>
+  <input type="text" [(ngModel)]="newCustomer.email" />
+
+  <label>Email Administrativo</label>
+  <input type="text" [(ngModel)]="newCustomer.adminEmail" />
+
+  <label>Método de Pago</label>
+  <select [(ngModel)]="newCustomer.paymentMethodId">
+    <option *ngFor="let metodo of paymentMethods" [value]="metodo.id">
+      {{ metodo.method }}
+    </option>
+  </select>
+
+  <button type="button" class="crear-btn" (click)="crearClientes()">CREAR CLIENTE</button>
+</div>
 </div>
   

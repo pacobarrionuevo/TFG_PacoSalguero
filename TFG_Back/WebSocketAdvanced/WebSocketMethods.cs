@@ -3,6 +3,8 @@ using TFG_Back.Models.Database;
 
 namespace TFG_Back.WebSocketAdvanced
 {
+    // Clase de utilidad para realizar operaciones de base de datos desde la lógica de WebSocket.
+    // Se inyecta como Scoped para asegurar que cada operación use un DbContext fresco.
     public class WebSocketMethods
     {
         private readonly UnitOfWork _unitOfWork;

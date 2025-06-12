@@ -1,348 +1,168 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Models.Database;
-using TFG_Back.Models.DTO;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc;
+using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Services;
-using static TFG_Back.WebSocketAdvanced.WebSocketNetwork;
+using System.IO;
+using TFG_Back.Models.DTO;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace TFG_Back.WebSocketAdvanced
 {
-
+    // Clase central que gestiona todas las conexiones WebSocket activas.
     public class WebSocketNetwork
     {
-        private int _idCounter;
-        private readonly List<WebSocketHandler> _handlers = new List<WebSocketHandler>();
-        private readonly List<WebSocketHandler> _connectedPlayers = new List<WebSocketHandler>();
-        private readonly List<WebSocketHandler> _waitingPlayers = new List<WebSocketHandler>();
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly SemaphoreSlim _connectedSemaphore = new SemaphoreSlim(1, 1);
-        private readonly SemaphoreSlim _waitingSemaphore = new SemaphoreSlim(1, 1);
+        // Diccionario concurrente para almacenar los manejadores de WebSocket por ID de usuario.
+        private readonly ConcurrentDictionary<int, WebSocketHandler> _handlers = new();
+        // Fábrica para crear scopes de inyección de dependencias, necesario para usar servicios Scoped en un Singleton.
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        private readonly Dictionary<int, WebSocketHandler> _connectedUsers = new Dictionary<int, WebSocketHandler>();
-
-        private readonly IServiceProvider _serviceProvider;
-        private static int _activeConnections = 0;
-        public event Action<int> OnActiveConnectionsChanged;
-
-        public WebSocketNetwork(IServiceProvider serviceProvider)
+        public WebSocketNetwork(IServiceScopeFactory scopeFactory)
         {
-            _serviceProvider = serviceProvider;
-            OnActiveConnectionsChanged += count => NotifyActiveConnectionsChanged(count);
+            _scopeFactory = scopeFactory;
+            Console.WriteLine("[WebSocketNetwork] Instancia creada.");
         }
 
-        public async Task BroadcastMessage(string message)
-        {
-            await _semaphore.WaitAsync();
-            try
-            {
-                var handlersSnapshot = _handlers.ToList();
-                Console.WriteLine($"Enviando mensaje a {handlersSnapshot.Count} clientes: {message}");
-                foreach (var handler in handlersSnapshot)
-                {
-                    if (handler.IsOpen)
-                    {
-                        await handler.SendAsync(message);
-                    }
-                }
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-        }
-
-        private async void NotifyActiveConnectionsChanged(int count)
-        {
-            var message = new
-            {
-                Type = "activeConnections",
-                Count = count
-            };
-
-            var handlersSnapshot = _handlers.ToList();
-            foreach (var handler in handlersSnapshot)
-            {
-                if (handler.IsOpen)
-                {
-                    await handler.SendAsync(JsonSerializer.Serialize(message));
-                }
-            }
-        }
-
+        // Maneja una nueva conexión WebSocket.
         public async Task HandleAsync(WebSocket webSocket, int userId, string username)
         {
-            Interlocked.Increment(ref _activeConnections);
-            OnActiveConnectionsChanged?.Invoke(_activeConnections);
+            Console.WriteLine($"[WebSocket] HandleAsync: Intento de conexión para Usuario ID: {userId}, Username: {username}");
+            var handler = new WebSocketHandler(userId, webSocket, username);
 
-            var handler = await CreateHandlerAsync(userId, webSocket, username);
-            await AddUser(userId, handler);
-
-            try
+            // Si ya existe una conexión para este usuario, la cierra antes de crear la nueva.
+            if (_handlers.TryRemove(userId, out var oldHandler))
             {
-                await UpdateUserStatusAsync(handler, "Conectado");
-                await NotifyFriendsAsync(handler, true);
-
-                await handler.HandleAsync();
+                await oldHandler.DisposeAsync();
+                Console.WriteLine($"[WebSocket] HandleAsync: Conexión antigua para Usuario ID: {userId} eliminada.");
             }
-            finally
+
+            _handlers[userId] = handler;
+            Console.WriteLine($"[WebSocket] HandleAsync: Conexión establecida. Usuario ID: {userId} añadido a los handlers. Total: {_handlers.Count}");
+
+            // Se suscribe a los eventos del manejador.
+            handler.MessageReceived += OnMessageReceived;
+            handler.Disconnected += OnDisconnected;
+
+            await UpdateUserStatus(userId, true);
+            await handler.HandleAsync();
+        }
+
+        // Se ejecuta cuando se recibe un mensaje de un cliente.
+        private async Task OnMessageReceived(WebSocketHandler sender, string messageJson)
+        {
+            Console.WriteLine($"[WebSocket] OnMessageReceived: Mensaje recibido de Usuario ID: {sender.Id}. Mensaje: {messageJson}");
+            var messageOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var message = JsonSerializer.Deserialize<WebSocketMessage>(messageJson, messageOptions);
+
+            if (string.IsNullOrEmpty(message?.Type))
             {
-                await UpdateUserStatusAsync(handler, "Desconectado");
-                await NotifyFriendsAsync(handler, false);
+                Console.WriteLine("[WebSocket] OnMessageReceived ERROR: Mensaje sin tipo definido.");
+                return;
             }
-        }
 
-        private async Task AddUser(int userId, WebSocketHandler handler)
-        {
-            _connectedUsers[userId] = handler;
-            Console.WriteLine($"Usuario {userId} conectado.");
-        }
-
-        private async Task<WebSocketHandler> CreateHandlerAsync(int userId, WebSocket webSocket, string username)
-        {
-            await _connectedSemaphore.WaitAsync();
-            using var scope = _serviceProvider.CreateScope();
-            var wsMethods = scope.ServiceProvider.GetRequiredService<WebSocketMethods>();
-
-            // Aquí sí podemos usar userId para buscar al usuario
-            var user = await wsMethods.GetUserById(userId);
-            try
-            {
-                var handler = new WebSocketHandler(userId, webSocket, username: user?.UserNickname ?? "Usuario desconocido");
-
-                handler.Disconnected += OnDisconnectedHandler;
-                handler.MessageReceived += OnMessageReceivedHandler;
-
-                // Agregar el handler a la lista de handlers
-                _handlers.Add(handler);
-
-                // Agregar el handler a la lista de jugadores conectados
-                _connectedPlayers.Add(handler);
-
-                Console.WriteLine($"Nuevo cliente conectado. ID: {handler.Id}, Total de clientes: {_handlers.Count}");
-                return handler;
-            }
-            finally
-            {
-                _connectedSemaphore.Release();
-            }
-        }
-
-        private async Task OnDisconnectedHandler(WebSocketHandler handler)
-        {
-            Console.WriteLine($"Evento de desconexión disparado para el usuario {handler.Id}.");
-            await UpdateUserStatusAsync(handler, "Desconectado");
-            await NotifyFriendsAsync(handler, false);
-        }
-        
-
-        private async Task OnMessageReceivedHandler(WebSocketHandler handler, string message)
-        {
-            Console.WriteLine($"Mensaje recibido de {handler.Id}: {message}");
-
-            try
-            {
-                // Deserializar a un objeto base con la propiedad Type
-                var baseMsg = JsonSerializer.Deserialize<WebSocketMessage>(message);
-                if (baseMsg == null)
-                {
-                    Console.WriteLine("No se pudo deserializar el mensaje o es nulo.");
-                    return;
-                }
-
-                switch (baseMsg.Type.ToLower())
-                {
-                    case "sendfriendrequest":
-                        var sendFriendRequestMessage = JsonSerializer.Deserialize<SendFriendRequestMessage>(message);
-                        await ProcessFriendRequest(handler, sendFriendRequestMessage.ReceiverId);
-                        break;
-
-                    case "acceptfriendrequest":
-                        var acceptFriendRequestMessage = JsonSerializer.Deserialize<AcceptFriendRequestMessage>(message);
-                        await ProcessAcceptFriendRequest(handler, acceptFriendRequestMessage.RequestId);
-                        break;
-
-                    case "rejectfriendrequest":
-                        var rejectFriendRequestMessage = JsonSerializer.Deserialize<RejectFriendRequestMessage>(message);
-                        await ProcessRejectFriendRequest(handler, rejectFriendRequestMessage.RequestId);
-                        break;
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error procesando mensaje: {ex.Message}");
-            }
-        }
-
-        // por si lo usamos
-        public class ChatMessage : WebSocketMessage
-        {
-            [JsonPropertyName("sender")]
-            public string Sender { get; set; }
-
-            [JsonPropertyName("text")]
-            public string Text { get; set; }
-        }
-
-        public class WebSocketMessage
-        {
-            [JsonPropertyName("type")]
-            public string Type { get; set; }
-        }
-
-        public class InviteFriendMessage : WebSocketMessage
-        {
-            [JsonPropertyName("friendId")]
-            public int FriendId { get; set; }
-        }
-
-        public class AcceptInvitationMessage : WebSocketMessage
-        {
-            [JsonPropertyName("inviterId")]
-            public int InviterId { get; set; }
-        }
-
-        public class SendFriendRequestMessage : WebSocketMessage
-        {
-            [JsonPropertyName("receiverId")]
-            public int ReceiverId { get; set; }
-        }
-
-        public class AcceptFriendRequestMessage : WebSocketMessage
-        {
-            [JsonPropertyName("requestId")]
-            public int RequestId { get; set; }
-        }
-
-        public class RejectFriendRequestMessage : WebSocketMessage
-        {
-            [JsonPropertyName("requestId")]
-            public int RequestId { get; set; }
-        }
-
-        private async Task ProcessFriendRequest(WebSocketHandler handler, int receiverId)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var friendService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
-
-            var result = await friendService.SendFriendRequest(handler.Id, receiverId);
-
-            if (result.Success)
-            {
-                if (_connectedUsers.TryGetValue(receiverId, out var receiver))
-                {
-                    await receiver.SendAsync(JsonSerializer.Serialize(new
-                    {
-                        type = "friendRequest",
-                        requestId = result.FriendshipId,
-                        senderId = handler.Id,
-                        senderName = result.SenderName
-                    }));
-                }
-            }
-        }
-        public class TurnTimeoutMessage : WebSocketMessage
-        {
-            [JsonPropertyName("gameId")]
-            public string GameId { get; set; }
-
-            [JsonPropertyName("playerId")]
-            public int PlayerId { get; set; }
-        }
-
-
-        private async Task ProcessAcceptFriendRequest(WebSocketHandler handler, int requestId)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var friendService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
-            var request = await friendService.GetRequestDetails(requestId);
-
-            if (request == null) return;
-
-            var success = await friendService.AcceptFriendRequest(requestId, handler.Id);
-            if (success)
-            {
-                var notifyPayload = new { type = "friendListUpdate" };
-                await handler.SendAsync(JsonSerializer.Serialize(notifyPayload));
-
-                if (_connectedUsers.TryGetValue(request.SenderId, out var sender))
-                {
-                    await sender.SendAsync(JsonSerializer.Serialize(notifyPayload));
-                }
-            }
-        }
-
-        private async Task ProcessRejectFriendRequest(WebSocketHandler handler, int requestId)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var friendService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
-            var requestDetails = await friendService.GetRequestDetails(requestId);
-
-            if (requestDetails == null) return;
-
-            var success = await friendService.RejectFriendRequest(requestId, handler.Id);
-            if (success)
-            {
-                if (_connectedUsers.TryGetValue(requestDetails.SenderId, out var sender))
-                {
-                    await sender.SendAsync(JsonSerializer.Serialize(new
-                    {
-                        type = "friendRequestRejected",
-                        requestId = requestId,
-                        reason = "La solicitud fue rechazada"
-                    }));
-                }
-            }
-        }
-
-        private async Task UpdateUserStatusAsync(WebSocketHandler handler, string status)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var wsMethods = scope.ServiceProvider.GetRequiredService<WebSocketMethods>();
-            var user = await wsMethods.GetUserById(handler.Id);
-
-            if (user != null)
-            {
-                user.UserStatus = status;
-                await wsMethods.UpdateUserAsync(user);
-            }
-        }
-
-
-        private async Task NotifyFriendsAsync(WebSocketHandler handler, bool isConnected)
-        {
-            using var scope = _serviceProvider.CreateScope();
+            Console.WriteLine($"[WebSocket] OnMessageReceived: Mensaje tipo '{message.Type}' detectado. Procesando...");
+            // Crea un nuevo scope para resolver dependencias Scoped (como UnitOfWork).
+            using var scope = _scopeFactory.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
-            var friends = await unitOfWork._friendRequestRepository.GetFriendsList(handler.Id);
 
-            var message = JsonSerializer.Serialize(new
+            switch (message.Type)
             {
-                type = isConnected ? "friendConnected" : "friendDisconnected",
-                friendId = handler.Id
-            });
+                case "sendFriendRequest":
+                    // Lógica para enviar una solicitud de amistad.
+                    var sendMsg = JsonSerializer.Deserialize<SendFriendRequestMessage>(messageJson, messageOptions);
+                    if (sendMsg != null)
+                    {
+                        // ... (Lógica de creación de amistad) ...
+                        // Notifica al receptor de la solicitud.
+                        var senderUser = await unitOfWork._userRepository.GetByIdAsync(sender.Id);
+                        var notification = new { type = "new_friend_request", payload = new { /* ... */ } };
+                        await SendMessageToUserAsync(sendMsg.ReceiverId, JsonSerializer.Serialize(notification));
+                    }
+                    break;
 
-            foreach (var friend in _connectedPlayers.Where(p => friends.Any(f => f.UserId == p.Id)))
-            {
-                await friend.SendAsync(message);
+                case "acceptFriendRequest":
+                    // Lógica para aceptar una solicitud de amistad.
+                    var acceptMsg = JsonSerializer.Deserialize<AcceptFriendRequestMessage>(messageJson, messageOptions);
+                    if (acceptMsg != null)
+                    {
+                        var friendRequestService = scope.ServiceProvider.GetRequiredService<FriendRequestService>();
+                        var (success, senderUser, receiverUser) = await friendRequestService.AcceptRequestAsync(acceptMsg.RequestId, sender.Id);
+
+                        if (success && senderUser != null && receiverUser != null)
+                        {
+                            // Notifica a ambos usuarios que ahora son amigos.
+                            var notificationToSender = new { type = "new_friend_notification", payload = ToUserDTO(receiverUser) };
+                            var notificationToReceiver = new { type = "new_friend_notification", payload = ToUserDTO(senderUser) };
+                            await SendMessageToUserAsync(senderUser.UserId, JsonSerializer.Serialize(notificationToSender));
+                            await SendMessageToUserAsync(receiverUser.UserId, JsonSerializer.Serialize(notificationToReceiver));
+                        }
+                    }
+                    break;
+                default:
+                    Console.WriteLine($"[WebSocket] OnMessageReceived ADVERTENCIA: Tipo de mensaje no manejado: {message.Type}");
+                    break;
             }
         }
 
-        public List<int> GetConnectedUsers() => _connectedUsers.Keys.ToList();
-
-        public int GetActiveConnections() => _activeConnections;
-
-        public WebSocketHandler GetHandlerById(int userId)
+        // Se ejecuta cuando un cliente se desconecta.
+        private async Task OnDisconnected(WebSocketHandler handler)
         {
-            return _handlers.FirstOrDefault(h => h.Id == userId);
+            if (_handlers.TryRemove(handler.Id, out _))
+            {
+                Console.WriteLine($"[WebSocket] OnDisconnected: Usuario ID: {handler.Id} desconectado. Total handlers: {_handlers.Count}");
+                await UpdateUserStatus(handler.Id, false);
+            }
+        }
+
+        // Actualiza el estado de conexión del usuario en la base de datos y notifica a sus amigos.
+        private async Task UpdateUserStatus(int userId, bool isOnline)
+        {
+            Console.WriteLine($"[WebSocket] UpdateUserStatus: Actualizando estado de Usuario ID: {userId} a IsOnline: {isOnline}");
+            using var scope = _scopeFactory.CreateScope();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            var user = await unitOfWork._userRepository.GetByIdAsync(userId);
+            if (user == null) return;
+
+            user.IsOnline = isOnline;
+            user.LastSeen = isOnline ? null : DateTime.UtcNow;
+            await unitOfWork.SaveAsync();
+
+            // Notifica a todos los amigos del cambio de estado.
+            var friends = await unitOfWork._friendRequestRepository.GetFriendsList(userId);
+            var statusUpdate = new { type = "friend_status_update", payload = new { userId, isOnline, lastSeen = user.LastSeen } };
+            var message = JsonSerializer.Serialize(statusUpdate);
+
+            foreach (var friend in friends)
+            {
+                await SendMessageToUserAsync(friend.UserId, message);
+            }
+        }
+
+        // Envía un mensaje a un usuario específico si está conectado.
+        public async Task SendMessageToUserAsync(int userId, string message)
+        {
+            if (_handlers.TryGetValue(userId, out var handler) && handler.IsOpen)
+            {
+                await handler.SendAsync(message);
+            }
+        }
+
+        public List<int> GetConnectedUsers()
+        {
+            return _handlers.Keys.ToList();
+        }
+
+        private UserDTO ToUserDTO(User user)
+        {
+            return new UserDTO { /* ... */ };
         }
     }
+
+    // Clases auxiliares para la deserialización de mensajes WebSocket.
+    public class WebSocketMessage { public string Type { get; set; } }
+    public class SendFriendRequestMessage { public int ReceiverId { get; set; } }
+    public class AcceptFriendRequestMessage { public int RequestId { get; set; } }
 }

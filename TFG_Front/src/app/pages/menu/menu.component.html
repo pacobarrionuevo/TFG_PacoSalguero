@@ -1,9 +1,9 @@
-<!-- menu.component.html -->
+
 <div class="layout">
     <div class="sidebar">
         <div class="usuario">
-            <p>Bienvenido, {{ userNickname }}</p>
             <img [src]="userProfilePhoto" alt="Foto de Perfil" class="perfil-foto">
+            <p>Bienvenido, {{ userNickname }}</p>
         </div>
 
         <nav class="navegacion">
@@ -25,9 +25,9 @@
         </nav>
 
         <div class="cerrar-sesion">
-            <!-- <a (click)="logout()"> -->
+            <a (click)="logout()">
                 <i class="icono icon-cerrar"></i> Cerrar Sesión
-            <!-- </a> -->
+            </a>
         </div>
     </div>
 </div>

@@ -14,6 +14,7 @@ import { ImageService } from '../../services/image.service';
 })
 export class RegisterComponent {
   
+  // Referencias a elementos del DOM (actualmente no se usan, podrían ser para diálogos modales).
   @ViewChild('addEditDialog')
   addOrEditDialog: ElementRef<HTMLDialogElement>;
 
@@ -43,36 +44,23 @@ export class RegisterComponent {
   ngOnInit(): void {
     this.jwt = localStorage.getItem('accessToken'); 
 
+    // Inicializa el formulario reactivo para el registro.
     this.addOrEditForm = this.formBuilder.group({
       nickname: [''],
       email: [''],
       password: [''],
       confirm_password: [''],
-      file: [null]
+      file: [null] // Campo para el archivo de imagen.
     });
   }
 
-  openDialog(dialogRef: ElementRef<HTMLDialogElement>) {
-    dialogRef.nativeElement.showModal();
-  }
-
-  closeDialog(dialogRef: ElementRef<HTMLDialogElement>) {
-    dialogRef.nativeElement.close();
-  }
-
+  // Captura el archivo seleccionado por el usuario y lo asigna al formulario.
   onFileSelected(event: any) {
     const image = event.target.files[0] as File;
     this.addOrEditForm.patchValue({ file: image });
   }
 
-  async upateImageList() {
-    const request = await this.imageService.getAllImages();
-
-    if (request.success) {
-      this.images = request.data;
-    }
-  }
-
+  // Envía los datos del formulario de registro al servicio de autenticación.
   async submit() {
     const file = this.addOrEditForm.get('file')?.value as File;
   
@@ -81,17 +69,18 @@ export class RegisterComponent {
         return;
     }
 
+    // Construye un objeto FormData para enviar los datos, incluyendo el archivo.
     const formData = new FormData();
     formData.append('UserNickname', this.addOrEditForm.get('nickname')?.value);
     formData.append('UserEmail', this.addOrEditForm.get('email')?.value);
     formData.append('UserPassword', this.addOrEditForm.get('password')?.value);
     formData.append('UserConfirmPassword', this.addOrEditForm.get('confirm_password')?.value);
     formData.append('UserProfilePhoto', file);
-    console.log(formData);
 
     try {
         const result = await this.authService.register(formData).toPromise();
         if (result) {
+            // Si el registro es exitoso, guarda el token y redirige.
             localStorage.setItem('accessToken', result.stringToken);
             this.jwt = result.stringToken;
             
@@ -104,5 +93,5 @@ export class RegisterComponent {
     } catch (error) {
         alert("Error al registrar: " + error.message);
     }
-}
+  }
 }

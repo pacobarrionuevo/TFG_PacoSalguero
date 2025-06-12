@@ -1,1 +1,101 @@
-<p>admin works!</p>
+<div class="admin-panel">
+  <header class="admin-header">
+    <h1>Panel de Administración</h1>
+    <button (click)="logout()" class="btn btn-logout">Cerrar Sesión</button>
+  </header>
+
+  <main class="admin-main-content">
+    <section class="dashboard-section">
+      <h2>Estadísticas Rápidas</h2>
+      <div class="dashboard-stats" *ngIf="dashboardStats; else loadingStats">
+        <div class="stat-card">
+          <div class="icon">👤</div>
+          <div class="number">{{ dashboardStats.totalUsers }}</div>
+          <div class="label">Usuarios Totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon">👥</div>
+          <div class="number">{{ dashboardStats.totalCustomers }}</div>
+          <div class="label">Clientes Totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon">🛠️</div>
+          <div class="number">{{ dashboardStats.totalServices }}</div>
+          <div class="label">Servicios Totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon">📅</div>
+          <div class="number">{{ dashboardStats.totalAgendaEntries }}</div>
+          <div class="label">Entradas en Agenda</div>
+        </div>
+      </div>
+      <ng-template #loadingStats>
+        <p>Cargando estadísticas...</p>
+      </ng-template>
+    </section>
+
+    <section class="management-section">
+      <h2>Gestión de Usuarios ({{ users.length }})</h2>
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Avatar</th>
+              <th>Nickname</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.userId }}</td>
+              <td>
+                <div class="avatar-container">
+                  <img [src]="avatarPreviewCache[user.userId!] || imageService.getImageUrl(user.userProfilePhoto)" alt="Avatar" class="avatar">
+                  <label *ngIf="user.editing" class="avatar-edit-overlay" [for]="'avatar-input-' + user.userId">
+                    ✏️
+                    <input 
+                      type="file" 
+                      [id]="'avatar-input-' + user.userId" 
+                      (change)="onAvatarSelected($event, user)" 
+                      accept="image/*" 
+                      class="hidden-file-input">
+                  </label>
+                </div>
+              </td>
+              <td>
+                <span *ngIf="!user.editing">{{ user.userNickname }}</span>
+                <input *ngIf="user.editing" type="text" [(ngModel)]="user.userNickname" class="form-control">
+              </td>
+              <td>
+                <span *ngIf="!user.editing">{{ user.userEmail }}</span>
+                <input *ngIf="user.editing" type="email" [(ngModel)]="user.userEmail" class="form-control">
+              </td>
+              <td>
+                <select [value]="user.role" (change)="changeUserRole(user, $event)" class="form-control" [disabled]="user.editing">
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </td>
+              <td class="actions">
+                <ng-container *ngIf="!user.editing">
+                  <button (click)="editUser(user)" class="btn btn-edit">Editar</button>
+                  <button (click)="deleteUser(user.userId)" class="btn btn-danger">Eliminar</button>
+                </ng-container>
+                <ng-container *ngIf="user.editing">
+                  <button (click)="saveUser(user)" class="btn btn-save">Guardar</button>
+                  <button (click)="cancelEdit(user)" class="btn btn-cancel">Cancelar</button>
+                </ng-container>
+              </td>
+            </tr>
+            <tr *ngIf="users.length === 0">
+              <td colspan="6" style="text-align: center;">No hay usuarios para mostrar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>

@@ -24,6 +24,7 @@ export class FacturasComponent {
     this.cargarEntradas();
   }
 
+  // Carga las entradas de la agenda y añade la propiedad 'seleccionado' para el control en la UI.
   cargarEntradas(): void {
     this.agendaService.getEntradas().subscribe({
       next: (data) => {
@@ -37,23 +38,25 @@ export class FacturasComponent {
     });
   }
 
+  // Comprueba si hay al menos una entrada seleccionada para habilitar el botón de facturar.
   haySeleccionados(): boolean {
     return this.entradas.some(e => e.seleccionado);
   }
 
+  // Filtra las entradas seleccionadas y las mapea al modelo ServiceFacturado.
   facturarSeleccionados(): void {
-  this.serviciosSeleccionados = this.entradas
-    .filter(e => e.seleccionado)
-    .map(e => ({
-      centro: e.centroTrabajo,
-      cliente: e.cliente,
-      fecha: e.fechaHora,
-      paciente: e.paciente,
-      servicio: e.servicio?.nombre || '(Sin nombre)',
-      observaciones: e.observaciones
-    }));
+    this.serviciosSeleccionados = this.entradas
+      .filter(e => e.seleccionado)
+      .map(e => ({
+        centro: e.centroTrabajo,
+        cliente: e.cliente,
+        fecha: e.fechaHora,
+        paciente: e.paciente,
+        servicio: e.servicio?.nombre || '(Sin nombre)',
+        observaciones: e.observaciones
+      }));
 
-  console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
-}
-
+    // Aquí iría la lógica para enviar `serviciosSeleccionados` al backend para generar la factura.
+    console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
+  }
 }

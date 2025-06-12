@@ -3,6 +3,7 @@ using TFG_Back.Models.Database.Entidades;
 
 namespace TFG_Back.Servicios
 {
+    // Servicio para la lógica de negocio de los métodos de pago.
     public class PaymentMethodService
     {
         private readonly UnitOfWork _unitOfWork;
@@ -16,7 +17,6 @@ namespace TFG_Back.Servicios
         {
             return await _unitOfWork._paymentMethodRepository.GetAllAsync();
         }
-
 
         public async Task<PaymentMethod> CreateAsync(PaymentMethod method)
         {
@@ -40,6 +40,7 @@ namespace TFG_Back.Servicios
             var existing = await _unitOfWork._paymentMethodRepository.GetByIdAsync(method.Id);
             if (existing == null) return null;
 
+            // Actualiza las propiedades de la entidad existente.
             existing.Method = method.Method;
             existing.Installments = method.Installments;
             existing.FirstPaymentDays = method.FirstPaymentDays;

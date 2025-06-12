@@ -2,7 +2,8 @@
 
 namespace TFG_Back.Models.Database.Repositorios
 {
-    public class PaymentMethodRepository: Repository<PaymentMethod>
+    // Repositorio específico para la entidad PaymentMethod.
+    public class PaymentMethodRepository : Repository<PaymentMethod>
     {
         public PaymentMethodRepository(DBContext context) : base(context) { }
     }

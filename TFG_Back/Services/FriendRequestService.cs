@@ -52,7 +52,7 @@ namespace TFG_Back.Services
                 senderId,
                 senderName = sender.UserNickname
             };
-            await _webSocketNetwork.SendMessageToUserAsync(receiverId, JsonSerializer.Serialize(notification));
+            await _webSocketNetwork.SendToUserAsync(receiverId, JsonSerializer.Serialize(notification));
         }
 
         public async Task AcceptRequestAsync(int friendshipId, int acceptorId)
@@ -69,7 +69,7 @@ namespace TFG_Back.Services
             var notification = new { type = "friendListUpdate" };
             foreach (var userFriendship in friendship.UserFriendship)
             {
-                await _webSocketNetwork.SendMessageToUserAsync(userFriendship.UserId, JsonSerializer.Serialize(notification));
+                await _webSocketNetwork.SendToUserAsync(userFriendship.UserId, JsonSerializer.Serialize(notification));
             }
         }
 

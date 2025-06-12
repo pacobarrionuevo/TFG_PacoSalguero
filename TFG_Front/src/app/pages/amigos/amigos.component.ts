@@ -1,302 +1,156 @@
-import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
-import { User } from '../../models/user';
-import { environment_development } from '../../../environments/environment.development';
-import { BehaviorSubject, interval, Subscription } from 'rxjs';
-import { SolicitudAmistad } from '../../models/solicitud-amistad';
-import { WebsocketService } from '../../services/websocket.service';
-import { AuthService } from '../../services/auth.service';
-import { ApiService } from '../../services/api.service';
-import { Router, RouterModule } from '@angular/router';
-import { ImageService } from '../../services/image.service';
-import { FriendService } from '../../services/friend.service';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { User } from '../../models/user';
+import { SolicitudAmistad } from '../../models/solicitud-amistad';
+import { FriendService } from '../../services/friend.service';
+import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
+import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-amigos',
   standalone: true,
-  imports: [FormsModule, RouterModule, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './amigos.component.html',
-  styleUrl: './amigos.component.css',
-  providers: [ DatePipe ]
+  styleUrls: ['./amigos.component.css']
 })
 export class AmigosComponent implements OnInit, OnDestroy {
-  usuarios: User[] = [];
-  usuariosFiltrados: User[] = [];
-  amigos: User[] = [];
   amigosFiltrados: User[] = [];
-  private BASE_URL = environment_development.apiUrl;
-  private subs: Subscription[] = [];
-  terminoBusqueda: string = '';
-  busquedaAmigos: string = '';
-  usuarioApodo: string = '';
-  usuarioFotoPerfil: string = '';
-  usuarioId: number | null = null;
-  perfil_default: string;
   solicitudesPendientes: SolicitudAmistad[] = [];
-  errorMessage: string | null = null;
-    onlineUsers: { userId: number }[] = []; 
-private onlineUsersSubscription: Subscription; 
+  usuariosFiltrados: User[] = [];
+  todosLosUsuarios: User[] = [];
+  
+  terminoBusqueda: string = '';
+  usuarioId: number | null = null;
+  solicitudesEnviadas: number[] = [];
+  perfil_default = 'assets/img/perfil_default.png';
+
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
-    public webSocketService: WebsocketService,
-    private apiService: ApiService,
-    private authService: AuthService,
-    private router: Router,
-    private imageService: ImageService,
     private friendService: FriendService,
-    private ngZone: NgZone,
-    private datePipe: DatePipe,
-    
-  ) {
-    this.perfil_default = this.imageService.getImageUrl('Perfil_Deffault.png');
-  }
+    private userService: UserService,
+    private authService: AuthService,
+    private websocketService: WebsocketService
+  ) {}
 
   ngOnInit(): void {
-    this.cargarInfoUsuario();
-    this.obtenerUsuarios();
+    this.usuarioId = this.authService.getUserData()?.id ?? null;
     this.cargarAmigos();
-    this.obtenerSolicitudesPendientes();
-    this.suscribirseAWebSockets();
-    this.inicializarActualizaciones();
-    this.onlineUsersSubscription = this.webSocketService.onlineUsers$.subscribe(users => {
-      this.onlineUsers = users;
-      console.log('Lista de usuarios online actualizada:', this.onlineUsers);
-    });
+    this.cargarSolicitudes();
+    this.cargarTodosLosUsuarios();
+    this.suscribirAEventosWebSocket();
   }
 
-   ngOnDestroy(): void {
-    if (this.onlineUsersSubscription) {
-      this.onlineUsersSubscription.unsubscribe();
-    }
-  }
-
-  private suscribirseAWebSockets(): void {
-    this.subs.push(
-      this.webSocketService.messageReceived.subscribe(message => {
-        this.ngZone.run(() => this.procesarMensajesWebSocket(message));
-      }),
-      this.webSocketService.onlineUsers$.subscribe(users => {
-  this.ngZone.run(() => {
-    this.onlineUsers = users; 
-    this.actualizarEstadosAmigos();
-  });
-})
-    );
-  }
-  esAmigo(usuarioId: number): boolean {
-  return this.amigos.some(amigo => amigo.UserId === usuarioId);
-}
- solicitudEnviada(usuarioId: number): boolean {
-    return false;
-  }
-getStatusText(amigo: User): string {
-    // Primero, verificamos el estado en tiempo real del WebSocket
-    if (this.isUserOnline(amigo.UserId)) {
-      return 'Trabajando ahora';
-    }
-
-    // Si no está en la lista de online, usamos los datos de la API
-    if (amigo.isOnline) {
-        return 'Trabajando ahora';
-    }
-
-    if (amigo.lastSeen) {
-      // Formateamos la fecha para que sea legible
-      const lastSeenDate = new Date(amigo.lastSeen);
-      return `Últ. vez: ${this.datePipe.transform(lastSeenDate, 'dd/MM/yyyy HH:mm')}`;
-    }
-
-    return 'Desconectado';
-  }
-
-  isUserOnline(userId: number): boolean {
-    if (!userId) return false;
-    return this.onlineUsers.some(u => u.userId === userId);
-  }
-
-  private inicializarActualizaciones(): void {
-    this.subs.push(
-      interval(1000).subscribe(() => this.actualizarUsuariosConectados()),
-      interval(30000).subscribe(() => this.actualizarListasCompletas())
-    );
-  }
-
-  private procesarMensajesWebSocket(message: any): void {
-    switch (message.type) {
-      case 'friendRequest':
-        this.manejarSolicitudAmistad(message);
-        break;
-      case 'friendRequestAccepted':
-        this.manejarSolicitudAceptada(message);
-        break;
-      case 'friendRequestRejected':
-        this.manejarSolicitudRechazada(message);
-        break;
-      case 'friendListUpdate':
-        this.actualizarListasCompletas();
-        break;
-    }
-  }
-
-  private actualizarListasCompletas(): void {
-    this.cargarAmigos();
-    this.obtenerSolicitudesPendientes();
-  }
-
-  private actualizarEstadosAmigos(): void {
-  this.amigos = this.amigos.map(amigo => ({
-    ...amigo,
-    isOnline: this.isUserOnline(amigo.UserId) 
-  }));
-  this.amigosFiltrados = [...this.amigos];
-}
-  actualizarEstadoAmigo(friendId: number, estado: boolean) {
-    const amigo = this.amigos.find(a => a.UserId === friendId);
-    if (amigo) amigo.isOnline = estado;
-  }
-
-  private actualizarUsuariosConectados(): void {
-  this.webSocketService.fetchOnlineUsers().subscribe({
-    next: (users) => {
-      this.onlineUsers = users; 
-      this.actualizarEstadosAmigos(); // Llama a actualizar estados después de recibir la lista
-    },
-    error: (err) => console.error('Error actualizando usuarios:', err)
-  });
-}
-
-  private manejarSolicitudAmistad(message: any): void {
-    const nuevaSolicitud: SolicitudAmistad = {
-      friendshipId: message.requestId,
-      userId: message.senderId,
-      userNickname: message.senderName,
-      userprofilephoto: this.validarUrlImagen(null)
-    };
-    this.solicitudesPendientes = [...this.solicitudesPendientes, nuevaSolicitud];
-  }
-
-  private manejarSolicitudAceptada(message: any): void {
-    this.actualizarListasCompletas();
-    this.errorMessage = `¡Ahora eres amigo de ${message.friendName}!`;
-    setTimeout(() => this.errorMessage = null, 5000);
-    this.actualizarListasCompletas();
-  }
-
-  private manejarSolicitudRechazada(message: any): void {
-    this.solicitudesPendientes = this.solicitudesPendientes.filter(
-      s => s.friendshipId !== message.requestId
-    );
-    this.errorMessage = message.reason || 'Solicitud rechazada';
-    setTimeout(() => this.errorMessage = null, 5000);
-    this.actualizarListasCompletas();
-  }
-
-  enviarSolicitud(receiverId: number): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'sendFriendRequest',
-      receiverId
-    }));
-    this.actualizarListasCompletas();
-  }
-
-  aceptarSolicitud(solicitud: SolicitudAmistad): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'acceptFriendRequest',
-      requestId: solicitud.friendshipId
-    }));
-    this.actualizarListasCompletas();
-  }
-
-  rechazarSolicitud(solicitud: SolicitudAmistad): void {
-    this.webSocketService.sendRxjs(JSON.stringify({
-      type: 'rejectFriendRequest',
-      requestId: solicitud.friendshipId
-    }));
-    this.actualizarListasCompletas();
-  }
-
-  private cargarInfoUsuario(): void {
-    const userInfo = this.authService.getUserData();
-    if (userInfo) {
-      this.usuarioApodo = userInfo.nickname;
-      this.usuarioFotoPerfil = this.validarUrlImagen(userInfo.profilephoto);
-      this.usuarioId = userInfo.id;
-    } else {
-      this.router.navigate(['/login']);
-    }
-  }
-
-  obtenerUsuarios(): void {
-    this.apiService.getUsuarios().subscribe(usuarios => {
-      this.usuarios = usuarios
-        .map(usuario => this.mapearUsuario(usuario))
-        .filter(usuario => usuario.UserId !== this.usuarioId);
-      this.usuariosFiltrados = [...this.usuarios];
-    });
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   private cargarAmigos(): void {
-    this.friendService.getFriendsList().subscribe({
-      next: amigos => {
-        this.amigos = amigos.map(a => this.mapearAmigo(a));
-        this.actualizarEstadosAmigos();
-      },
-      error: err => console.error('Error cargando amigos:', err)
+    this.friendService.getFriendsList().subscribe(amigos => {
+      this.amigosFiltrados = amigos;
     });
   }
 
-  private obtenerSolicitudesPendientes(): void {
-    this.friendService.getPendingRequests().subscribe({
-      next: solicitudes => {
-        this.solicitudesPendientes = solicitudes.map(s => this.mapearSolicitud(s));
-      },
-      error: err => console.error('Error cargando solicitudes:', err)
+  private cargarSolicitudes(): void {
+    this.friendService.getPendingRequests().subscribe(solicitudes => {
+      this.solicitudesPendientes = solicitudes;
     });
   }
 
-  private mapearUsuario(usuario: any): User {
-    return {
-      UserId: usuario.userId,
-      UserNickname: usuario.userNickname,
-      UserProfilePhoto: this.validarUrlImagen(usuario.userProfilePhoto)
-    };
+  private cargarTodosLosUsuarios(): void {
+    this.userService.getUsuarios().subscribe(usuarios => {
+      this.todosLosUsuarios = usuarios;
+    });
   }
 
-  private mapearAmigo(amigo: any): User {
-    return {
-      UserId: amigo.UsuarioId || amigo.userId,
-      UserNickname: amigo.UsuarioApodo || amigo.userNickname,
-      UserProfilePhoto: this.validarUrlImagen(amigo.UserProfilePhoto || amigo.userProfilePhoto),
-      isOnline: false
-    };
+  private suscribirAEventosWebSocket(): void {
+    const friendStatusSub = this.websocketService.friendStatusUpdate$.subscribe(update => {
+      const amigo = this.amigosFiltrados.find(a => a.UserId === update.userId);
+      if (amigo) {
+        amigo.isOnline = update.isOnline;
+        amigo.lastSeen = update.lastSeen;
+      }
+    });
+
+    const newFriendSub = this.websocketService.newFriendNotification$.subscribe(nuevoAmigo => {
+        if (!this.amigosFiltrados.some(a => a.UserId === nuevoAmigo.UserId)) {
+            this.amigosFiltrados.push(nuevoAmigo);
+        }
+    });
+
+    this.subscriptions.add(friendStatusSub);
+    this.subscriptions.add(newFriendSub);
   }
 
-  private mapearSolicitud(solicitud: any): SolicitudAmistad {
-    return {
-      friendshipId: solicitud.friendshipId,
-      userId: solicitud.usuarioId,
-      userNickname: solicitud.usuarioApodo,
-      userprofilephoto: this.validarUrlImagen(solicitud.usuarioFotoPerfil)
-    };
+  aceptarSolicitud(solicitud: SolicitudAmistad): void {
+    this.friendService.aceptarSolicitud(solicitud.friendshipId).subscribe(() => {
+      this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.friendshipId !== solicitud.friendshipId);
+    });
   }
 
-  validarUrlImagen(fotoPerfil: string | null): string {
-    return fotoPerfil ? `${this.BASE_URL}/fotos/${fotoPerfil}` : this.perfil_default;
+  rechazarSolicitud(solicitud: SolicitudAmistad): void {
+    this.friendService.rechazarSolicitud(solicitud.friendshipId).subscribe(() => {
+      this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.friendshipId !== solicitud.friendshipId);
+    });
+  }
+
+  enviarSolicitud(receiverId: number | undefined): void {
+    if (receiverId === undefined) return;
+    this.friendService.sendFriendRequest(receiverId).subscribe(() => {
+      this.solicitudesEnviadas.push(receiverId);
+    });
   }
 
   buscarUsuarios(): void {
-    this.usuariosFiltrados = this.terminoBusqueda.trim()
-      ? this.usuarios.filter(usuario =>
-          usuario.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) &&
-          usuario.UserId !== this.usuarioId)
-      : [...this.usuarios].filter(usuario => usuario.UserId !== this.usuarioId);
+    if (!this.terminoBusqueda) {
+      this.usuariosFiltrados = [];
+      return;
+    }
+    this.usuariosFiltrados = this.todosLosUsuarios.filter(u =>
+      u.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase())
+    );
   }
 
-  logout(): void {
-    this.webSocketService.disconnectRxjs();
-    this.webSocketService.clearToken();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  esAmigo(id: number | undefined): boolean {
+    if (id === undefined) return false;
+    return this.amigosFiltrados.some(a => a.UserId === id);
+  }
+
+  solicitudEnviada(id: number | undefined): boolean {
+    if (id === undefined) return false;
+    return this.solicitudesEnviadas.includes(id);
+  }
+
+  getStatusText(amigo: User): string {
+    if (amigo.isOnline) {
+      return 'Conectado';
+    }
+    if (!amigo.lastSeen) {
+      return 'Desconectado';
+    }
+
+    const lastSeenDate = new Date(amigo.lastSeen);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - lastSeenDate.getTime()) / 1000);
+
+    let interval = seconds / 31536000;
+    if (interval > 1) return `Hace ${Math.floor(interval)} años`;
+    
+    interval = seconds / 2592000;
+    if (interval > 1) return `Hace ${Math.floor(interval)} meses`;
+
+    interval = seconds / 86400;
+    if (interval > 1) return `Hace ${Math.floor(interval)} días`;
+
+    interval = seconds / 3600;
+    if (interval > 1) return `Hace ${Math.floor(interval)} horas`;
+
+    interval = seconds / 60;
+    if (interval > 1) return `Hace ${Math.floor(interval)} minutos`;
+
+    return 'Hace un momento';
   }
 }

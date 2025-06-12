@@ -15,11 +15,14 @@ export class MainComponent {
   enfermeras: string;
   isLoggedIn: boolean = false;
   isAdmin: boolean = false;
-  constructor(private imageService: ImageService,private authService: AuthService, private router: Router) {
-    this.enfermeras = this.imageService.getImageUrl('enfermeras.jpg');
+
+  constructor(private imageService: ImageService, private authService: AuthService, private router: Router) {
+    // Obtiene la URL de la imagen a través del servicio de imágenes.
+    this.enfermeras = this.imageService.getImageUrl('images/enfermeras.jpg');
   }
 
   ngOnInit(): void {
+    // Se suscribe a los observables del servicio de autenticación para reaccionar a los cambios de estado.
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
@@ -28,9 +31,9 @@ export class MainComponent {
     });
   }
   
+  // Cierra la sesión del usuario y lo redirige a la página de login.
   logout() {
     this.authService.logout();
-    // ?    
     this.router.navigate(['/login']);
   }
 }

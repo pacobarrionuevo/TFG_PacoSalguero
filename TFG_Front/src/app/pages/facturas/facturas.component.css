@@ -1,0 +1,113 @@
+.agenda-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8em;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+.entradas-list {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.entrada-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  background-color: white;
+}
+
+.entrada-card:last-child {
+  border-bottom: none;
+}
+
+.entrada-header {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  color: #3498db;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.fecha, .hora {
+  font-size: 0.95em;
+}
+
+.entrada-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  position: relative;
+}
+
+.entrada-body p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.entrada-body strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.color-tag {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Checkbox alineado a la derecha */
+.entrada-body label {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.action-buttons {
+  margin-top: 2rem;
+  text-align: right;
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

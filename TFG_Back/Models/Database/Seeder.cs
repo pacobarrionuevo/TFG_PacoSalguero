@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TFG_Back.Models.Database.Entidades;
-using TFG_Back.Models.Recursos;
+using TFG_Back.Recursos;
 
 namespace TFG_Back.Models.Database
 {
+    // Clase responsable de poblar la base de datos con datos iniciales (seeding).
+    // Es útil para tener datos de prueba al iniciar la aplicación por primera vez.
     public class Seeder
     {
         private readonly DBContext _dBContext;
@@ -15,29 +17,32 @@ namespace TFG_Back.Models.Database
 
         public async Task SeedAsync()
         {
-
-            await _dBContext.Database.MigrateAsync();
             await SeedImagesAsync();
             await _dBContext.SaveChangesAsync();
         }
 
+        // Método para crear usuarios y relaciones de amistad de prueba.
         private async Task SeedImagesAsync()
         {
-            // Todos los usuarios
+            // Crea dos usuarios de prueba.
             User usuario1 = new User()
             {
-                
-                //UserId = 1,
-                UserNickname = "Jose",
-                UserEmail = "jose777@gmail.com",
-                UserPassword = PasswordHelper.Hash("jose777"),
-                UserConfirmPassword = PasswordHelper.Hash("jose777"),
+                UserNickname = "Profe",
+                UserEmail = "profe@gmail.com",
+                UserPassword = PasswordHelper.Hash("profe777"),
+                UserConfirmPassword = PasswordHelper.Hash("profe777"),
                 UserProfilePhoto = "Perfil_Deffault.png",
-                Role = "admin",
+                UserFriendship = new List<UserHasFriendship>(),
+                Role = "admin", // Asigna el rol de administrador.
+                IsOnline = true
+            };
             
-            };    
 
-            // Insertar usuarios y relaciones en la base de datos
+            
+
+           
+
+            // Añade todas las nuevas entidades al contexto de la base de datos.
             await _dBContext.AddRangeAsync(usuario1);
             await _dBContext.SaveChangesAsync();
         }

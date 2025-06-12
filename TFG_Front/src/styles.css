@@ -1,7 +1,7 @@
 body {
     margin: 0px;
     font-family:'Trebuchet MS';
-    background-image: url(https://localhost:7077/images/hospital_background.jpg);
+    background: linear-gradient(to top, #cce6ff, #ffffff);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;

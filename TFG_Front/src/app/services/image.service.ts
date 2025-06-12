@@ -1,24 +1,36 @@
 import { Injectable } from '@angular/core';
+import { environment_development } from '../../environments/environment.development';
 import { ApiService } from './api.service';
 import { Result } from '../models/result';
 import { Image } from '../models/image';
-import { environment } from '../../environments/environment';
 import { CreateOrUpdateImageRequest } from '../models/create-update-image-request';
-import { environment_development } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar las operaciones relacionadas con imágenes.
 export class ImageService {
 
-  private baseURL = `${environment_development.apiUrl}/images`;
+  private baseURL = environment_development.apiUrl; 
 
   constructor(private api: ApiService) { }
 
-  getImageUrl(imageName: string): string {
-    return `${this.baseURL}/${imageName}`;
+  // Construye la URL completa para una imagen a partir de su ruta relativa.
+  getImageUrl(imagePath: string | undefined | null): string {
+    if (!imagePath) {
+      // Devuelve una imagen por defecto si la ruta no está definida.
+      return 'assets/img/perfil_default.png'; 
+    }
+
+    // Lógica para manejar rutas de fotos de perfil que no incluyen el prefijo de la carpeta.
+    if (!imagePath.includes('/')) {
+      imagePath = `fotos/${imagePath}`;
+    }
+
+    return `${this.baseURL}/${imagePath}`;
   }
 
+  // Los siguientes métodos son para un CRUD de imágenes genérico (actualmente no se usa en toda su capacidad).
   getAllImages(): Promise<Result<Image[]>> {
     return this.api.get<Image[]>('images');
   }
@@ -27,7 +39,6 @@ export class ImageService {
     const formData = new FormData();
     formData.append('name', createOrUpdateImageRequest.name);
     formData.append('file', createOrUpdateImageRequest.file);
-
     return this.api.post<Image>('images', formData);
   }
 
@@ -35,7 +46,6 @@ export class ImageService {
     const formData = new FormData();
     formData.append('name', createOrUpdateImageRequest.name);
     formData.append('file', createOrUpdateImageRequest.file);
-
     return this.api.put(`images/${id}`, formData);
   }
 

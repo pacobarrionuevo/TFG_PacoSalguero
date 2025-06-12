@@ -7,11 +7,13 @@ import { User } from '../models/user';
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para obtener información de usuarios.
 export class UserService {
-  private baseURL = `${environment_development.apiUrl}/User`; 
+  private baseURL = `${environment_development.apiUrl}/api/User`; 
 
   constructor(private http: HttpClient) { }
 
+  // Obtiene la lista completa de usuarios.
   getUsuarios(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseURL}/users`);
   }

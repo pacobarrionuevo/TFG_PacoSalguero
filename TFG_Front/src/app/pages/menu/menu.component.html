@@ -1,34 +1,33 @@
-<!-- menu.component.html -->
+
 <div class="layout">
     <div class="sidebar">
         <div class="usuario">
-            <p>Bienvenido, Usuario</p>
-            <img src="assets/user_placeholder.png" alt="Foto Usuario" class="foto-usuario">
+            <img [src]="userProfilePhoto" alt="Foto de Perfil" class="perfil-foto">
+            <p>Bienvenido, {{ userNickname }}</p>
         </div>
 
         <nav class="navegacion">
-            <a routerLink="/ficheros" routerLinkActive="activo">
+            <a routerLink="/app/ficheros" routerLinkActive="activo">
                 <i class="icono icon-ficheros"></i> Ficheros
             </a>
-            <a routerLink="/agenda" routerLinkActive="activo">
+            <a routerLink="/app/agenda" routerLinkActive="activo">
                 <i class="icono icon-agenda"></i> Agenda
             </a>
-            <a routerLink="/facturas" routerLinkActive="activo">
+            <a routerLink="/app/facturas" routerLinkActive="activo">
                 <i class="icono icon-facturas"></i> Facturas
             </a>
-            <a routerLink="/informes" routerLinkActive="activo">
+            <a routerLink="/app/informes" routerLinkActive="activo">
                 <i class="icono icon-informes"></i> Informes
+            </a>
+            <a routerLink="/app/amigos" routerLinkActive="activo">
+                <i class="icono icon-amigos"></i> Amigos
             </a>
         </nav>
 
         <div class="cerrar-sesion">
-            <!-- <a (click)="logout()"> -->
+            <a (click)="logout()">
                 <i class="icono icon-cerrar"></i> Cerrar Sesión
-            <!-- </a> -->
+            </a>
         </div>
-    </div>
-
-    <div class="contenido">
-        <router-outlet></router-outlet>
     </div>
 </div>

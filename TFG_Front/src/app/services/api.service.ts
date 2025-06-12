@@ -3,11 +3,12 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } 
 import { Result } from '../models/result';
 import { Observable, lastValueFrom } from 'rxjs';
 import { environment_development } from '../../environments/environment.development';
-
+import { User } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
+// Servicio genérico para interactuar con la API, estandarizando las peticiones y respuestas.
 export class ApiService {
 
   private BASE_URL = environment_development.apiUrl;
@@ -15,8 +16,51 @@ export class ApiService {
   jwt: string | undefined;
 
   constructor(private http: HttpClient) { }
+
+  // --- Métodos específicos (podrían refactorizarse para usar los métodos genéricos) ---
+   getUsuarios(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.BASE_URL}/api/User/users`);
+  }
+
+  getFriendsList(usuarioId: number): Observable<User[]> {
+    return this.http.get<User[]>(`${this.BASE_URL}/api/FriendRequest/friends/${usuarioId}`);
+  }
+
+  getPendingFriendRequests(usuarioId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.BASE_URL}/api/FriendRequest/pending/${usuarioId}`);
+  }
+
+  sendFriendRequest(receiverId: number): Observable<any> {
+    const params = new HttpParams().set('receiverId', receiverId.toString());
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/send`, {}, {
+      headers: this.getHeader(),
+      params: params
+    });
+  }
   
-  // Metodos existentes (get, post, put, delete, sendRequest, getHeader)
+  acceptFriendRequest(amistadId: number): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/accept`, { amistadId }, {
+      headers: this.getHeader()
+    });
+  }
+  
+  rejectFriendRequest(amistadId: number): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/api/FriendRequest/reject`, null, {
+      headers: this.getHeader(),
+      params: { amistadId: amistadId.toString() }
+    });
+  }
+
+  getUsuarioById(userId: number): Observable<User> {
+    return this.http.get<User>(`${this.BASE_URL}/api/User/users/${userId}`);
+  }
+
+  actualizarUsuario(userId: number, datos: any): Observable<any> {
+    return this.http.put(`${this.BASE_URL}/api/User/users/${userId}`, datos);
+  }
+  
+  // --- Métodos genéricos para peticiones HTTP ---
+
   async get<T = void>(path: string, params: any = {}, responseType: 'json' | 'text' | 'blob' | 'arraybuffer' = 'json'): Promise<Result<T>> {
     const url = `${this.BASE_URL}/api${path}`;
     const request$ = this.http.get(url, {
@@ -25,7 +69,6 @@ export class ApiService {
       responseType: responseType as any,
       observe: 'response',
     });
-
     return this.sendRequest<T>(request$);
   }
 
@@ -35,7 +78,6 @@ export class ApiService {
       headers: this.getHeader(contentType),
       observe: 'response'
     });
-
     return this.sendRequest<T>(request$);
   }
 
@@ -45,7 +87,6 @@ export class ApiService {
       headers: this.getHeader(contentType),
       observe: 'response'
     });
-
     return this.sendRequest<T>(request$);
   }
 
@@ -56,10 +97,10 @@ export class ApiService {
       headers: this.getHeader(),
       observe: 'response'
     });
-
     return this.sendRequest<T>(request$);
   }
 
+  // Envuelve la petición HTTP en una promesa y la convierte a un objeto Result.
   private async sendRequest<T = void>(request$: Observable<HttpResponse<any>>): Promise<Result<T>> {
     let result: Result<T>;
     
@@ -69,14 +110,9 @@ export class ApiService {
 
       if (response.ok) {
         const data = response.body as T;
-
-        if (data == undefined) {
-          result = Result.success(statusCode);
-        } else {
-          result = Result.success(statusCode, data);
-        }
+        result = data == undefined ? Result.success(statusCode) : Result.success(statusCode, data);
       } else {
-        result = result = Result.error(statusCode, response.statusText);
+        result = Result.error(statusCode, response.statusText);
       }
     } catch (exception) {
       if (exception instanceof HttpErrorResponse) {
@@ -91,6 +127,7 @@ export class ApiService {
     return result;
   }
 
+  // Construye las cabeceras HTTP, añadiendo el token de autorización si existe.
   private getHeader(contentType: string | null = 'application/json'): HttpHeaders {
     const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     let header: any = {};
@@ -103,5 +140,4 @@ export class ApiService {
     }
     return new HttpHeaders(header);
   }
-  
 }

@@ -1,0 +1,60 @@
+<div class="amigos-container">
+  <h2>Lista de Amigos</h2>
+
+  <div class="grid">
+    <div class="col">
+      <h3>AMIGOS</h3>
+      <div *ngFor="let amigo of amigosFiltrados" class="card amigo">
+        <img [src]="imageService.getImageUrl(amigo.userProfilePhoto)" class="avatar" alt="Perfil" />
+        <div class="info">
+          <strong>{{ amigo.userNickname }}</strong>
+          
+          <span class="estado" [ngClass]="{
+            'conectado': amigo.isOnline,
+            'desconectado': !amigo.isOnline
+          }">
+            {{ getStatusText(amigo) }}
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>SOLICITUDES</h3>
+      <div *ngFor="let solicitud of solicitudesPendientes" class="card solicitud">
+        <img [src]="imageService.getImageUrl(solicitud.userProfilePhoto)" class="avatar" alt="Perfil" />
+        <div class="info">
+          <strong>{{ solicitud.userNickname }}</strong>
+          <span>Quiere ser tu amigo</span>
+        </div>
+        <div class="acciones">
+          <button (click)="aceptarSolicitud(solicitud)" class="btn aceptar" title="Aceptar">✔</button>
+          <button (click)="rechazarSolicitud(solicitud)" class="btn rechazar" title="Rechazar">✖</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<div class="usuarios-section">
+  <h3>Buscar Usuarios</h3>
+  <input type="text" [(ngModel)]="terminoBusqueda" (input)="buscarUsuarios()" placeholder="Buscar usuarios..." class="busqueda" />
+
+  <div class="usuario-card" *ngFor="let usuario of usuariosFiltrados">
+    <img [src]="imageService.getImageUrl(usuario.userProfilePhoto)" class="avatar" alt="Perfil" />
+    <div class="info">
+      <strong>{{ usuario.userNickname }}</strong>
+    </div>
+    <button 
+      *ngIf="usuario.userId !== usuarioId && !esAmigo(usuario.userId) && !solicitudEnviada(usuario.userId)"
+      (click)="enviarSolicitud(usuario.userId)" 
+      class="btn enviar"
+      title="Enviar solicitud de amistad">
+      <span>+</span> Añadir
+    </button>
+    <span *ngIf="esAmigo(usuario.userId)" class="estado-amistad">Ya es tu amigo</span>
+    <span *ngIf="solicitudEnviada(usuario.userId)" class="estado-amistad">Solicitud enviada</span>
+  </div>
+</div>

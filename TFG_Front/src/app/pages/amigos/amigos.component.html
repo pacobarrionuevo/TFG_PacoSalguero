@@ -5,9 +5,9 @@
     <div class="col">
       <h3>AMIGOS</h3>
       <div *ngFor="let amigo of amigosFiltrados" class="card amigo">
-        <img [src]="amigo.UserProfilePhoto || perfil_default" class="avatar" alt="Perfil" />
+        <img [src]="imageService.getImageUrl(amigo.userProfilePhoto)" class="avatar" alt="Perfil" />
         <div class="info">
-          <strong>{{ amigo.UserNickname }}</strong>
+          <strong>{{ amigo.userNickname }}</strong>
           
           <span class="estado" [ngClass]="{
             'conectado': amigo.isOnline,
@@ -23,7 +23,7 @@
     <div class="col">
       <h3>SOLICITUDES</h3>
       <div *ngFor="let solicitud of solicitudesPendientes" class="card solicitud">
-        <img [src]="solicitud.userprofilephoto || perfil_default" class="avatar" alt="Perfil" />
+        <img [src]="imageService.getImageUrl(solicitud.userProfilePhoto)" class="avatar" alt="Perfil" />
         <div class="info">
           <strong>{{ solicitud.userNickname }}</strong>
           <span>Quiere ser tu amigo</span>
@@ -43,18 +43,18 @@
   <input type="text" [(ngModel)]="terminoBusqueda" (input)="buscarUsuarios()" placeholder="Buscar usuarios..." class="busqueda" />
 
   <div class="usuario-card" *ngFor="let usuario of usuariosFiltrados">
-    <img [src]="usuario.UserProfilePhoto || perfil_default" class="avatar" alt="Perfil" />
+    <img [src]="imageService.getImageUrl(usuario.userProfilePhoto)" class="avatar" alt="Perfil" />
     <div class="info">
-      <strong>{{ usuario.UserNickname }}</strong>
+      <strong>{{ usuario.userNickname }}</strong>
     </div>
     <button 
-      *ngIf="usuario.UserId !== usuarioId && !esAmigo(usuario.UserId) && !solicitudEnviada(usuario.UserId)"
-      (click)="enviarSolicitud(usuario.UserId)" 
+      *ngIf="usuario.userId !== usuarioId && !esAmigo(usuario.userId) && !solicitudEnviada(usuario.userId)"
+      (click)="enviarSolicitud(usuario.userId)" 
       class="btn enviar"
       title="Enviar solicitud de amistad">
       <span>+</span> Añadir
     </button>
-    <span *ngIf="esAmigo(usuario.UserId)" class="estado-amistad">Ya es tu amigo</span>
-    <span *ngIf="solicitudEnviada(usuario.UserId)" class="estado-amistad">Solicitud enviada</span>
+    <span *ngIf="esAmigo(usuario.userId)" class="estado-amistad">Ya es tu amigo</span>
+    <span *ngIf="solicitudEnviada(usuario.userId)" class="estado-amistad">Solicitud enviada</span>
   </div>
 </div>

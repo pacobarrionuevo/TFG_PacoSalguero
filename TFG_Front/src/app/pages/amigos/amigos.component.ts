@@ -1,13 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, interval } from 'rxjs'; // Importar interval
 import { User } from '../../models/user';
 import { SolicitudAmistad } from '../../models/solicitud-amistad';
 import { FriendService } from '../../services/friend.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { WebsocketService } from '../../services/websocket.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
   selector: 'app-amigos',
@@ -25,70 +26,112 @@ export class AmigosComponent implements OnInit, OnDestroy {
   terminoBusqueda: string = '';
   usuarioId: number | null = null;
   solicitudesEnviadas: number[] = [];
-  perfil_default = 'assets/img/perfil_default.png';
-
+  
   private subscriptions: Subscription = new Subscription();
+  private refreshTimer: any; // Variable para el temporizador
 
   constructor(
     private friendService: FriendService,
     private userService: UserService,
     private authService: AuthService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    public imageService: ImageService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
+    console.log('[Amigos Component] ngOnInit: Iniciando componente.');
     this.usuarioId = this.authService.getUserData()?.id ?? null;
-    this.cargarAmigos();
-    this.cargarSolicitudes();
-    this.cargarTodosLosUsuarios();
+    
+    // Carga inicial de datos
+    this.cargarDatosIniciales();
+    
+    // Suscripción a eventos WebSocket
     this.suscribirAEventosWebSocket();
+
+    // --- IMPLEMENTACIÓN DE LA IDEA DE REFRESCO ---
+    // Iniciar un temporizador que recargue los datos cada 10 segundos (10000 ms)
+    this.refreshTimer = setInterval(() => {
+      console.log('[Amigos Component] Refrescando datos de amigos y solicitudes...');
+      this.cargarAmigos();
+      this.cargarSolicitudes();
+    }, 10000);
   }
 
   ngOnDestroy(): void {
+    console.log('[Amigos Component] ngOnDestroy: Limpiando suscripciones y temporizador.');
     this.subscriptions.unsubscribe();
+    // Limpiar el temporizador para evitar fugas de memoria
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
   }
 
-  private cargarAmigos(): void {
+  cargarDatosIniciales(): void {
+    this.cargarAmigos();
+    this.cargarSolicitudes();
+    this.cargarTodosLosUsuarios();
+  }
+
+  cargarAmigos(): void {
     this.friendService.getFriendsList().subscribe(amigos => {
       this.amigosFiltrados = amigos;
     });
   }
 
-  private cargarSolicitudes(): void {
+  cargarSolicitudes(): void {
     this.friendService.getPendingRequests().subscribe(solicitudes => {
       this.solicitudesPendientes = solicitudes;
     });
   }
 
-  private cargarTodosLosUsuarios(): void {
+  cargarTodosLosUsuarios(): void {
     this.userService.getUsuarios().subscribe(usuarios => {
       this.todosLosUsuarios = usuarios;
+      this.usuariosFiltrados = this.todosLosUsuarios; 
     });
   }
 
   private suscribirAEventosWebSocket(): void {
-    const friendStatusSub = this.websocketService.friendStatusUpdate$.subscribe(update => {
-      const amigo = this.amigosFiltrados.find(a => a.UserId === update.userId);
-      if (amigo) {
-        amigo.isOnline = update.isOnline;
-        amigo.lastSeen = update.lastSeen;
-      }
+    console.log('[Amigos Component] Suscribiendo a eventos de WebSocket...');
+    
+    const statusSub = this.websocketService.friendStatusUpdate$.subscribe(update => {
+      this.ngZone.run(() => {
+        const amigoIndex = this.amigosFiltrados.findIndex(a => a.userId === update.userId);
+        if (amigoIndex !== -1) {
+          this.amigosFiltrados[amigoIndex] = { ...this.amigosFiltrados[amigoIndex], isOnline: update.isOnline, lastSeen: update.lastSeen };
+          this.amigosFiltrados = [...this.amigosFiltrados];
+        }
+      });
     });
 
     const newFriendSub = this.websocketService.newFriendNotification$.subscribe(nuevoAmigo => {
-        if (!this.amigosFiltrados.some(a => a.UserId === nuevoAmigo.UserId)) {
-            this.amigosFiltrados.push(nuevoAmigo);
+      this.ngZone.run(() => {
+        if (!this.amigosFiltrados.some(a => a.userId === nuevoAmigo.userId)) {
+            this.amigosFiltrados = [...this.amigosFiltrados, nuevoAmigo];
         }
+        this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.userId !== nuevoAmigo.userId);
+      });
     });
 
-    this.subscriptions.add(friendStatusSub);
+    const newRequestSub = this.websocketService.newFriendRequest$.subscribe(nuevaSolicitud => {
+      this.ngZone.run(() => {
+        if (!this.solicitudesPendientes.some(s => s.friendshipId === nuevaSolicitud.friendshipId)) {
+          this.solicitudesPendientes = [...this.solicitudesPendientes, nuevaSolicitud];
+        }
+      });
+    });
+
+    this.subscriptions.add(statusSub);
     this.subscriptions.add(newFriendSub);
+    this.subscriptions.add(newRequestSub);
   }
 
   aceptarSolicitud(solicitud: SolicitudAmistad): void {
-    this.friendService.aceptarSolicitud(solicitud.friendshipId).subscribe(() => {
-      this.solicitudesPendientes = this.solicitudesPendientes.filter(s => s.friendshipId !== solicitud.friendshipId);
-    });
+    this.websocketService.send(JSON.stringify({
+      type: 'acceptFriendRequest',
+      requestId: solicitud.friendshipId
+    }));
   }
 
   rechazarSolicitud(solicitud: SolicitudAmistad): void {
@@ -99,24 +142,26 @@ export class AmigosComponent implements OnInit, OnDestroy {
 
   enviarSolicitud(receiverId: number | undefined): void {
     if (receiverId === undefined) return;
-    this.friendService.sendFriendRequest(receiverId).subscribe(() => {
-      this.solicitudesEnviadas.push(receiverId);
-    });
+    this.websocketService.send(JSON.stringify({
+      type: 'sendFriendRequest',
+      receiverId: receiverId
+    }));
+    this.solicitudesEnviadas.push(receiverId);
   }
 
   buscarUsuarios(): void {
     if (!this.terminoBusqueda) {
-      this.usuariosFiltrados = [];
+      this.usuariosFiltrados = this.todosLosUsuarios;
       return;
     }
     this.usuariosFiltrados = this.todosLosUsuarios.filter(u =>
-      u.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase())
+      u.userNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase())
     );
   }
 
   esAmigo(id: number | undefined): boolean {
     if (id === undefined) return false;
-    return this.amigosFiltrados.some(a => a.UserId === id);
+    return this.amigosFiltrados.some(a => a.userId === id);
   }
 
   solicitudEnviada(id: number | undefined): boolean {
@@ -131,26 +176,13 @@ export class AmigosComponent implements OnInit, OnDestroy {
     if (!amigo.lastSeen) {
       return 'Desconectado';
     }
-
     const lastSeenDate = new Date(amigo.lastSeen);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - lastSeenDate.getTime()) / 1000);
-
-    let interval = seconds / 31536000;
-    if (interval > 1) return `Hace ${Math.floor(interval)} años`;
-    
-    interval = seconds / 2592000;
-    if (interval > 1) return `Hace ${Math.floor(interval)} meses`;
-
-    interval = seconds / 86400;
-    if (interval > 1) return `Hace ${Math.floor(interval)} días`;
-
-    interval = seconds / 3600;
+    let interval = seconds / 3600;
     if (interval > 1) return `Hace ${Math.floor(interval)} horas`;
-
     interval = seconds / 60;
     if (interval > 1) return `Hace ${Math.floor(interval)} minutos`;
-
     return 'Hace un momento';
   }
 }

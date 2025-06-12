@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -19,10 +20,13 @@ namespace TFG_Back.Controllers
         private readonly DBContext _context;
         private readonly PasswordHelper passwordHelper;
         private readonly TokenValidationParameters _tokenParameters;
-        public UserController(DBContext _dbContext, IOptionsMonitor<JwtBearerOptions> jwtOptions)
+        private readonly UnitOfWork _unitOfWork;
+
+        public UserController(DBContext _dbContext, IOptionsMonitor<JwtBearerOptions> jwtOptions, UnitOfWork unitOfWork)
         {
             _context = _dbContext;
             _tokenParameters = jwtOptions.Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
+            _unitOfWork = unitOfWork;
         }
         private UserSignUpDTO ToDtoRegistro(User users)
         {
@@ -37,19 +41,25 @@ namespace TFG_Back.Controllers
         }
 
         [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsuarios()
+        public async Task<IActionResult> GetUsers()
         {
-            return await _context.Users
-                .Select(u => new UserDTO
-                {
-                    UserId = u.UserId,
-                    UserNickname = u.UserNickname,
-                    UserEmail = u.UserEmail,
-                    UserProfilePhoto = u.UserProfilePhoto,
-                    Role = u.Role
-                    
-                })
-                .ToListAsync();
+            var users = await _unitOfWork._userRepository.GetAllAsync();
+            var userDtos = users.Select(u => ToUserDTO(u)).ToList();
+            return Ok(userDtos);
+        }
+
+        private UserDTO ToUserDTO(User user)
+        {
+            return new UserDTO
+            {
+                UserId = user.UserId,
+                UserNickname = user.UserNickname,
+                UserProfilePhoto = Path.GetFileName(user.UserProfilePhoto), 
+                UserEmail = user.UserEmail,
+                IsOnline = user.IsOnline,
+                LastSeen = user.LastSeen,
+                Role = user.Role
+            };
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)

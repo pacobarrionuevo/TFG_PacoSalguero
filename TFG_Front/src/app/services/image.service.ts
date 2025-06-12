@@ -2,20 +2,22 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Result } from '../models/result';
 import { Image } from '../models/image';
-import { environment } from '../../environments/environment';
-import { CreateOrUpdateImageRequest } from '../models/create-update-image-request';
 import { environment_development } from '../../environments/environment.development';
+import { CreateOrUpdateImageRequest } from '../models/create-update-image-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
 
-  private baseURL = `${environment_development.apiUrl}/images`;
+  private baseURL = `${environment_development.apiUrl}/fotos`; 
 
   constructor(private api: ApiService) { }
 
   getImageUrl(imageName: string): string {
+    if (!imageName) {
+      return 'assets/img/perfil_default.png'; 
+    }
     return `${this.baseURL}/${imageName}`;
   }
 

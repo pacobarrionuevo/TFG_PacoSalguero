@@ -12,19 +12,23 @@ import { AuthResponse } from '../models/auth-response';
 export class AuthService {
 
   private BASE_URL = environment_development.apiUrl;
+  // BehaviorSubject para gestionar el estado de autenticación de forma reactiva.
   private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
   private isAdminSubject = new BehaviorSubject<boolean>(this.checkAdmin());
 
   constructor(private http: HttpClient) { }
 
+  // Realiza la petición de login.
   login(authData: AuthRequest, rememberMe: boolean): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/login`, authData).pipe(
       tap((response: AuthResponse) => {
+        // Limpia cualquier token anterior.
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('accessToken');
         localStorage.removeItem('isAdmin');
         sessionStorage.removeItem('isAdmin');
   
+        // Almacena el nuevo token en localStorage o sessionStorage según la opción "Recuérdame".
         if (rememberMe) {
           localStorage.setItem('accessToken', response.stringToken);
           localStorage.setItem('isAdmin', JSON.stringify(response.isAdmin));
@@ -33,16 +37,19 @@ export class AuthService {
           sessionStorage.setItem('isAdmin', JSON.stringify(response.isAdmin));
         }
         
+        // Notifica a los suscriptores que el estado de autenticación ha cambiado.
         this.loggedIn.next(true);
         this.isAdminSubject.next(this.checkAdmin()); 
       })
     );
   }
 
+  // Realiza la petición de registro.
   register(formData: FormData): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.BASE_URL}/api/User/register`, formData, { headers: {} });
   }
 
+  // Cierra la sesión del usuario.
   logout(): void {
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
@@ -51,10 +58,12 @@ export class AuthService {
     console.log('AuthService: Sesión cerrada correctamente');
   }
 
+  // Comprueba si existe un token en el almacenamiento local.
   private hasToken(): boolean {
     return !!localStorage.getItem('accessToken');
   }
 
+  // Comprueba si el usuario tiene el rol de administrador a partir del token.
   private checkAdmin(): boolean {
     const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (!token) return false;
@@ -68,51 +77,30 @@ export class AuthService {
     }
   }
 
+  // Decodifica el payload de un token JWT.
   private decodeToken(token: string): any {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(atob(base64));
   }
 
+  // Expone el estado de autenticación como un Observable.
   get isLoggedIn$(): Observable<boolean> {
     return this.loggedIn.asObservable();
   }
 
+  // Expone el estado de administrador como un Observable.
   get isAdmin$(): Observable<boolean> {
     return this.isAdminSubject.asObservable();
   }
 
+  // Actualiza el estado de autenticación (útil al iniciar la app).
   updateAuthState(): void {
     this.loggedIn.next(this.hasToken());
     this.isAdminSubject.next(this.checkAdmin());
   }
-  getUserDataFromToken(): any {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.error('El token no está bien estructurado.');
-        return null;
-      }
-      const payloadBase64 = parts[1];
-      const payloadJson = atob(payloadBase64);
 
-      try {
-        const payload = JSON.parse(payloadJson);
-        return {
-          id: payload.id || 'ID no disponible',
-          name: payload.nickname || 'Nombre no disponible',
-          email: payload.email || 'Correo no disponible',
-          profilePicture: payload.profilephoto || 'Foto no disponible'
-        };
-      } catch (e) {
-        console.error('Error al parsear el JSON del payload:', e);
-        return null;
-      }
-    }
-    return null;
-  }
-
+  // Obtiene los datos del usuario decodificando el token.
   getUserData(): { 
     id: number, 
     nickname: string, 
@@ -121,7 +109,7 @@ export class AuthService {
     role: boolean 
   } | null {
 
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
 
     if (!token) return null;
 

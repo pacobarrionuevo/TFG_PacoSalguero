@@ -21,6 +21,7 @@ export class FicherosComponent implements OnInit {
   paymentMethods: PaymentMethod[] = [];
   customers: Customer[] = [];
 
+  // Modelos para los formularios de creación.
   nuevoServicio: Service = {
     nombre: '',
     abreviatura: '',
@@ -50,14 +51,13 @@ export class FicherosComponent implements OnInit {
     private customerService: CustomerService) {}
 
   ngOnInit(): void {
+    // Carga todos los datos necesarios al iniciar el componente.
     this.cargarServicios();
     this.cargarMetodosPago();
     this.cargarClientes();
   }
 
-  ///////////////////////////////////////////////////
-  ////// Lógica relacionada con los servicios ///////
-  ///////////////////////////////////////////////////
+  // --- Lógica relacionada con los servicios ---
 
   cargarServicios() {
     this.servicioService.getAll().subscribe({
@@ -75,7 +75,7 @@ export class FicherosComponent implements OnInit {
     this.servicioService.create(this.nuevoServicio).subscribe({
       next: (nuevo) => {
         this.servicios.push(nuevo);
-        this.nuevoServicio = { nombre: '', abreviatura: '', color: '' };
+        this.nuevoServicio = { nombre: '', abreviatura: '', color: '' }; // Limpia el formulario.
       },
       error: (err) => {
         console.error('Error al crear servicio:', err);
@@ -83,14 +83,18 @@ export class FicherosComponent implements OnInit {
       }
     });
   }
+
+  // Activa el modo de edición para una fila de la tabla.
   editarServicio(servicio: Service): void {
     servicio.editing = true;
   }
+
+  // Guarda los cambios de un servicio editado.
   guardarServicio(servicio: Service): void {
     this.servicioService.update(servicio).subscribe({
       next: () => {
         servicio.editing = false;
-        this.cargarServicios();
+        this.cargarServicios(); // Recarga para asegurar consistencia.
       },
       error: (err) => console.error('Error al actualizar servicio:', err)
     });
@@ -105,9 +109,7 @@ export class FicherosComponent implements OnInit {
     }
   }
 
-  ///////////////////////////////////////////////////
-  /// Lógica relacionada con los Métodos de Pago ////
-  ///////////////////////////////////////////////////
+  // --- Lógica relacionada con los Métodos de Pago ---
 
   cargarMetodosPago() {
     this.paymentMethodService.getAll().subscribe({
@@ -117,20 +119,15 @@ export class FicherosComponent implements OnInit {
   }
 
   crearMetodoPago() {
-    if (!this.newPaymentMethod.method ||
-        this.newPaymentMethod.installments < 1 ||
-        this.newPaymentMethod.firstPaymentDays < 0 ||
-        this.newPaymentMethod.daysBetweenPayments < 0) {
+    if (!this.newPaymentMethod.method || this.newPaymentMethod.installments < 1 || this.newPaymentMethod.firstPaymentDays < 0 || this.newPaymentMethod.daysBetweenPayments < 0) {
       alert("Todos los campos son obligatorios y deben tener valores válidos");
       return;
     }
 
-
     this.paymentMethodService.create(this.newPaymentMethod).subscribe({
       next: (nuevo) => {
-        console.log('Método de pago creado:', nuevo);
         this.paymentMethods.push(nuevo);
-        this.newPaymentMethod = { method: '', installments: 0, firstPaymentDays: 0, daysBetweenPayments: 0}
+        this.newPaymentMethod = { method: '', installments: 0, firstPaymentDays: 0, daysBetweenPayments: 0 };
       },
       error: (err) => {
         console.error('Error al crear método de pago:', err);
@@ -140,85 +137,50 @@ export class FicherosComponent implements OnInit {
   }
 
   editarMetodoPago(paymentMethod: PaymentMethod): void {
-  paymentMethod.editing = true;
-}
+    paymentMethod.editing = true;
+  }
 
-guardarMetodoPago(paymentMethod: PaymentMethod): void {
-  console.log(paymentMethod);
-  this.paymentMethodService.update(paymentMethod).subscribe({
-    next: () => {
-      paymentMethod.editing = false;
-      this.cargarMetodosPago();
-    },
-    error: (err) => console.error('Error al actualizar método de pago:', err)
-  });
-}
-
-eliminarMetodoPago(id: number): void {
-  if (confirm('¿Estás seguro de eliminar este método de pago?')) {
-    this.paymentMethodService.delete(id).subscribe({
-      next: () => this.cargarMetodosPago(),
-      error: (err) => console.error('Error al eliminar método de pago:', err)
+  guardarMetodoPago(paymentMethod: PaymentMethod): void {
+    this.paymentMethodService.update(paymentMethod).subscribe({
+      next: () => {
+        paymentMethod.editing = false;
+        this.cargarMetodosPago();
+      },
+      error: (err) => console.error('Error al actualizar método de pago:', err)
     });
   }
-}
 
-  ///////////////////////////////////////////////////
-  /////// Lógica relacionada con los clientes ///////
-  ///////////////////////////////////////////////////
+  eliminarMetodoPago(id: number): void {
+    if (confirm('¿Estás seguro de eliminar este método de pago?')) {
+      this.paymentMethodService.delete(id).subscribe({
+        next: () => this.cargarMetodosPago(),
+        error: (err) => console.error('Error al eliminar método de pago:', err)
+      });
+    }
+  }
+
+  // --- Lógica relacionada con los clientes ---
 
   cargarClientes() {
     this.customerService.getAll().subscribe({
       next: (data) => this.customers = data,
-      error: (err) => console.error('Error al obtener métodos de pago:', err)
+      error: (err) => console.error('Error al obtener clientes:', err)
     });
   }
 
-    crearClientes() {
-    // Validación básica
-    if (
-      !this.newCustomer.name ||
-      !this.newCustomer.email ||
-      !this.newCustomer.paymentMethodId ||
-      this.newCustomer.cif <= 0 ||
-      this.newCustomer.phoneNumber <= 0
-    ) {
+  crearClientes() {
+    if (!this.newCustomer.name || !this.newCustomer.email || !this.newCustomer.paymentMethodId || this.newCustomer.cif <= 0 || this.newCustomer.phoneNumber <= 0) {
       alert("Faltan campos obligatorios o hay valores inválidos.");
       return;
     }
 
-    // Crear objeto con solo los campos que necesita el backend
-    const clienteDTO = {
-      cif: this.newCustomer.cif,
-      name: this.newCustomer.name,
-      adress: this.newCustomer.adress,
-      postalCode: this.newCustomer.postalCode,
-      placeOfResidence: this.newCustomer.placeOfResidence,
-      phoneNumber: this.newCustomer.phoneNumber,
-      email: this.newCustomer.email,
-      adminEmail: this.newCustomer.adminEmail, 
-      paymentMethodId: this.newCustomer.paymentMethodId 
-  };
+    const clienteDTO = { ...this.newCustomer };
 
     this.customerService.create(clienteDTO).subscribe({
       next: (clienteCreado) => {
-        console.log('Cliente creado:', clienteCreado);
         this.customers.push(clienteCreado);
         alert("Cliente creado correctamente");
-
-        // Reiniciar formulario
-        this.newCustomer = {
-          cif: 0,
-          name: '',
-          adress: '',
-          postalCode: 0,
-          placeOfResidence: '',
-          phoneNumber: 0,
-          email: '',
-          adminEmail: '',
-          paymentMethodId: undefined,
-          paymentMethod: undefined
-        };
+        this.newCustomer = { cif: null, name: '', adress: '', postalCode: null, placeOfResidence: '', phoneNumber: null, email: '', adminEmail: '', paymentMethodId: undefined, paymentMethod: undefined };
       },
       error: (err) => {
         console.error('Error al crear cliente:', err);
@@ -232,20 +194,7 @@ eliminarMetodoPago(id: number): void {
   }
 
   guardarCliente(customer: Customer): void {
-    const clienteDTO = {
-      id: customer.id,
-      cif: customer.cif,
-      name: customer.name,
-      adress: customer.adress,
-      postalCode: customer.postalCode,
-      placeOfResidence: customer.placeOfResidence,
-      phoneNumber: customer.phoneNumber,
-      email: customer.email,
-      adminEmail: customer.adminEmail,
-      paymentMethodId: customer.paymentMethodId, 
-      paymentMethod: customer.paymentMethod
-    };
-    console.log(customer);
+    const clienteDTO = { ...customer };
     this.customerService.update(clienteDTO).subscribe({
       next: () => {
         customer.editing = false;
@@ -263,6 +212,4 @@ eliminarMetodoPago(id: number): void {
       });
     }
   }
-
-
 }

@@ -1,10 +1,5 @@
-<!-- lista-agenda.component.html -->
 <div class="agenda-container">
     <h2>AGENDA PROFESIONAL</h2>
-
-    <a routerLink="/menu" routerLinkActive="activo">
-      <i class="icono icon-ficheros"></i> Volver al menú
-    </a>
     
     <div class="entradas-list">
       <div *ngFor="let entrada of entradas" class="entrada-card">
@@ -31,13 +26,14 @@
     </div>
     <div class="action-buttons">
         <button 
-          routerLink="/crearentrada" 
+          routerLink="/app/crearentrada" 
           class="btn btn-primary"
         >
           <i class="fas fa-plus"></i> AÑADIR ENTRADA
         </button>
       </div>
-      <button  [routerLink]="'/calendar'">
+      <button 
+       class="btn btn-primary"  [routerLink]="'/app/calendar'">
           Calendario
         </button>
     </div>

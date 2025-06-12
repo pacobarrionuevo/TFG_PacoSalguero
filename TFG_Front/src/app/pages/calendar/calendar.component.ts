@@ -28,6 +28,7 @@ export class CalendarComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Carga primero los servicios para poder asociarlos a las entradas de la agenda.
     this.cargarServicios();
     this.generarCalendario();
     this.cargarEntradasMes();
@@ -42,35 +43,36 @@ export class CalendarComponent implements OnInit {
     });
   }
 
+  // Carga las entradas de la agenda para el mes y año actualmente seleccionados.
   cargarEntradasMes(): void {
-  const year = this.currentDate.getFullYear();
-  const month = this.currentDate.getMonth() + 1;
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth() + 1;
 
-  console.log(`Cargando entradas para ${month}/${year}`);
+    this.agendaService.getEntradasPorMes(year, month).subscribe({
+      next: (entradas) => {
+        // Mapea las entradas para asociarles su servicio correspondiente y convertir la fecha.
+        this.entradasMes = entradas.map(e => {
+          const servicio = this.servicios.find(s => s.id === e.serviceId);
+          const fecha = new Date(e.fechaHora);
+          return {
+            ...e,
+            fechaHora: fecha,
+            servicio: servicio
+          };
+        });
+      }
+    });
+  }
 
-  this.agendaService.getEntradasPorMes(year, month).subscribe({
-    next: (entradas) => {
-      console.log('Entradas recibidas:', entradas);
-      this.entradasMes = entradas.map(e => {
-        const servicio = this.servicios.find(s => s.id === e.serviceId);
-        const fecha = new Date(e.fechaHora);
-        console.log(`Entrada: ${e.id}, Fecha: ${fecha}`);
-        return {
-          ...e,
-          fechaHora: fecha,
-          servicio: servicio
-        };
-      });
-    }
-  });
-}
-
+  // Genera la estructura de semanas y días para el mes actual.
   generarCalendario(): void {
     const start = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
     const end = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
     
+    // Ajusta la fecha de inicio al lunes de la primera semana.
     start.setDate(start.getDate() - (start.getDay() || 7) + 1);
     
+    // Ajusta la fecha de fin al domingo de la última semana.
     end.setDate(end.getDate() + (7 - end.getDay()));
 
     this.weeks = [];
@@ -86,6 +88,7 @@ export class CalendarComponent implements OnInit {
     }
   }
 
+  // Cambia al mes anterior o siguiente y recarga los datos.
   cambiarMes(delta: number): void {
     this.currentDate.setMonth(this.currentDate.getMonth() + delta);
     this.currentDate = new Date(this.currentDate);
@@ -93,17 +96,19 @@ export class CalendarComponent implements OnInit {
     this.cargarEntradasMes();
   }
 
+  // Filtra y devuelve las entradas de la agenda para un día específico.
   entradasDelDia(fecha: Date): EntradaAgenda[] {
-  return this.entradasMes.filter(e => {
-    const entradaDate = new Date(e.fechaHora);
-    return (
-      entradaDate.getFullYear() === fecha.getFullYear() &&
-      entradaDate.getMonth() === fecha.getMonth() &&
-      entradaDate.getDate() === fecha.getDate()
-    );
-  });
-}
+    return this.entradasMes.filter(e => {
+      const entradaDate = new Date(e.fechaHora);
+      return (
+        entradaDate.getFullYear() === fecha.getFullYear() &&
+        entradaDate.getMonth() === fecha.getMonth() &&
+        entradaDate.getDate() === fecha.getDate()
+      );
+    });
+  }
 
+  // Comprueba si un día pertenece al mes que se está visualizando.
   esMesActual(fecha: Date): boolean {
     return fecha.getMonth() === this.currentDate.getMonth();
   }

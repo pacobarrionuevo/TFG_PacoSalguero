@@ -1,4 +1,4 @@
-/* Fondo del sidebar */
+
 .sidebar {
     width: 220px;
     background: linear-gradient(to bottom, #2a0066, #400080, #5f00b2);
@@ -6,28 +6,31 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     padding: 20px 10px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Sección del usuario */
 .usuario {
     text-align: center;
     margin-bottom: 30px;
+    padding: 10px 0;
 }
 
 .usuario p {
+    margin-top: 15px; 
     margin-bottom: 10px;
     font-weight: bold;
+    font-size: 1.1em;
 }
 
-.foto-usuario {
+.perfil-foto {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    background-color: white;
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 3px solid #fff; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+    background-color: #4d0099; 
 }
 
 /* Navegación de secciones */
@@ -35,6 +38,7 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    flex-grow: 1;
 }
 
 .navegacion a {
@@ -43,25 +47,24 @@
     gap: 10px;
     text-decoration: none;
     color: white;
-    padding: 10px;
+    padding: 12px 15px; 
     border-radius: 8px;
-    transition: background 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .navegacion a:hover,
 .navegacion a.activo {
     background-color: #4d0099;
+    transform: translateX(5px); /* Pequeño efecto al pasar el ratón por encima*/
 }
 
-/* Iconos ficticios por ahora */
 .icono {
     width: 20px;
     height: 20px;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 4px;
 }
 
-/* Cerrar sesión */
 .cerrar-sesion {
     margin-top: 20px;
 }
@@ -72,10 +75,11 @@
     gap: 10px;
     text-decoration: none;
     color: white;
-    padding: 10px;
+    padding: 12px 15px;
     border-radius: 8px;
     background-color: #800000;
-    transition: background 0.3s ease;
+    transition: background-color 0.3s ease;
+    cursor: pointer; 
 }
 
 .cerrar-sesion a:hover {
@@ -89,7 +93,7 @@
 
 .contenido {
     flex-grow: 1;
-    background: linear-gradient(to bottom, #ffffff, #cce0ff);
+    background: linear-gradient(to top, #ffffff, #cce0ff);
     padding: 20px;
     overflow-y: auto;
 }

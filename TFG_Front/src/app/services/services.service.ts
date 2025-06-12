@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Service } from '../models/service';
 import { Observable } from 'rxjs';
+import { environment_development } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar las operaciones CRUD de los servicios.
 export class ServicesService {
 
-  private baseURL = 'https://localhost:7077/api/Service';
+  private baseURL = `${environment_development.apiUrl}/api/Service`;
 
   constructor(private http: HttpClient) {}
 

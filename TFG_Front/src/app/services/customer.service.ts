@@ -7,6 +7,7 @@ import { Customer } from '../models/customer';
 @Injectable({
   providedIn: 'root'
 })
+// Servicio para gestionar las operaciones CRUD de los clientes.
 export class CustomerService {
 
   private baseURL = `${environment_development.apiUrl}/api/Customer`

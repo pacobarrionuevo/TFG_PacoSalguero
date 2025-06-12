@@ -1,5 +1,6 @@
 ﻿namespace TFG_Back.Models.Database.Entidades
 {
+    // Entidad que representa a un cliente en la base de datos.
     public class Customer
     {
         public int Id { get; set; }
@@ -12,9 +13,9 @@
         public string Email { get; set; }
         public string AdminEmail { get; set; }
 
-        public int PaymentMethodId { get; set; } //FK
+        // Clave foránea para la relación con PaymentMethod.
+        public int PaymentMethodId { get; set; }
+        // Propiedad de navegación para acceder al método de pago asociado.
         public PaymentMethod PaymentMethod { get; set; }
-
-
     }
 }

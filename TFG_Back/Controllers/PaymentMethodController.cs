@@ -8,6 +8,7 @@ namespace TFG_Back.Controllers
     [Route("api/[controller]")]
     public class PaymentMethodController : ControllerBase
     {
+        // Inyectamos el servicio de métodos de pago.
         private readonly PaymentMethodService _service;
 
         public PaymentMethodController(PaymentMethodService service)
@@ -15,6 +16,7 @@ namespace TFG_Back.Controllers
             _service = service;
         }
 
+        // Endpoint para obtener todos los métodos de pago.
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentMethod>>> GetAll()
         {
@@ -22,6 +24,7 @@ namespace TFG_Back.Controllers
             return Ok(servicios);
         }
 
+        // Endpoint para crear un nuevo método de pago.
         [HttpPost]
         public async Task<ActionResult<PaymentMethod>> Create(PaymentMethod method)
         {
@@ -29,6 +32,7 @@ namespace TFG_Back.Controllers
             return CreatedAtAction(nameof(Create), new { id = created.Id }, created);
         }
 
+        // Endpoint para eliminar un método de pago por su ID.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -36,6 +40,7 @@ namespace TFG_Back.Controllers
             return result ? NoContent() : NotFound();
         }
 
+        // Endpoint para actualizar un método de pago.
         [HttpPut("{id}")]
         public async Task<ActionResult<PaymentMethod>> Update(int id, PaymentMethod method)
         {

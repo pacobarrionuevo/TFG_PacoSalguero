@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using TFG_Back.Models.Database;
 using TFG_Back.Models.Database.Entidades;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TFG_Back.Controllers
 {

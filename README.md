@@ -93,6 +93,55 @@ La aplicación ofrece un conjunto de herramientas diseñadas para cubrir las nec
     -   Selección de entradas de la agenda para agruparlas y facturarlas.
     -   (En desarrollo) Generación de facturas en formato PDF a partir de los servicios seleccionados.
     -   Integración con un informe de Power BI para el análisis de datos de la aplicación.
+## 📚 Bibliografía y Recursos Específicos
+
+Esta sección detalla los recursos técnicos, tutoriales y artículos consultados para implementar las funcionalidades más complejas de la aplicación.
+
+### 1. Calendario Dinámico y Gestión de Fechas (Angular)
+
+La creación de un calendario mensual interactivo requirió una manipulación precisa de fechas y la generación de una estructura de datos para la vista.
+
+-   **Algoritmo para Generar la Matriz del Calendario**:
+    -   [Tutorial sobre cómo crear un calendario con JavaScript](https://www.w3schools.com/howto/howto_js_calendar.asp) - Se tomaron como base los conceptos para calcular el primer día de la semana del mes y rellenar los días de los meses anterior y posterior para completar la cuadrícula. La lógica fue adaptada a TypeScript y al ciclo de vida de Angular.
+
+-   **Manipulación del Objeto `Date` en TypeScript/JavaScript**:
+    -   [Guía sobre el Objeto `Date` en JavaScript (MDN)](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Date) - Referencia esencial para obtener años, meses, días y para realizar cálculos como obtener el último día del mes (`new Date(year, month + 1, 0)`).
+
+-   **Formateo y Estilos Dinámicos**:
+    -   [Guía del `DatePipe` de Angular](https://angular.dev/api/common/DatePipe) - Para formatear las fechas de manera consistente en la interfaz (ej. 'MMMM yyyy').
+    -   [Documentación de `[ngClass]` y `[style]`](https://angular.dev/guide/attribute-binding) - Para aplicar estilos dinámicos a los días del calendario, como diferenciar el mes actual, el día de hoy y el color de fondo de los eventos según el tipo de servicio.
+
+### 2. Gestión de Estado en Tiempo Real (Amigos)
+
+El sistema de amigos requería no solo gestionar las relaciones, sino también reflejar su estado de conexión en tiempo real y calcular hace cuánto tiempo se desconectaron.
+
+-   **Cálculo del "Tiempo Transcurrido" (Last Seen)**:
+    -   [Algoritmo "Time Ago" en JavaScript (Stack Overflow)](https://stackoverflow.com/questions/3177836/how-to-format-a-javascript-date) - Se estudiaron varios enfoques para implementar la función `getStatusText`. La lógica de calcular la diferencia en segundos y convertirla a minutos, horas o días se basa en algoritmos comunes de "tiempo relativo".
+
+-   **Manejo de Fechas en UTC**:
+    -   **Backend**: Para evitar inconsistencias horarias entre el servidor y los clientes, se utilizó `DateTime.UtcNow` en el backend (`WebSocketNetwork.cs`) al registrar la desconexión.
+    -   **Frontend**: Se trabajó con objetos `Date` en el frontend, que internamente manejan la zona horaria del cliente, asegurando que los cálculos de tiempo relativo fueran correctos para cada usuario.
+    -   [Trabajar con Fechas en C# (.NET)](https://learn.microsoft.com/es-es/dotnet/standard/datetime/choosing-between-datetime) - Documentación sobre las diferencias entre `DateTime` y `DateTimeOffset` y el uso de UTC.
+
+### 3. Arquitectura WebSocket y Comunicación en Tiempo Real
+
+La implementación de la comunicación en tiempo real fue uno de los pilares del proyecto y presentó varios desafíos de arquitectura.
+
+-   **Gestión de Conexiones en el Backend (ASP.NET Core)**:
+    -   [Manejo de Múltiples Clientes WebSocket](https://www.c-sharpcorner.com/article/chatapp-using-websockets-in-asp-net-core/) - Tutorial que sirvió de inspiración para crear un gestor de conexiones (`WebSocketNetwork.cs`) que mantiene un pool de clientes activos.
+    -   [Uso de `ConcurrentDictionary<TKey, TValue>`](https://learn.microsoft.com/es-es/dotnet/api/system.collections.concurrent.concurrentdictionary-2) - Se utilizó esta estructura de datos para almacenar las conexiones de forma segura para subprocesos, evitando condiciones de carrera al conectar o desconectar usuarios.
+    -   [Uso de `IServiceScopeFactory` en servicios Singleton](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/dependency-injection#service-lifetimes) - Para poder inyectar y utilizar servicios con ciclo de vida `Scoped` (como `UnitOfWork`) dentro del gestor de WebSockets, que opera como un Singleton.
+
+-   **Integración de WebSockets en el Frontend (Angular)**:
+    -   [Guía de RxJS `Subject` y `BehaviorSubject`](https://rxjs.dev/guide/subject) - La arquitectura del `WebsocketService` en Angular se basa en `Subject` para emitir los eventos recibidos del servidor y que los componentes puedan suscribirse a ellos de forma reactiva.
+    -   [Entendiendo `NgZone` en Angular](https://angular.dev/guide/zone) - Se utilizó `ngZone.run()` para asegurar que las actualizaciones recibidas desde el WebSocket (que ocurren fuera del contexto de Angular) disparen correctamente el ciclo de detección de cambios y actualicen la interfaz de usuario.
+
+### 4. Patrones de Arquitectura y Buenas Prácticas
+
+-   **Patrón Repositorio y Unidad de Trabajo (Unit of Work)**:
+    -   [Implementación del Patrón Repositorio en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) - Guía conceptual de Microsoft que sirvió de base para estructurar la capa de acceso a datos (`Repository.cs`, `UnitOfWork.cs`).
+-   **Inyección de Dependencias en .NET**:
+    -   [Inyección de dependencias en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/dependency-injection) - Documentación fundamental para configurar los servicios y repositorios en `Program.cs`.
 
 ## 📌 Estado Actual del Proyecto
 

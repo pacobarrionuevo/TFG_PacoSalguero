@@ -69,6 +69,7 @@ namespace TFG_Back.Controllers
 
         // Endpoint para el registro de nuevos usuarios.
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)
         {
             // Valida que el email no esté ya en uso.
@@ -133,6 +134,7 @@ namespace TFG_Back.Controllers
 
         // Endpoint para el inicio de sesión.
         [HttpPost("login")]
+        [AllowAnonymous]
         public IActionResult Login([FromBody] UserLoginDTO usuarioLoginDto)
         {
             // Permite el login tanto con email como con nickname.

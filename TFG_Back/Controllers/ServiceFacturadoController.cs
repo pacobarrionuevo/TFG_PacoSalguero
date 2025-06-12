@@ -8,7 +8,6 @@ namespace TFG_Back.Controllers
     [Route("api/[controller]")]
     public class ServiceFacturadoController : ControllerBase
     {
-        // Inyectamos el servicio para manejar la lógica de los servicios facturados.
         private readonly ServiceFacturadoService _service;
 
         public ServiceFacturadoController(ServiceFacturadoService service)
@@ -16,7 +15,6 @@ namespace TFG_Back.Controllers
             _service = service;
         }
 
-        // Endpoint para obtener todos los servicios facturados.
         [HttpGet]
         public async Task<ActionResult<ICollection<ServiceFacturado>>> GetAll()
         {
@@ -24,26 +22,23 @@ namespace TFG_Back.Controllers
             return Ok(result);
         }
 
-        // Endpoint para crear una nueva entrada de servicio facturado.
         [HttpPost]
         public async Task<IActionResult> CrearFactura([FromBody] ServiceFacturado servicio)
         {
             if (servicio == null)
                 return BadRequest("No se han enviado servicio.");
 
-            // La lógica de negocio (guardar en BD, etc.) está en el servicio.
+            // Aquí podrías guardar en base de datos, generar el PDF, etc.
             await _service.CreateAsync(servicio);
 
             return Ok();
         }
 
-        // Endpoint para generar un PDF a partir de una lista de servicios facturados.
         [HttpPost("generar-pdf")]
         public async Task<ActionResult<string>> GenerarFacturaPDF(IEnumerable<ServiceFacturado> servicios)
         {
             var pdfResult = await _service.GenerarFacturaPDFAsync(servicios);
-            // Devuelve la ruta o información sobre el PDF generado.
-            return Ok(pdfResult);
+            return Ok(pdfResult); // Puedes devolver un enlace, base64, etc.
         }
     }
 }

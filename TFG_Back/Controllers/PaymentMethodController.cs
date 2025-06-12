@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Servicios;
-
+using Microsoft.AspNetCore.Authorization;
 namespace TFG_Back.Controllers
 {
     [ApiController]

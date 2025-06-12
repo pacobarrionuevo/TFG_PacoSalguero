@@ -146,8 +146,7 @@ app.UseAuthorization(); // Habilita la autorización.
 app.UseWebSockets(); // Habilita el soporte para WebSockets.
 app.UseMiddleware<Middleware>(); // Middleware personalizado para WebSockets.
 app.UseHttpsRedirection(); // Redirige las peticiones HTTP a HTTPS.
-app.MapControllers(); // Mapea los controladores.
-
+app.MapControllers().RequireAuthorization();
 // --- Inicialización de la Base de Datos ---
 await InitDatabaseAsync(app.Services);
 

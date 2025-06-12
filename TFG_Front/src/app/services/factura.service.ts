@@ -14,7 +14,9 @@ export class FacturaService {
   constructor(private http: HttpClient) { }
 
   // Envía un servicio facturado al backend.
-  enviarServicioFacturado(servicio: ServiceFacturado) {
-    return this.http.post(this.apiUrl, servicio);
+  generarFacturaPDF(servicios: ServiceFacturado[]) {
+    return this.http.post(`${this.apiUrl}/api/ServiceFacturado/generar-pdf`, servicios, {
+      responseType: 'blob' // Importante para manejar el PDF como archivo
+    });
   }
 }

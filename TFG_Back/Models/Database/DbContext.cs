@@ -22,6 +22,8 @@ namespace TFG_Back.Models.Database
         public DbSet<FriendShip> Friendships { get; set; }
         public DbSet<UserHasFriendship> UserHasFriendship { get; set; }
 
+        public DbSet<ServiceFacturado> ServicesFacturados { get; set; }
+
         public DBContext(IOptions<Settings> options)
         {
             _settings = options.Value;

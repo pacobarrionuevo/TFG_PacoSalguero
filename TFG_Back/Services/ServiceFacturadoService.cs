@@ -35,46 +35,43 @@ namespace TFG_Back.Services
             var plantillaPath = @"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturas.docx";
             var outputPath = @$"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturasCopia{DateTime.Now:yyyyMMddHHmmss}.pdf";
 
-            // 1. Carga el documento de plantilla de Word.
+            // 2. Cargar la plantilla
             Document document = new Document();
             document.LoadFromFile(plantillaPath);
 
-            // 2. Ejecuta MailMerge para campos simples (ej. nombre de usuario).
-            string[] fieldNames = new string[] { "UserName" };
-            string[] fieldValues = new string[] { "Jose" };
-            document.MailMerge.Execute(fieldNames, fieldValues);
-
-            // 3. Crea una DataTable con el mismo nombre que la tabla en la plantilla ("Factura").
+            // 5. Crear el DataTable con el nombre de la región: "Factura"
             DataTable table = new DataTable("Factura");
 
-            // 4. Agrega columnas a la DataTable que coincidan con los campos de la tabla de Word.
+            // 6. Agregar columnas con los mismos nombres que los campos de la plantilla
             table.Columns.Add("centro");
             table.Columns.Add("cliente");
             table.Columns.Add("fecha");
-            table.Columns.Add("observaciones");
             table.Columns.Add("paciente");
             table.Columns.Add("servicio");
+            table.Columns.Add("observaciones");
 
-            // 5. Rellena la DataTable con los datos de los servicios.
+            // 7. Agregar filas a partir de la lista de servicios facturados
             foreach (var servicio in servicios)
             {
                 table.Rows.Add(
                     servicio.Centro,
                     servicio.Cliente,
-                    servicio.Fecha.ToString("dd/MM/yyyy"),
-                    servicio.Observaciones,
+                    servicio.Fecha.ToString("dd/MM/yyyy"), // Ajusta formato si es necesario
                     servicio.Paciente,
-                    servicio.Servicio
+                    servicio.Servicio,
+                    servicio.Observaciones
                 );
             }
 
-            // 6. Ejecuta el merge de la tabla (actualmente comentado).
-            // document.MailMerge.ExecuteWithDataTable(table);
+            // 8. Ejecutar la combinación de correspondencia para la tabla
+            document.MailMerge.ExecuteWidthRegion(table);
 
-            // 7. Guarda el documento resultante como PDF (actualmente comentado).
-            // document.SaveToFile(outputPath, FileFormat.PDF);
+            // 9. Exportar como PDF
+            document.SaveToFile(outputPath, FileFormat.PDF);
 
+            // Retornar la ruta del archivo generado
             return outputPath;
+
         }
     }
 }

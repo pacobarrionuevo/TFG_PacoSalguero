@@ -36,6 +36,7 @@ builder.Services.AddScoped<ServiceRepository>();
 builder.Services.AddScoped<PaymentMethodRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<FriendRequestRepository>();
+builder.Services.AddScoped<ServiceFacturadoRepository>();
 builder.Services.AddScoped<WebSocketMethods>();
 
 // --- Inyección de Dependencias (Transient: una nueva instancia cada vez que se solicita) ---
@@ -45,6 +46,7 @@ builder.Services.AddTransient<CustomerService>();
 builder.Services.AddTransient<ImageService>();
 builder.Services.AddTransient<AdminService>();
 builder.Services.AddTransient<FriendRequestService>();
+builder.Services.AddTransient<ServiceFacturadoService>();
 builder.Services.AddScoped<WebSocketNetwork>(); // Scoped para que haya una única instancia por petición (importante para WebSocket).
 builder.Services.AddTransient<Middleware>();
 
@@ -99,10 +101,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false, // No se valida el emisor del token.
-            ValidateAudience = false, // No se valida la audiencia del token.
-            ValidateLifetime = true, // Se valida que el token no haya expirado.
-            ValidateIssuerSigningKey = true, // Se valida la firma del token.
+            ValidateIssuer = false, 
+            ValidateAudience = false, 
+            ValidateLifetime = true, 
+            ValidateIssuerSigningKey = true, 
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.JwtKey))
         };
 
@@ -119,7 +121,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// --- Pipeline de Middlewares ---
 
 // Habilita Swagger solo en el entorno de desarrollo.
 if (app.Environment.IsDevelopment())
@@ -139,16 +140,15 @@ app.Use(async (context, next) => {
     await next();
 });
 
-app.UseStaticFiles(); // Permite servir archivos estáticos desde wwwroot.
-app.UseCors(); // Aplica la política de CORS.
-app.UseAuthentication(); // Habilita la autenticación.
-app.UseAuthorization(); // Habilita la autorización.
-app.UseWebSockets(); // Habilita el soporte para WebSockets.
+app.UseStaticFiles(); 
+app.UseCors(); 
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+app.UseWebSockets();
 app.UseMiddleware<Middleware>(); // Middleware personalizado para WebSockets.
-app.UseHttpsRedirection(); // Redirige las peticiones HTTP a HTTPS.
-app.MapControllers(); // Mapea los controladores.
+app.UseHttpsRedirection(); 
+app.MapControllers(); 
 
-// --- Inicialización de la Base de Datos ---
 await InitDatabaseAsync(app.Services);
 
 await app.RunAsync();

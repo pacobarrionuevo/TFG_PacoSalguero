@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ServiceFacturado } from '../../models/service-facturado';
+import { FacturaService } from '../../services/factura.service';
 
 @Component({
   selector: 'app-facturas',
@@ -18,7 +19,7 @@ export class FacturasComponent {
   entradas: EntradaAgenda[] = [];
   serviciosSeleccionados: ServiceFacturado[] = [];
 
-  constructor(private agendaService: AgendaService) { }
+  constructor(private agendaService: AgendaService, private facturaService: FacturaService) { }
 
   ngOnInit(): void {
     this.cargarEntradas();
@@ -58,5 +59,24 @@ export class FacturasComponent {
 
     // Aquí iría la lógica para enviar `serviciosSeleccionados` al backend para generar la factura.
     console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
+
+    // Llamada al backend para generar PDF
+    this.facturaService.generarFacturaPDF(this.serviciosSeleccionados).subscribe({
+      next: (pdfBlob) => {
+        const blob = new Blob([pdfBlob], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'FacturaServicios.pdf';
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al generar la factura PDF:', err);
+        alert('Ocurrió un error al generar la factura.');
+      }
+    });
   }
 }

@@ -4,6 +4,8 @@ using TFG_Back.Models.Database;
 using TFG_Back.Models.Database.Entidades;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
+using TFG_Back.WebSocketAdvanced; 
+using System.Text.Json;
 
 namespace TFG_Back.Controllers
 {
@@ -15,13 +17,16 @@ namespace TFG_Back.Controllers
     {
         // Inyectamos UnitOfWork para gestionar las operaciones de base de datos de forma transaccional.
         private readonly UnitOfWork _unitOfWork;
+        private readonly WebSocketNetwork _webSocketNetwork; // <-- AÑADIDO
 
-        public FriendRequestController(UnitOfWork unitOfWork)
+        // MODIFICADO: Constructor para inyectar WebSocketNetwork
+        public FriendRequestController(UnitOfWork unitOfWork, WebSocketNetwork webSocketNetwork)
         {
             _unitOfWork = unitOfWork;
+            _webSocketNetwork = webSocketNetwork; // <-- AÑADIDO
         }
 
-        // Endpoint para enviar una solicitud de amistad a otro usuario.
+        // MODIFICADO: Endpoint para enviar una solicitud de amistad y notificar por WebSocket
         [HttpPost("send")]
         public async Task<IActionResult> SendRequest([FromQuery] int receiverId)
         {
@@ -42,6 +47,28 @@ namespace TFG_Back.Controllers
             _unitOfWork._context.UserHasFriendship.Add(senderLink);
             _unitOfWork._context.UserHasFriendship.Add(receiverLink);
             await _unitOfWork.SaveAsync();
+
+            // --- INICIO DE LA LÓGICA DE NOTIFICACIÓN POR WEBSOCKET ---
+            var senderUser = await _unitOfWork._userRepository.GetByIdAsync(senderId);
+            if (senderUser != null)
+            {
+                var payload = new
+                {
+                    friendshipId = friendship.FriendShipId,
+                    userId = senderUser.UserId,
+                    userNickname = senderUser.UserNickname,
+                    userProfilePhoto = senderUser.UserProfilePhoto
+                };
+
+                var wsMessage = new
+                {
+                    type = "new_friend_request",
+                    payload = payload
+                };
+
+                await _webSocketNetwork.SendMessageToUserAsync(receiverId, JsonSerializer.Serialize(wsMessage));
+            }
+            // --- FIN DE LA LÓGICA DE NOTIFICACIÓN ---
 
             return Ok(new { success = true, amistadId = friendship.FriendShipId });
         }

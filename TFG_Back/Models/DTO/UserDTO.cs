@@ -8,7 +8,8 @@
         public string UserEmail { get; set; }
         public string UserPassword { get; set; }
         public string UserConfirmPassword { get; set; }
-        public string UserStatus { get; set; }
+        public bool IsOnline { get; set; }
+        public DateTime? LastSeen { get; set; }
 
         public string Role { get; set; } = "usuario";
         public bool IsFriend { get; set; }

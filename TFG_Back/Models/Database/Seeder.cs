@@ -33,8 +33,8 @@ namespace TFG_Back.Models.Database
                 UserProfilePhoto = "Perfil_Deffault.png",
                 UserFriendship = new List<UserHasFriendship>(),
                 Role = "admin",
-                UserStatus = "Connected"
-            
+                IsOnline = true
+
             };
             User usuario2 = new User()
             {
@@ -47,7 +47,7 @@ namespace TFG_Back.Models.Database
                 UserProfilePhoto = "Perfil_Deffault.png",
                 UserFriendship = new List<UserHasFriendship>(),
                 Role = "admin",
-                UserStatus = "Connected"
+                IsOnline = true
 
             };
             FriendShip amistad1 = new FriendShip()

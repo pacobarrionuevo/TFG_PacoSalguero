@@ -19,8 +19,7 @@ export class WebsocketService {
   activeConnections = new Subject<number>();
 
   friendNotAvailable = new Subject<string>();
-  public onlineUsers$ = new BehaviorSubject<Set<number>>(new Set());
-
+public onlineUsers$ = new BehaviorSubject<{ userId: number }[]>([]);
   // Clave para almacenar el token en sessionStorage
   private tokenKey = 'websocket_token'; 
 
@@ -43,6 +42,9 @@ export class WebsocketService {
   private onConnected() {
     console.log('WebSocketService: Socket connected');
     this.connected.next();
+    this.fetchOnlineUsers().subscribe(users => {
+      this.onlineUsers$.next(users);
+    });
   }
 
   // Verifica si el websocket está conectado.
@@ -111,6 +113,7 @@ export class WebsocketService {
   // Muestra que se ha desconectado el websocket
   private onDisconnected() {
     console.log('WebSocketService: Desconectado del WebSocket');
+    this.onlineUsers$.next([]);
     this.disconnected.next();
   }
 
@@ -127,7 +130,13 @@ private handleMessage(message: string): void {
       // Procesar el mensaje según su tipo
         if (normalizedMessage.type === 'activeConnections') {
           this.handleActiveConnections(normalizedMessage);
-      }  else if (normalizedMessage.type === 'friendConnected') {
+      }else if (message === 'user_status_changed') {
+        console.log('Recibida notificación de cambio de estado. Actualizando lista de usuarios online...');
+        this.fetchOnlineUsers().subscribe(users => {
+            this.onlineUsers$.next(users);
+        });
+        return;
+    }  else if (normalizedMessage.type === 'friendConnected') {
           this.addOnlineUser(normalizedMessage.friendId);
       } else if (normalizedMessage.type === 'friendDisconnected') {
           this.removeOnlineUser(normalizedMessage.friendId);
@@ -171,8 +180,8 @@ private handleMessage(message: string): void {
     console.log(`WebSocketService: Recibido activeConnections. Count: ${parsedMessage.count}`);
     this.activeConnections.next(parsedMessage.count);
   }
-fetchOnlineUsers(): Observable<number[]> {
-    return this.http.get<{ onlineUsers: number[] }>(`${this.baseURL}/ws/online-users`).pipe(
+fetchOnlineUsers(): Observable<{ userId: number }[]> {
+    return this.http.get<{ onlineUsers: { userId: number }[] }>(`${this.baseURL}/ws/online-users`).pipe(
       map(response => Array.isArray(response?.onlineUsers) ? response.onlineUsers : []),
       catchError(() => of([]))
     );
@@ -203,23 +212,25 @@ fetchOnlineUsers(): Observable<number[]> {
 
   private addOnlineUser(userId: number): void {
     this.ngZone.run(() => {
-      const updated = new Set(this.onlineUsers$.value);
-      updated.add(userId);
-      this.onlineUsers$.next(updated);
+      const currentUsers = this.onlineUsers$.value;
+      if (!currentUsers.some(u => u.userId === userId)) {
+        const updatedUsers = [...currentUsers, { userId }];
+        this.onlineUsers$.next(updatedUsers);
+      }
     });
   }
 
   private removeOnlineUser(userId: number): void {
     this.ngZone.run(() => {
-      const updated = new Set(this.onlineUsers$.value);
-      updated.delete(userId);
-      this.onlineUsers$.next(updated);
+      const updatedUsers = this.onlineUsers$.value.filter(u => u.userId !== userId);
+      this.onlineUsers$.next(updatedUsers);
     });
   }
 
-  private handleOnlineUsers(message: { users: number[] }): void {
+
+  private handleOnlineUsers(message: { users: { userId: number }[] }): void {
     this.ngZone.run(() => {
-      this.onlineUsers$.next(new Set(message.users));
+      this.onlineUsers$.next(message.users);
     });
   }
 

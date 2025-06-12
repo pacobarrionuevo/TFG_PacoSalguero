@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../../models/user';
 import { environment_development } from '../../../environments/environment.development';
-import { interval, Subscription } from 'rxjs';
+import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import { SolicitudAmistad } from '../../models/solicitud-amistad';
 import { WebsocketService } from '../../services/websocket.service';
 import { AuthService } from '../../services/auth.service';
@@ -9,7 +9,7 @@ import { ApiService } from '../../services/api.service';
 import { Router, RouterModule } from '@angular/router';
 import { ImageService } from '../../services/image.service';
 import { FriendService } from '../../services/friend.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -17,7 +17,8 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [FormsModule, RouterModule, CommonModule],
   templateUrl: './amigos.component.html',
-  styleUrl: './amigos.component.css'
+  styleUrl: './amigos.component.css',
+  providers: [ DatePipe ]
 })
 export class AmigosComponent implements OnInit, OnDestroy {
   usuarios: User[] = [];
@@ -25,7 +26,6 @@ export class AmigosComponent implements OnInit, OnDestroy {
   amigos: User[] = [];
   amigosFiltrados: User[] = [];
   private BASE_URL = environment_development.apiUrl;
-  onlineUserIds = new Set<number>();
   private subs: Subscription[] = [];
   terminoBusqueda: string = '';
   busquedaAmigos: string = '';
@@ -35,6 +35,8 @@ export class AmigosComponent implements OnInit, OnDestroy {
   perfil_default: string;
   solicitudesPendientes: SolicitudAmistad[] = [];
   errorMessage: string | null = null;
+    onlineUsers: { userId: number }[] = []; 
+
 
   constructor(
     public webSocketService: WebsocketService,
@@ -43,7 +45,10 @@ export class AmigosComponent implements OnInit, OnDestroy {
     private router: Router,
     private imageService: ImageService,
     private friendService: FriendService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private datePipe: DatePipe,
+    private onlineUsersSubscription: Subscription,
+    
   ) {
     this.perfil_default = this.imageService.getImageUrl('Perfil_Deffault.png');
   }
@@ -55,10 +60,16 @@ export class AmigosComponent implements OnInit, OnDestroy {
     this.obtenerSolicitudesPendientes();
     this.suscribirseAWebSockets();
     this.inicializarActualizaciones();
+    this.onlineUsersSubscription = this.webSocketService.onlineUsers$.subscribe(users => {
+      this.onlineUsers = users;
+      console.log('Lista de usuarios online actualizada:', this.onlineUsers);
+    });
   }
 
-  ngOnDestroy(): void {
-    this.subs.forEach(sub => sub.unsubscribe());
+   ngOnDestroy(): void {
+    if (this.onlineUsersSubscription) {
+      this.onlineUsersSubscription.unsubscribe();
+    }
   }
 
   private suscribirseAWebSockets(): void {
@@ -67,12 +78,42 @@ export class AmigosComponent implements OnInit, OnDestroy {
         this.ngZone.run(() => this.procesarMensajesWebSocket(message));
       }),
       this.webSocketService.onlineUsers$.subscribe(users => {
-        this.ngZone.run(() => {
-          this.onlineUserIds = new Set(users);
-          this.actualizarEstadosAmigos();
-        });
-      })
+  this.ngZone.run(() => {
+    this.onlineUsers = users; 
+    this.actualizarEstadosAmigos();
+  });
+})
     );
+  }
+  esAmigo(usuarioId: number): boolean {
+  return this.amigos.some(amigo => amigo.UserId === usuarioId);
+}
+ solicitudEnviada(usuarioId: number): boolean {
+    return false;
+  }
+getStatusText(amigo: User): string {
+    // Primero, verificamos el estado en tiempo real del WebSocket
+    if (this.isUserOnline(amigo.UserId)) {
+      return 'Trabajando ahora';
+    }
+
+    // Si no está en la lista de online, usamos los datos de la API
+    if (amigo.isOnline) {
+        return 'Trabajando ahora';
+    }
+
+    if (amigo.lastSeen) {
+      // Formateamos la fecha para que sea legible
+      const lastSeenDate = new Date(amigo.lastSeen);
+      return `Últ. vez: ${this.datePipe.transform(lastSeenDate, 'dd/MM/yyyy HH:mm')}`;
+    }
+
+    return 'Desconectado';
+  }
+
+  isUserOnline(userId: number): boolean {
+    if (!userId) return false;
+    return this.onlineUsers.some(u => u.userId === userId);
   }
 
   private inicializarActualizaciones(): void {
@@ -105,24 +146,26 @@ export class AmigosComponent implements OnInit, OnDestroy {
   }
 
   private actualizarEstadosAmigos(): void {
-    this.amigos = this.amigos.map(amigo => ({
-      ...amigo,
-      UsuarioEstado: this.onlineUserIds.has(amigo.UserId) ? 'Conectado' : 'Desconectado'
-    }));
-    this.amigosFiltrados = [...this.amigos];
-  }
-
-  actualizarEstadoAmigo(friendId: number, estado: string) {
+  this.amigos = this.amigos.map(amigo => ({
+    ...amigo,
+    isOnline: this.isUserOnline(amigo.UserId) 
+  }));
+  this.amigosFiltrados = [...this.amigos];
+}
+  actualizarEstadoAmigo(friendId: number, estado: boolean) {
     const amigo = this.amigos.find(a => a.UserId === friendId);
-    if (amigo) amigo.UserStatus = estado;
+    if (amigo) amigo.isOnline = estado;
   }
 
   private actualizarUsuariosConectados(): void {
-    this.webSocketService.fetchOnlineUsers().subscribe({
-      next: (users) => this.onlineUserIds = new Set(users),
-      error: (err) => console.error('Error actualizando usuarios:', err)
-    });
-  }
+  this.webSocketService.fetchOnlineUsers().subscribe({
+    next: (users) => {
+      this.onlineUsers = users; 
+      this.actualizarEstadosAmigos(); // Llama a actualizar estados después de recibir la lista
+    },
+    error: (err) => console.error('Error actualizando usuarios:', err)
+  });
+}
 
   private manejarSolicitudAmistad(message: any): void {
     const nuevaSolicitud: SolicitudAmistad = {
@@ -226,7 +269,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
       UserId: amigo.UsuarioId || amigo.userId,
       UserNickname: amigo.UsuarioApodo || amigo.userNickname,
       UserProfilePhoto: this.validarUrlImagen(amigo.UserProfilePhoto || amigo.userProfilePhoto),
-      UserStatus: 'Desconectado'
+      isOnline: false
     };
   }
 
@@ -249,10 +292,6 @@ export class AmigosComponent implements OnInit, OnDestroy {
           usuario.UserNickname?.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) &&
           usuario.UserId !== this.usuarioId)
       : [...this.usuarios].filter(usuario => usuario.UserId !== this.usuarioId);
-  }
-
-  isUserOnline(userId: number): boolean {
-    return this.onlineUserIds.has(userId);
   }
 
   logout(): void {

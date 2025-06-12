@@ -13,12 +13,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 using TFG_Back.Services;
 using static TFG_Back.WebSocketAdvanced.WebSocketNetwork;
+using System.Net.Sockets;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace TFG_Back.WebSocketAdvanced
 {
 
     public class WebSocketNetwork
     {
+        private readonly ConcurrentDictionary<int, WebSocket> _sockets = new ConcurrentDictionary<int, WebSocket>();
+        private readonly WebSocketMethods _webSocketMethods;
+        private readonly IServiceScopeFactory _scopeFactory;
         private int _idCounter;
         private readonly List<WebSocketHandler> _handlers = new List<WebSocketHandler>();
         private readonly List<WebSocketHandler> _connectedPlayers = new List<WebSocketHandler>();
@@ -33,8 +39,10 @@ namespace TFG_Back.WebSocketAdvanced
         private static int _activeConnections = 0;
         public event Action<int> OnActiveConnectionsChanged;
 
-        public WebSocketNetwork(IServiceProvider serviceProvider)
+        public WebSocketNetwork(IServiceProvider serviceProvider, WebSocketMethods webSocketMethods, IServiceScopeFactory scopeFactory)
         {
+            _webSocketMethods = webSocketMethods;
+            _scopeFactory = scopeFactory;
             _serviceProvider = serviceProvider;
             OnActiveConnectionsChanged += count => NotifyActiveConnectionsChanged(count);
         }
@@ -88,17 +96,42 @@ namespace TFG_Back.WebSocketAdvanced
 
             try
             {
-                await UpdateUserStatusAsync(handler, "Conectado");
-                await NotifyFriendsAsync(handler, true);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+                    var user = await unitOfWork._userRepository.GetByIdAsync(userId);
+                    if (user != null)
+                    {
+                        user.IsOnline = true;
+                        user.LastSeen = DateTime.UtcNow;
+                        await unitOfWork.SaveAsync();
+                    }
+                }
+                await BroadcastUserStatusUpdate();
 
-                await handler.HandleAsync();
             }
-            finally
+            catch (Exception ex)
             {
-                await UpdateUserStatusAsync(handler, "Desconectado");
-                await NotifyFriendsAsync(handler, false);
+                Console.WriteLine($"WebSocket Error: {ex.Message}");
             }
+            _sockets.TryRemove(userId, out _);  
+
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+                var user = await unitOfWork._userRepository.GetByIdAsync(userId);
+                if (user != null)
+                {
+                    user.IsOnline = false;
+                    user.LastSeen = DateTime.UtcNow; 
+                    await unitOfWork.SaveAsync();
+                }
+            }
+
+            await BroadcastUserStatusUpdate();
+
         }
+
 
         private async Task AddUser(int userId, WebSocketHandler handler)
         {
@@ -135,7 +168,20 @@ namespace TFG_Back.WebSocketAdvanced
                 _connectedSemaphore.Release();
             }
         }
+        public async Task BroadcastUserStatusUpdate()
+        {
+            
+            var message = "user_status_changed";
+            var messageBytes = Encoding.UTF8.GetBytes(message);
 
+            foreach (var socket in _sockets.Values)
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    await socket.SendAsync(new ArraySegment<byte>(messageBytes, 0, messageBytes.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+            }
+        }
         private async Task OnDisconnectedHandler(WebSocketHandler handler)
         {
             Console.WriteLine($"Evento de desconexión disparado para el usuario {handler.Id}.");
@@ -315,7 +361,7 @@ namespace TFG_Back.WebSocketAdvanced
 
             if (user != null)
             {
-                user.UserStatus = status;
+                user.IsOnline = false;
                 await wsMethods.UpdateUserAsync(user);
             }
         }

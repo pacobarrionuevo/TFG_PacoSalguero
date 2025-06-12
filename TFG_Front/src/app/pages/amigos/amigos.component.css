@@ -2,7 +2,7 @@
   max-width: 900px;
   margin: auto;
   padding: 20px;
-  background: linear-gradient(to bottom right, #eaf3ff, #d2e4ff);
+  background: linear-gradient(to bottom right, #f0f7ff, #dbe9ff); 
   border-radius: 12px;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -11,16 +11,19 @@ h2 {
   text-align: center;
   font-size: 24px;
   margin-bottom: 20px;
+  color: #334e68; 
 }
 
 .grid {
   display: flex;
+  flex-wrap: wrap; 
   gap: 20px;
   justify-content: space-between;
 }
 
 .col {
   flex: 1;
+  min-width: 300px; 
 }
 
 h3 {
@@ -28,6 +31,7 @@ h3 {
   font-size: 18px;
   margin-bottom: 12px;
   font-weight: bold;
+  color: #486581;
 }
 
 .card {
@@ -37,15 +41,21 @@ h3 {
   margin-bottom: 12px;
   background-color: white;
   border-radius: 8px;
-  border: 2px solid #c0d7f7;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #c0d7f7;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px); 
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  margin-right: 12px;
+  margin-right: 15px; 
+  object-fit: cover;
 }
 
 .info {
@@ -59,12 +69,13 @@ h3 {
 }
 
 .estado.conectado {
-  color: green;
-  font-weight: 500;
+  color: #28a745;
+  font-weight: 600; 
 }
 
 .estado.desconectado {
-  color: gray;
+  color: #6c757d;
+  font-style: italic; 
 }
 
 .acciones {
@@ -74,38 +85,47 @@ h3 {
 
 .btn {
   border: none;
-  padding: 6px 10px;
+  padding: 8px; 
   font-size: 16px;
   border-radius: 50%;
   cursor: pointer;
+  width: 32px; 
+  height: 32px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
 }
 
 .btn.aceptar {
-  background-color: #34c759;
-  color: white;
+  background-color: #e4f8e9;
+  color: #28a745;
+}
+.btn.aceptar:hover {
+  background-color: #d4f4db;
 }
 
 .btn.rechazar {
-  background-color: #ff3b30;
-  color: white;
+  background-color: #fde8e7;
+  color: #dc3545;
 }
+.btn.rechazar:hover {
+    background-color: #fbdadb;
+}
+
 .divider {
   margin: 30px 0;
-  border-top: 2px dashed #ccc;
+  border: 0;
+  border-top: 1px solid #dbe9ff; 
 }
 
 .usuarios-section {
   margin-top: 20px;
 }
 
-.usuarios-section h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
 .busqueda {
   width: 100%;
-  padding: 8px;
+  padding: 10px; 
   margin-bottom: 20px;
   font-size: 14px;
   border-radius: 6px;
@@ -116,11 +136,10 @@ h3 {
   display: flex;
   align-items: center;
   padding: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   background-color: #ffffff;
-  border: 1px solid #cce0ff;
+  border: 1px solid #e0e9f5;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .usuario-card .info {
@@ -132,12 +151,29 @@ h3 {
   background-color: #007bff;
   color: white;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 20px; 
   border: none;
   cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn.enviar span {
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .btn.enviar[disabled] {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.estado-amistad {
+    font-size: 12px;
+    color: #6c757d;
+    font-style: italic;
+    margin-left: auto; 
+    padding-right: 10px;
 }

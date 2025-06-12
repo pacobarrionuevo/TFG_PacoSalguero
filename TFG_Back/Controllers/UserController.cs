@@ -179,7 +179,7 @@ namespace TFG_Back.Controllers
                 UserNickname = usuario.UserNickname,
                 UserEmail = usuario.UserEmail,
                 UserProfilePhoto = usuario.UserProfilePhoto,
-                UserStatus = usuario.UserStatus,
+                IsOnline=usuario.IsOnline,
                 Role = usuario.Role,
                 IsFriend = usuario.UserFriendship.Any(ua => ua.Friendship.IsAccepted)
             };

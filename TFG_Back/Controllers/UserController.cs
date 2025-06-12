@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -18,19 +17,16 @@ namespace TFG_Back.Controllers
     public class UserController : Controller
     {
         private readonly DBContext _context;
-        // Parámetros para la validación y creación de tokens JWT.
         private readonly TokenValidationParameters _tokenParameters;
         private readonly UnitOfWork _unitOfWork;
 
         public UserController(DBContext _dbContext, IOptionsMonitor<JwtBearerOptions> jwtOptions, UnitOfWork unitOfWork)
         {
             _context = _dbContext;
-            // Obtenemos los parámetros de validación de JWT configurados en Program.cs.
             _tokenParameters = jwtOptions.Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
             _unitOfWork = unitOfWork;
         }
 
-        // Convierte una entidad User a un DTO de registro.
         private UserSignUpDTO ToDtoRegistro(User users)
         {
             return new UserSignUpDTO()
@@ -43,7 +39,6 @@ namespace TFG_Back.Controllers
             };
         }
 
-        // Endpoint para obtener todos los usuarios. Principalmente para el panel de administración.
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
@@ -52,14 +47,13 @@ namespace TFG_Back.Controllers
             return Ok(userDtos);
         }
 
-        // Convierte una entidad User a un DTO público, ocultando información sensible.
         private UserDTO ToUserDTO(User user)
         {
             return new UserDTO
             {
                 UserId = user.UserId,
                 UserNickname = user.UserNickname,
-                UserProfilePhoto = user.UserProfilePhoto,
+                UserProfilePhoto = user.UserProfilePhoto, // Devuelve ruta completa
                 UserEmail = user.UserEmail,
                 IsOnline = user.IsOnline,
                 LastSeen = user.LastSeen,
@@ -67,18 +61,14 @@ namespace TFG_Back.Controllers
             };
         }
 
-        // Endpoint para el registro de nuevos usuarios.
         [HttpPost("register")]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromForm] UserSignUpDTO user)
         {
-            // Valida que el email no esté ya en uso.
             if (_context.Users.Any(u => u.UserEmail == user.UserEmail))
             {
                 return BadRequest("El nombre del usuario ya está en uso");
             }
 
-            // Valida que las contraseñas coincidan.
             if (user.UserPassword != user.UserConfirmPassword)
             {
                 return BadRequest("Las contraseñas no coinciden");
@@ -89,13 +79,11 @@ namespace TFG_Back.Controllers
                 return BadRequest("No se ha elegido foto de perfil");
             }
 
-            // Genera un nombre de archivo único y lo guarda.
             string nombreArchivo = $"{Guid.NewGuid()}_{user.UserProfilePhoto.FileName}";
             string rutaRelativaCompleta = $"fotos/{nombreArchivo}";
 
             await StoreImageAsync(rutaRelativaCompleta, user.UserProfilePhoto);
 
-            // Crea la nueva entidad de usuario con la contraseña hasheada.
             User newUser = new User()
             {
                 UserNickname = user.UserNickname,
@@ -103,13 +91,12 @@ namespace TFG_Back.Controllers
                 UserPassword = PasswordHelper.Hash(user.UserPassword),
                 UserConfirmPassword = PasswordHelper.Hash(user.UserConfirmPassword),
                 UserProfilePhoto = rutaRelativaCompleta,
-                Role = "user" // Rol por defecto para nuevos usuarios.
+                Role = "user"
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            // Genera un token JWT para el nuevo usuario para que inicie sesión automáticamente.
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
@@ -132,12 +119,9 @@ namespace TFG_Back.Controllers
             return Ok(new { StringToken = accessToken, UserId = newUser.UserId });
         }
 
-        // Endpoint para el inicio de sesión.
         [HttpPost("login")]
-        [AllowAnonymous]
         public IActionResult Login([FromBody] UserLoginDTO usuarioLoginDto)
         {
-            // Permite el login tanto con email como con nickname.
             string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             User user;
 
@@ -155,13 +139,11 @@ namespace TFG_Back.Controllers
                 return Unauthorized("Usuario no existe");
             }
 
-            // Compara el hash de la contraseña proporcionada con el hash almacenado.
             if (!PasswordHelper.Hash(usuarioLoginDto.UserPassword).Equals(user.UserPassword))
             {
                 return Unauthorized("Contraseña incorrecta");
             }
 
-            // Si las credenciales son correctas, genera un token JWT.
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
@@ -185,7 +167,6 @@ namespace TFG_Back.Controllers
             return Ok(new { StringToken = accessToken, user.UserId });
         }
 
-        // Endpoint para obtener los detalles de un usuario por su ID.
         [HttpGet("usuarios/{id}")]
         public async Task<ActionResult<UserDTO>> GetUsuarioById(int id)
         {
@@ -199,7 +180,6 @@ namespace TFG_Back.Controllers
                 return NotFound("Usuario no encontrado");
             }
 
-            // Mapea a un DTO para enviar al cliente.
             var usuarioDto = new UserDTO
             {
                 UserId = usuario.UserId,
@@ -214,7 +194,6 @@ namespace TFG_Back.Controllers
             return Ok(usuarioDto);
         }
 
-        // Endpoint para que un usuario actualice su propia información.
         [HttpPut("usuarios/{id}")]
         public async Task<IActionResult> ActualizarUsuario(int id, [FromBody] UpdateUserDTO dto)
         {
@@ -234,10 +213,9 @@ namespace TFG_Back.Controllers
                 usuario.UserEmail = dto.UserEmail;
             }
 
-            // Si se proporciona una nueva contraseña, se hashea y actualiza.
             if (!string.IsNullOrEmpty(dto.UserPassword))
             {
-                if (dto.UserPassword != dto.UserPassword) // Parece un error, debería ser dto.UserConfirmPassword
+                if (dto.UserPassword != dto.UserPassword)
                 {
                     return BadRequest("Las contraseñas no coinciden");
                 }
@@ -248,7 +226,6 @@ namespace TFG_Back.Controllers
             return Ok(usuario);
         }
 
-        // Método auxiliar para guardar un archivo de imagen en el servidor.
         private async Task StoreImageAsync(string relativePath, IFormFile file)
         {
             using Stream stream = file.OpenReadStream();

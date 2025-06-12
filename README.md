@@ -3,7 +3,8 @@
 Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º año del CPIFP Alan Turing en Desarrollo de Aplicaciones Multiplataforma.
 
 - **Enlace al anteproyecto:** [Documento de Google Docs](https://docs.google.com/document/d/1TFJnD-q_kEXWpyvHYLzhxsQBzPGWbPmFwfnIWQeBnkk/edit?usp=sharing)
-- **Enlace a los diseños en Figma:** *(aquí podéis añadir el enlace)* (Aún hay vistas por añadir).
+- **Enlace a los diseños en Figma:** - **Enlace a los diseños en Figma:** [SanitariosApp_Mockup en Figma](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=62-214)
+
 
 ---
 

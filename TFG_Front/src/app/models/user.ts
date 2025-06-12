@@ -9,4 +9,5 @@ export interface User {
     isOnline?: boolean;
     lastSeen?: string;
     esAmigo?: boolean;
+    editing?: boolean; 
 }

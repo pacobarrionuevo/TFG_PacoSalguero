@@ -44,7 +44,7 @@ namespace TFG_Back.Models.Database
             modelBuilder.Entity<User>()
                 .Property(u => u.LastSeen)
                 .HasConversion(
-                    // Conversor para guardar (no hace nada especial)
+                    // Conversor para guardar 
                     v => v,
                     // Conversor para leer: Especifica que el DateTime leído es UTC
                     v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : (DateTime?)null

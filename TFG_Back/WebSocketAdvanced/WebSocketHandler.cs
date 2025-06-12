@@ -1,12 +1,10 @@
-﻿// TFG_Back/WebSocketAdvanced/WebSocketHandler.cs
-
+﻿
 using System.Net.WebSockets;
 using System.Text;
-using System.Threading.Tasks; // Añadido para Task y ValueTask
+using System.Threading.Tasks; 
 
 namespace TFG_Back.WebSocketAdvanced
 {
-    // --- CAMBIO: Implementamos IAsyncDisposable en lugar de IDisposable ---
     public class WebSocketHandler : IAsyncDisposable
     {
         private readonly WebSocket _webSocket;

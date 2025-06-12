@@ -38,6 +38,7 @@ builder.Services.AddTransient<ServicesService>();
 builder.Services.AddTransient<PaymentMethodService>();
 builder.Services.AddTransient<CustomerService>();
 builder.Services.AddTransient<ImageService>();
+builder.Services.AddTransient<AdminService>();
 builder.Services.AddTransient<FriendRequestService>();
 builder.Services.AddScoped<WebSocketNetwork>();
 builder.Services.AddTransient<Middleware>();

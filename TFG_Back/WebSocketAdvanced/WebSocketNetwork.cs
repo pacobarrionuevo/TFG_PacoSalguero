@@ -1,5 +1,4 @@
-﻿// TFG_Back/WebSocketAdvanced/WebSocketNetwork.cs
-
+﻿
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
@@ -10,7 +9,7 @@ using TFG_Back.Services;
 using System.IO;
 using TFG_Back.Models.DTO;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization; // Asegúrate de que este using está presente
+using System.Text.Json.Serialization; 
 
 namespace TFG_Back.WebSocketAdvanced
 {
@@ -162,7 +161,6 @@ namespace TFG_Back.WebSocketAdvanced
             }
 
             user.IsOnline = isOnline;
-            // --- ÚNICO CAMBIO IMPORTANTE AQUÍ ---
             user.LastSeen = isOnline ? null : DateTime.UtcNow;
 
             await unitOfWork.SaveAsync();

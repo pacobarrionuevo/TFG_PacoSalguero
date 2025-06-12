@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TFG_Back.Services;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using TFG_Back.Models.Database.Entidades;
-using Microsoft.AspNetCore.Authorization;
+using TFG_Back.Models.Database;
+using TFG_Back.Models.DTO;
+using TFG_Back.Services;
 
 namespace TFG_Back.Controllers
 {
@@ -14,72 +16,118 @@ namespace TFG_Back.Controllers
     public class FriendRequestController : ControllerBase
     {
         private readonly FriendRequestService _friendRequestService;
+        private readonly UnitOfWork _unitOfWork;
 
-        public FriendRequestController(FriendRequestService friendRequestService)
+        public FriendRequestController(FriendRequestService friendRequestService, UnitOfWork unitOfWork)
         {
             _friendRequestService = friendRequestService;
+            _unitOfWork = unitOfWork;
+        }
+
+        private (bool, int) GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst("id");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return (false, 0);
+            }
+            return (true, userId);
         }
 
         [HttpPost("send")]
         public async Task<IActionResult> SendFriendRequest([FromQuery] int receiverId)
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var senderId))
-                return Unauthorized("Usuario no autenticado.");
+            var (isAuthenticated, senderId) = GetCurrentUserId();
+            if (!isAuthenticated)
+            {
+                return Unauthorized("Claim 'id' inválido o no encontrado en el token.");
+            }
 
             if (senderId == receiverId)
+            {
                 return BadRequest("No puedes enviarte una solicitud a ti mismo.");
+            }
 
-            var result = await _friendRequestService.SendFriendRequest(senderId, receiverId);
-
-            if (result.Success)
-                return Ok(result);
-            else
-                return StatusCode(500, "Error al enviar la solicitud.");
+            await _friendRequestService.SendRequestAsync(senderId, receiverId);
+            return Ok(new { message = "Solicitud enviada correctamente." });
         }
-
-
 
         [HttpPost("accept")]
         public async Task<IActionResult> AcceptFriendRequest([FromQuery] int amistadId)
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var receiverId))
-                return Unauthorized("Usuario no autenticado.");
+            var (isAuthenticated, userId) = GetCurrentUserId();
+            if (!isAuthenticated)
+            {
+                return Unauthorized("Claim 'id' inválido o no encontrado en el token.");
+            }
 
-            var result = await _friendRequestService.AcceptFriendRequest(amistadId, receiverId);
-            return result ? Ok() : BadRequest("No se pudo aceptar la solicitud.");
+            await _friendRequestService.AcceptRequestAsync(amistadId, userId);
+            return Ok();
         }
 
         [HttpPost("reject")]
         public async Task<IActionResult> RejectFriendRequest([FromQuery] int amistadId)
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var receiverId))
-                return Unauthorized("Usuario no autenticado.");
+            var (isAuthenticated, userId) = GetCurrentUserId();
+            if (!isAuthenticated)
+            {
+                return Unauthorized("Claim 'id' inválido o no encontrado en el token.");
+            }
 
-            var result = await _friendRequestService.RejectFriendRequest(amistadId, receiverId);
-            return result ? Ok() : BadRequest("No se pudo rechazar la solicitud.");
+            await _friendRequestService.RejectRequestAsync(amistadId, userId);
+            return Ok();
         }
-
 
         [HttpGet("friends")]
-        public async Task<ActionResult<List<User>>> GetFriendsList()
+        public async Task<IActionResult> GetFriendsList()
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var usuarioId))
-                return Unauthorized("Usuario no autenticado.");
+            var (isAuthenticated, userId) = GetCurrentUserId();
+            if (!isAuthenticated)
+            {
+                return Unauthorized("Claim 'id' inválido o no encontrado en el token.");
+            }
 
-            var amigos = await _friendRequestService.GetFriendsList(usuarioId);
-            return Ok(amigos);
+            var friends = await _unitOfWork._friendRequestRepository.GetFriendsList(userId);
+
+            var friendDtos = friends.Select(u => new UserDTO
+            {
+                UserId = u.UserId,
+                UserNickname = u.UserNickname,
+                UserProfilePhoto = u.UserProfilePhoto,
+                IsOnline = u.IsOnline,
+                LastSeen = u.LastSeen
+            });
+
+            return Ok(friendDtos);
         }
-
 
         [HttpGet("pending")]
-        public async Task<ActionResult<List<FriendShip>>> GetPendingFriendRequests()
+        public async Task<IActionResult> GetPendingFriendRequests()
         {
-            if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out var usuarioId))
-                return Unauthorized("Usuario no autenticado.");
+            var (isAuthenticated, userId) = GetCurrentUserId();
+            if (!isAuthenticated)
+            {
+                return Unauthorized("Claim 'id' inválido o no encontrado en el token.");
+            }
 
-            var solicitudesPendientes = await _friendRequestService.GetPendingFriendRequests(usuarioId);
-            return Ok(solicitudesPendientes);
+            var pendingRequests = await _unitOfWork._context.UserHasFriendship
+                .Where(uhf => uhf.UserId == userId && !uhf.Requestor && !uhf.Friendship.IsAccepted)
+                .Select(uhf => new
+                {
+                    SenderRelation = uhf.Friendship.UserFriendship.FirstOrDefault(sender => sender.Requestor),
+                    FriendshipId = uhf.FriendshipId
+                })
+                .Where(x => x.SenderRelation != null && x.SenderRelation.User != null)
+                .Select(x => new
+                {
+                    FriendshipId = x.FriendshipId,
+                    UserId = x.SenderRelation.User.UserId,
+                    UserNickname = x.SenderRelation.User.UserNickname,
+                    UserProfilePhoto = x.SenderRelation.User.UserProfilePhoto
+                })
+                .ToListAsync();
+
+            return Ok(pendingRequests);
         }
-
     }
 }

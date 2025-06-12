@@ -1,183 +1,89 @@
-﻿using TFG_Back .Models.Database;
-using TFG_Back.Models.Database.Entidades;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TFG_Back.Models.Database;
+using TFG_Back.Models.Database.Entidades;
+using TFG_Back.WebSocketAdvanced;
 
 namespace TFG_Back.Services
 {
     public class FriendRequestService
     {
-        private readonly DBContext _context;
+        private readonly UnitOfWork _unitOfWork;
+        private readonly WebSocketNetwork _webSocketNetwork;
 
-        public FriendRequestService(DBContext context)
+        public FriendRequestService(UnitOfWork unitOfWork, WebSocketNetwork webSocketNetwork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _webSocketNetwork = webSocketNetwork;
         }
 
-        public class FriendRequestResult
+        public async Task SendRequestAsync(int senderId, int receiverId)
         {
-            public bool Success { get; set; }
-            public int FriendshipId { get; set; }
-            public string SenderName { get; set; }
-        }
+            if (senderId == receiverId) return;
 
-        public async Task<FriendRequestResult> SendFriendRequest(int senderId, int receiverId)
-        {
-            if (senderId == receiverId)
-                return new FriendRequestResult { Success = false };
-
-            var exists = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .AnyAsync(a =>
-                    !a.IsAccepted &&
-                    a.UserFriendship.Any(ua => ua.UserId == senderId) &&
-                    a.UserFriendship.Any(ua => ua.UserId == receiverId)
+            var exists = await _unitOfWork._context.UserHasFriendship
+                .AnyAsync(uhf =>
+                    (uhf.UserId == senderId && uhf.Friendship.UserFriendship.Any(other => other.UserId == receiverId)) ||
+                    (uhf.UserId == receiverId && uhf.Friendship.UserFriendship.Any(other => other.UserId == senderId))
                 );
-            if (exists)
-                return new FriendRequestResult { Success = false };
 
-            var amistad = new FriendShip() { IsAccepted = false };
-            _context.Friendships.Add(amistad);
-            await _context.SaveChangesAsync();
+            if (exists) return;
 
-            var senderRelation = new UserHasFriendship()
+            var friendship = new FriendShip { IsAccepted = false };
+            _unitOfWork._context.Friendships.Add(friendship);
+            await _unitOfWork.SaveAsync();
+
+            var senderRelation = new UserHasFriendship { UserId = senderId, FriendshipId = friendship.FriendShipId, Requestor = true };
+            var receiverRelation = new UserHasFriendship { UserId = receiverId, FriendshipId = friendship.FriendShipId, Requestor = false };
+            _unitOfWork._context.UserHasFriendship.AddRange(senderRelation, receiverRelation);
+            await _unitOfWork.SaveAsync();
+
+            var sender = await _unitOfWork._userRepository.GetByIdAsync(senderId);
+            if (sender == null) return;
+
+            var notification = new
             {
-                UserId = senderId,
-                FriendshipId = amistad.FriendShipId,
-                Requestor = true
+                type = "friendRequest",
+                requestId = friendship.FriendShipId,
+                senderId,
+                senderName = sender.UserNickname
             };
-
-            var receiverRelation = new UserHasFriendship()
-            {
-                UserId = receiverId,
-                FriendshipId = amistad.FriendShipId,
-                Requestor = false
-            };
-
-            _context.UserHasFriendship.AddRange(senderRelation, receiverRelation);
-            await _context.SaveChangesAsync();
-
-            var sender = await _context.Users.FindAsync(senderId);
-
-            return new FriendRequestResult
-            {
-                Success = true,
-                FriendshipId = amistad.FriendShipId,
-                SenderName = sender?.UserNickname
-            };
+            await _webSocketNetwork.SendMessageToUserAsync(receiverId, JsonSerializer.Serialize(notification));
         }
-        
-        public class FriendRequestDetails
-        {
-            public int SenderId { get; set; }
-            public int ReceiverId { get; set; }
-        }
-        public async Task<FriendRequestDetails?> GetRequestDetails(int requestId)
-        {
-            var amistad = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .FirstOrDefaultAsync(a => a.FriendShipId == requestId);
 
-            if (amistad == null)
+        public async Task AcceptRequestAsync(int friendshipId, int acceptorId)
+        {
+            var friendship = await _unitOfWork._context.Friendships
+                .Include(f => f.UserFriendship)
+                .FirstOrDefaultAsync(f => f.FriendShipId == friendshipId && f.UserFriendship.Any(uf => uf.UserId == acceptorId && !uf.Requestor));
+
+            if (friendship == null || friendship.IsAccepted) return;
+
+            friendship.IsAccepted = true;
+            await _unitOfWork.SaveAsync();
+
+            var notification = new { type = "friendListUpdate" };
+            foreach (var userFriendship in friendship.UserFriendship)
             {
-                Console.WriteLine($"[GetRequestDetails] No se encontró la amistad con ID: {requestId}");
-                return null;
+                await _webSocketNetwork.SendMessageToUserAsync(userFriendship.UserId, JsonSerializer.Serialize(notification));
             }
-
-            if (amistad.UserFriendship == null || amistad.UserFriendship.Count < 2)
-            {
-                Console.WriteLine($"[GetRequestDetails] Relación incompleta para la amistad ID: {requestId}");
-                return null;
-            }
-
-            var sender = amistad.UserFriendship.FirstOrDefault(ua => ua.Requestor);
-            var receiver = amistad.UserFriendship.FirstOrDefault(ua => !ua.Requestor);
-
-            if (sender == null || receiver == null)
-            {
-                Console.WriteLine($"[GetRequestDetails] Faltan datos de sender o receiver para amistad ID: {requestId}");
-                return null;
-            }
-
-            Console.WriteLine($"[GetRequestDetails] OK - sender={sender.UserId}, receiver={receiver.UserId}");
-            return new FriendRequestDetails
-            {
-                SenderId = sender.UserId,
-                ReceiverId = receiver.UserId
-            };
         }
 
-
-        public async Task<bool> AcceptFriendRequest(int amistadId, int receiverId)
+        public async Task RejectRequestAsync(int friendshipId, int rejectorId)
         {
-            var amistad = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .FirstOrDefaultAsync(a => a.FriendShipId == amistadId && !a.IsAccepted);
+            var friendship = await _unitOfWork._context.Friendships
+                .Include(f => f.UserFriendship)
+                .FirstOrDefaultAsync(f => f.FriendShipId == friendshipId && f.UserFriendship.Any(uf => uf.UserId == rejectorId));
 
-            if (amistad == null)
-                return false;
+            if (friendship == null) return;
 
-            var receiverRecord = amistad.UserFriendship
-                .FirstOrDefault(ua => ua.UserId == receiverId && ua.Requestor == false);
-
-            if (receiverRecord == null)
-                return false;
-
-            amistad.IsAccepted = true;
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> RejectFriendRequest(int amistadId, int receiverId)
-        {
-            var amistad = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .FirstOrDefaultAsync(a => a.FriendShipId == amistadId && !a.IsAccepted);
-
-            if (amistad == null)
-                return false;
-
-            var receiverRecord = amistad.UserFriendship
-                .FirstOrDefault(ua => ua.UserId == receiverId && ua.Requestor == false);
-
-            if (receiverRecord == null)
-                return false;
-
-            _context.UserHasFriendship.RemoveRange(amistad.UserFriendship);
-            _context.Friendships.Remove(amistad);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-        public async Task<List<User>> GetFriendsList(int usuarioId)
-        {
-            var friendships = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                    .ThenInclude(ua => ua.User)
-                .Where(a => a.IsAccepted && a.UserFriendship.Any(ua => ua.UserId == usuarioId))
-                .ToListAsync();
-
-            List<User> friends = new List<User>();
-            foreach (var amistad in friendships)
-            {
-                var friendRelation = amistad.UserFriendship.FirstOrDefault(ua => ua.UserId != usuarioId);
-                if (friendRelation != null && friendRelation.User != null)
-                    friends.Add(friendRelation.User);
-            }
-            return friends;
-        }
-        public async Task<List<FriendShip>> GetPendingFriendRequests(int usuarioId)
-        {
-            var pendingRequests = await _context.Friendships
-                .Include(a => a.UserFriendship)
-                .Where(a => !a.IsAccepted &&
-                       a.UserFriendship.Any(ua => ua.UserId == usuarioId && ua.Requestor == false))
-                .ToListAsync();
-
-            return pendingRequests;
+            _unitOfWork._context.UserHasFriendship.RemoveRange(friendship.UserFriendship);
+            _unitOfWork._context.Friendships.Remove(friendship);
+            await _unitOfWork.SaveAsync();
         }
     }
 }

@@ -23,6 +23,12 @@
   margin-bottom: 1.5rem;
 }
 
+/* Contenedor para los botones del header */
+.admin-header div {
+  display: flex;
+  gap: 0.5rem;
+}
+
 h1 { font-size: 2rem; color: #2c3e50; margin: 0; }
 h2 { font-size: 1.5rem; color: #34495e; margin-bottom: 1.5rem; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
 
@@ -98,6 +104,9 @@ input:disabled:not([type="text"]):not([type="email"]) { padding: 0.5rem; } /* Fi
 .btn-cancel:hover { background-color: #5a6268; }
 .btn-logout { background-color: #343a40; color: white; }
 .btn-logout:hover { background-color: #23272b; }
+
+.btn-home { background-color: #17a2b8; color: white; }
+.btn-home:hover { background-color: #138496; }
 
 @media (max-width: 768px) {
   .admin-panel { padding: 1rem; }

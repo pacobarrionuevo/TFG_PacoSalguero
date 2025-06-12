@@ -36,7 +36,7 @@ export class AmigosComponent implements OnInit, OnDestroy {
   solicitudesPendientes: SolicitudAmistad[] = [];
   errorMessage: string | null = null;
     onlineUsers: { userId: number }[] = []; 
-
+private onlineUsersSubscription: Subscription; 
 
   constructor(
     public webSocketService: WebsocketService,
@@ -47,7 +47,6 @@ export class AmigosComponent implements OnInit, OnDestroy {
     private friendService: FriendService,
     private ngZone: NgZone,
     private datePipe: DatePipe,
-    private onlineUsersSubscription: Subscription,
     
   ) {
     this.perfil_default = this.imageService.getImageUrl('Perfil_Deffault.png');

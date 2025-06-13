@@ -19,8 +19,8 @@ object RetrofitInstance {
 
     // Para emulador Android (10.0.2.2 = localhost del host)
     // La de development es "https://10.0.2.2:7077/"
-    // La de deployment es "https://juego-oca-paco-salguero.runasp.net/."
-    private const val BASE_URL = "https://juego-oca-paco-salguero.runasp.net/"
+    // La de deployment es "https://sanitariosapp.runasp.net/."
+    private const val BASE_URL = "https://sanitariosapp.runasp.net/"
     private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
         override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
         override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}

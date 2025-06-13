@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TFG_Back.Models.Database.Entidades;
 using static System.Net.Mime.MediaTypeNames;
@@ -21,6 +22,8 @@ namespace TFG_Back.Models.Database
         public DbSet<FriendShip> Friendships { get; set; }
         public DbSet<UserHasFriendship> UserHasFriendship { get; set; }
 
+        public DbSet<ServiceFacturado> ServicesFacturados { get; set; }
+
         public DBContext(IOptions<Settings> options)
         {
             _settings = options.Value;
@@ -30,9 +33,17 @@ namespace TFG_Back.Models.Database
         // La base de datos se creará en el directorio base de la aplicación.
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+#if DEBUG
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
+#else
+            string connection = "Server = db18491.databaseasp.net; Database = db18491; Uid = db18491; Pwd = 8Qj_Z-9r!2fL";
+            options.UseMySql(connection, ServerVersion.AutoDetect(connection));
+#endif
+
         }
+    
+
 
         // Configuración adicional del modelo de datos.
         protected override void OnModelCreating(ModelBuilder modelBuilder)

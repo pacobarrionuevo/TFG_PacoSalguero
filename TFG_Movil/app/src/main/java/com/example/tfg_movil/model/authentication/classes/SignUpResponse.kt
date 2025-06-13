@@ -1,7 +1,9 @@
 package com.example.tfg_movil.model.authentication.classes
 
+import com.google.gson.annotations.SerializedName
+
+// Respuesta del registro
 data class SignUpResponse(
-    val id: String,
-    val email: String,
-    val role: String
+    @SerializedName("stringToken")
+    val accessToken: String
 )

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStoreAuth by preferencesDataStore(name = "auth_preferences")
 
+// Manejo del almacenamiento seguro de credenciales
 class DataStoreManager {
 
     companion object {
@@ -20,6 +21,7 @@ class DataStoreManager {
         suspend fun saveCredentials(
             context: Context, accessToken: String, email: String, userId: Int
         ) {
+            // Guarda credenciales
             context.dataStoreAuth.edit { preferences ->
                 preferences[ACCESS_TOKEN_KEY] = accessToken
                 preferences[EMAIL_KEY] = email
@@ -27,6 +29,7 @@ class DataStoreManager {
             }
         }
 
+        // Métodos para obtener credenciales
         fun getAccessToken(context: Context) = context.dataStoreAuth.data.map { preferences ->
             preferences[ACCESS_TOKEN_KEY]
         }

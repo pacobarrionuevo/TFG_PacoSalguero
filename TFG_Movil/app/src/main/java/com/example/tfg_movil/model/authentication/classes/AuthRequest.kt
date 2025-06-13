@@ -1,7 +1,9 @@
 package com.example.tfg_movil.model.authentication.classes
 
+import com.google.gson.annotations.SerializedName
+
+// Modelo para la petición de login
 data class AuthRequest(
-    val email: String,
-    val password: String,
-    val role: String = "user"
+    @SerializedName("UserEmailOrNickname") val userEmailOrNickname: String,
+    @SerializedName("UserPassword") val password: String
 )

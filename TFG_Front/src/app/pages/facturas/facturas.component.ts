@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ServiceFacturado } from '../../models/service-facturado';
+import { FacturaService } from '../../services/factura.service';
 
 @Component({
   selector: 'app-facturas',
@@ -18,7 +19,7 @@ export class FacturasComponent {
   entradas: EntradaAgenda[] = [];
   serviciosSeleccionados: ServiceFacturado[] = [];
 
-  constructor(private agendaService: AgendaService) { }
+  constructor(private agendaService: AgendaService, private facturaService: FacturaService) { }
 
   ngOnInit(): void {
     this.cargarEntradas();
@@ -45,18 +46,29 @@ export class FacturasComponent {
 
   // Filtra las entradas seleccionadas y las mapea al modelo ServiceFacturado.
   facturarSeleccionados(): void {
-    this.serviciosSeleccionados = this.entradas
-      .filter(e => e.seleccionado)
-      .map(e => ({
-        centro: e.centroTrabajo,
-        cliente: e.cliente,
-        fecha: e.fechaHora,
-        paciente: e.paciente,
-        servicio: e.servicio?.nombre || '(Sin nombre)',
-        observaciones: e.observaciones
-      }));
+  this.serviciosSeleccionados = this.entradas
+    .filter(e => e.seleccionado)
+    .map(e => ({
+      centro: e.centroTrabajo,
+      cliente: e.cliente,
+      fecha: e.fechaHora,
+      paciente: e.paciente,
+      servicio: e.servicio?.nombre || '(Sin nombre)',
+      observaciones: e.observaciones
+    }));
 
-    // Aquí iría la lógica para enviar `serviciosSeleccionados` al backend para generar la factura.
-    console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
-  }
+  console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
+
+  this.facturaService.generarFacturaPDF(this.serviciosSeleccionados).subscribe({
+    next: (response) => {
+      // Abrimos la URL devuelta en una nueva pestaña
+      window.open(response.url, '_blank');
+    },
+    error: (err) => {
+      console.error('Error al generar la factura PDF:', err);
+      alert('Ocurrió un error al generar la factura.');
+    }
+  });
+}
+
 }

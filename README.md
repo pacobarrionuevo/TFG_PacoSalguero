@@ -1,10 +1,10 @@
-# TFG Sanitarios - Gestión Integral para Profesionales
+ TFG Sanitarios - Gestión Integral para Profesionales
 
 Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º año del CPIFP Alan Turing en Desarrollo de Aplicaciones Multiplataforma.
 
-- *Enlace al anteproyecto:* [Documento de Google Docs](https://docs.google.com/document/d/1TFJnD-q_kEXWpyvHYLzhxsQBzPGWbPmFwfnIWQeBnkk/edit?usp=sharing)
-- *Enlace a los diseños en Figma:* - *Enlace a los diseños en Figma:* [SanitariosApp_Mockup en Figma]([https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=62-214](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=0-1&t=x5xSijR0pW8exEXX-1))
-
+-   **Enlace a la aplicación web desplegada:** [**SanitariosApp en Vercel**](https://tfg-paco-salguero.vercel.app/)
+-   **Enlace al anteproyecto:** [Documento de Google Docs](https://docs.google.com/document/d/1TFJnD-q_kEXWpyvHYLzhxsQBzPGWbPmFwfnIWQeBnkk/edit?usp=sharing)
+-   **Enlace a los diseños en Figma:** [SanitariosApp_Mockup en Figma](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=0-1&t=x5xSijR0pW8exEXX-1)
 ---
 
 ## 1. Introducción

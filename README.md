@@ -141,6 +141,56 @@ La implementación de la comunicación en tiempo real fue uno de los pilares del
     -   [Implementación del Patrón Repositorio en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) - Guía conceptual de Microsoft que sirvió de base para estructurar la capa de acceso a datos (Repository.cs, UnitOfWork.cs).
 -   *Inyección de Dependencias en .NET*:
     -   [Inyección de dependencias en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/dependency-injection) - Documentación fundamental para configurar los servicios y repositorios en Program.cs.
+## 📚 Bibliografía y Recursos Específicos (Aplicación Móvil)
+
+Esta sección detalla los recursos técnicos, documentación oficial y tutoriales consultados para implementar las funcionalidades más complejas de la aplicación Android (`TFG_Movil`).
+
+### 1. Conexión con Backend .NET mediante Retrofit y OkHttp
+
+La comunicación entre la app Kotlin y el backend ASP.NET Core fue un pilar fundamental. La configuración de Retrofit para manejar la autenticación JWT y los certificados de desarrollo requirió una atención especial.
+
+-   **Configuración de Retrofit y Gson:**
+    -   [Documentación Oficial de Retrofit](https://square.github.io/retrofit/): Guía principal para entender cómo crear las interfaces de API (`AuthClient`, `AgendaClient`, etc.) y configurar la instancia de Retrofit.
+    -   [Tutorial de Retrofit con Kotlin Coroutines (ProAndroidDev)](https://proandroiddev.com/suspend-what-youre-doing-retrofit-has-coroutines-support-e654f7780287): Artículo que explica cómo integrar `suspend fun` en las interfaces de Retrofit para un manejo asíncrono limpio, tal como se implementa en los repositorios (`AuthRepository`, `AgendaRepository`).
+    -   [Gson Converter Factory (GitHub)](https://github.com/square/retrofit/tree/master/retrofit-converters/gson): Referencia para el uso del convertidor de Gson, necesario para mapear los DTOs del backend a las data classes de Kotlin.
+
+-   **Manejo de HTTPS con Certificados de Desarrollo:**
+    -   [Trusting all certificates with OkHttp (Stack Overflow)](https://stackoverflow.com/questions/25509296/trusting-all-certificates-with-okhttp): Hilo de discusión que proporciona la base para crear un `X509TrustManager` personalizado que confíe en todos los certificados. Esta técnica, implementada en `RetrofitInstance.kt`, es crucial para poder probar la app contra un servidor de desarrollo local (como el de `runasp.net`) que no tiene un certificado SSL validado por una CA.
+    -   [Android Network Security Configuration](https://developer.android.com/training/articles/security-config): Documentación oficial para entender el uso del fichero `network_security_config.xml`, que permite definir políticas de seguridad de red, como permitir el tráfico en texto plano (`cleartextTrafficPermitted`) para dominios específicos como `10.0.2.2` (el localhost del emulador).
+
+-   **Autenticación con JWT (JSON Web Tokens):**
+    -   [Adding an Interceptor to OkHttp in Kotlin (Baeldung)](https://www.baeldung.com/kotlin/okhttp-interceptors): Tutorial que explica el patrón `Interceptor` de OkHttp. Aunque en el proyecto no se usa un interceptor explícito, este recurso es fundamental para entender la mejor práctica de añadir dinámicamente el `Authorization: Bearer <token>` a todas las peticiones que lo requieran, en lugar de pasarlo manualmente en cada llamada.
+
+### 2. Arquitectura MVVM y Gestión de Estado en Jetpack Compose
+
+La aplicación se estructura siguiendo el patrón MVVM para una clara separación de responsabilidades y un código mantenible.
+
+-   **Guía de Arquitectura de Apps para Android:**
+    -   [Guía oficial de arquitectura de apps (Android Developers)](https://developer.android.com/topic/architecture): Documentación de Google que establece los principios de una arquitectura robusta, incluyendo las capas de UI, Dominio y Datos, que se reflejan en la estructura de paquetes (`model`, `viewmodel`, `views`).
+-   **Gestión de Estado con StateFlow y ViewModel:**
+    -   [State and Jetpack Compose (Android Developers)](https://developer.android.com/jetpack/compose/state): Guía esencial para entender cómo funciona el estado en Compose.
+    -   [Using StateFlow with collectAsState in Compose (Medium)](https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda): Artículo que detalla el uso de `StateFlow` en el `ViewModel` para exponer el estado y `collectAsState()` en el `Composable` para consumirlo de forma segura y reactiva. Este patrón es visible en todos los ViewModels del proyecto (`ViewModelAuth`, `ViewModelAgenda`, etc.).
+-   **Inyección de Dependencias:**
+    -   [Manual dependency injection (Android Developers)](https://developer.android.com/training/dependency-injection/manual): La aplicación utiliza inyección manual de dependencias (visible en `MainActivity.kt` al crear los repositorios y pasarlos a los ViewModels). Este recurso explica los fundamentos.
+    -   [Hilt and Jetpack integration (Android Developers)](https://developer.android.com/jetpack/compose/libraries#hilt): Como mejora, se podría utilizar Hilt. Esta documentación sería el siguiente paso para automatizar la inyección de dependencias y reducir el código boilerplate.
+
+### 3. Persistencia de Datos Locales con Jetpack DataStore
+
+Para guardar el token de autenticación y otros datos de sesión, se utiliza DataStore, la solución moderna de Android para la persistencia de datos clave-valor.
+
+-   **Implementación de Preferences DataStore:**
+    -   [Working with Preferences DataStore (Android Developers)](https://developer.android.com/topic/libraries/architecture/datastore): Documentación oficial que explica cómo implementar `PreferencesDataStore` para leer y escribir datos de forma asíncrona, tal como se hace en `DataStoreManager.kt`.
+    -   [Migrating from SharedPreferences to DataStore (Codelabs)](https://developer.android.com/codelabs/android-datastore): Tutorial práctico que justifica el cambio de `SharedPreferences` a `DataStore`, destacando sus ventajas en cuanto a seguridad de hilos y manejo de errores.
+
+### 4. Implementación de Calendario Interactivo en Compose
+
+La pantalla del calendario (`CalendarScreen.kt`) es una funcionalidad compleja que requiere lógica de manipulación de fechas y una construcción de UI personalizada.
+
+-   **Lógica de Fechas con `java.time`:**
+    -   [Java Time API Guide (Baeldung)](https://www.baeldung.com/java-8-date-time-intro): Guía completa sobre el paquete `java.time`, introducido en Java 8 y disponible en Android. Esencial para realizar cálculos como obtener el primer día del mes, el número de días, y navegar entre meses, como se hace en `CalendarScreen.kt`.
+-   **Construcción de la Rejilla del Calendario en Compose:**
+    -   [Lazy Grids in Jetpack Compose (Android Developers)](https://developer.android.com/jetpack/compose/lists#lazy-grids): Documentación sobre `LazyVerticalGrid`, el componente clave para dibujar la rejilla del calendario de manera eficiente.
+    -   [Building a Custom Calendar in Jetpack Compose (Tutorial)](https://www.geeksforgeeks.org/create-a-custom-calendar-in-android-using-jetpack-compose/): Un ejemplo práctico de cómo combinar la lógica de fechas con `LazyVerticalGrid` para construir un calendario funcional, similar al enfoque del proyecto.
 
 ## 📌 Estado Actual del Proyecto
 

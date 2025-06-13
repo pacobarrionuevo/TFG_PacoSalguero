@@ -37,12 +37,12 @@ namespace TFG_Back.Models.Database
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
 #else
-            string connection = "Server = db18491.databaseasp.net; Database = db18491; Uid = db18491; Pwd = 8Qj_Z-9r!2fL";
+            string connection = "Server=db21528.databaseasp.net; Database=db21528; Uid=db21528; Pwd=5Ex_#8Am3Bp=;";
             options.UseMySql(connection, ServerVersion.AutoDetect(connection));
 #endif
 
         }
-    
+
 
 
         // Configuración adicional del modelo de datos.

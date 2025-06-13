@@ -1,5 +1,4 @@
-// Fichero de configuración para el entorno de producción.
-// Se debe rellenar con las URLs del servidor cuando la aplicación se despliegue.
+// NO SE USA NO SE BORRA PORSIACA
 export const environment = {
     // Cuando esté subida
     apiUrl: 'https://tfg-paco-salguero.runasp.net',

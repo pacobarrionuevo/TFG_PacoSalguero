@@ -22,24 +22,28 @@ Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º
 
 El proyecto se estructura en cuatro componentes principales, cada uno desarrollado con tecnologías específicas para optimizar su rendimiento y funcionalidad:
 
--   *Backend (TFG_Back): Desarrollado con **ASP.NET Core*, sigue una arquitectura por capas utilizando el patrón Repositorio y Unit of Work para una gestión de datos robusta y escalable.
+-   *Backend (TFG_Back): Desarrollado con *ASP.NET Core*.
     -   *Base de datos*: SQLite gestionada a través de Entity Framework Core.
     -   *Autenticación*: Sistema basado en JSON Web Tokens (JWT) para proteger los endpoints.
     -   *Tiempo Real: Implementación de **WebSockets* para notificaciones instantáneas, como el estado de conexión de los usuarios y solicitudes de amistad.
     -   *API*: Una API RESTful que sirve como nexo de unión entre el backend y los clientes (web y móvil).
 
--   *Frontend (TFG_Front): Una Single Page Application (SPA) creada con **Angular*.
+-   *Frontend (TFG_Front): creada con *Angular*.
     -   *Diseño*: Componentes estructurados por páginas y un layout principal con menú de navegación para una experiencia de usuario coherente.
     -   *Comunicación*: Servicios dedicados para consumir la API del backend y un servicio de WebSocket para la interacción en tiempo real.
     -   *Funcionalidades*: Panel de administración, gestión de agenda, calendario interactivo, sistema de amigos, ficheros y facturación.
 
--   *Aplicación Móvil (TFG_Movil): App nativa para **Android* desarrollada en *Kotlin* y *Jetpack Compose*.
+-   *Aplicación Móvil (TFG_Movil): App nativa para *Android* desarrollada en *Kotlin* y *Jetpack Compose*.
     -   *Arquitectura*: Sigue el patrón MVVM (Model-View-ViewModel) para una separación clara de responsabilidades.
     -   *Comunicación: Utiliza **Retrofit* para las llamadas a la API y *DataStore* para la persistencia local de credenciales de usuario.
     -   *Enfoque*: Ofrece las funcionalidades esenciales de autenticación y navegación, proporcionando una experiencia optimizada para dispositivos móviles.
 
--   *Business Intelligence (Informe Power BI.pbix): Un informe interactivo creado con **Power BI* que se conecta a la base de datos de la aplicación para visualizar métricas clave y facilitar la toma de decisiones basada en datos.
+-   *Informe Power BI: Un informe interactivo creado con **Power BI* que se conecta a la base de datos de la aplicación para visualizar métricas clave y facilitar la toma de decisiones basada en datos.
+ ## ❗ Nota sobre el Repositorio y el Historial de Cambios
 
+Para una revisión completa del **historial de commits** y el desarrollo progresivo del proyecto, se debe consultar el repositorio principal donde se ha llevado a cabo el trabajo continuo. Este repositorio actual sirve como la entrega final consolidada.
+
+-   **Repositorio de Desarrollo Principal:** [**https://github.com/jorgeesg26/TFGPacoSalgueroMovil**](https://github.com/jorgeesg26/TFGPacoSalgueroMovil)
 ## 3. Paleta de Colores y Diseño
 
 La selección de colores de la aplicación se ha realizado con el objetivo de transmitir profesionalidad, confianza y calma, valores fundamentales en el sector sanitario.
@@ -142,12 +146,6 @@ La implementación de la comunicación en tiempo real fue uno de los pilares del
     -   [Guía de RxJS Subject y BehaviorSubject](https://rxjs.dev/guide/subject) - La arquitectura del WebsocketService en Angular se basa en Subject para emitir los eventos recibidos del servidor y que los componentes puedan suscribirse a ellos de forma reactiva.
     -   [Entendiendo NgZone en Angular](https://angular.dev/guide/zone) - Se utilizó ngZone.run() para asegurar que las actualizaciones recibidas desde el WebSocket (que ocurren fuera del contexto de Angular) disparen correctamente el ciclo de detección de cambios y actualicen la interfaz de usuario.
 
-### 4. Patrones de Arquitectura y Buenas Prácticas
-
--   *Patrón Repositorio y Unidad de Trabajo (Unit of Work)*:
-    -   [Implementación del Patrón Repositorio en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) - Guía conceptual de Microsoft que sirvió de base para estructurar la capa de acceso a datos (Repository.cs, UnitOfWork.cs).
--   *Inyección de Dependencias en .NET*:
-    -   [Inyección de dependencias en ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/dependency-injection) - Documentación fundamental para configurar los servicios y repositorios en Program.cs.
 ## 📚 Bibliografía y Recursos Específicos (Aplicación Móvil)
 
 Esta sección detalla los recursos técnicos, documentación oficial y tutoriales consultados para implementar las funcionalidades más complejas de la aplicación Android (`TFG_Movil`).

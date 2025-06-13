@@ -1,4 +1,3 @@
-/* Fondo general con degradado */
 .general {
     display: flex;
     justify-content: center;
@@ -8,7 +7,6 @@
     font-family: Arial, sans-serif;
 }
 
-/* Contenedor principal del formulario */
 .cuadradoFuera {
     background-color: white;
     border-radius: 10px;
@@ -18,7 +16,6 @@
     text-align: center;
 }
 
-/* Título */
 #registrarse {
     color: #0077c2;
     font-size: 28px;
@@ -26,7 +23,6 @@
     margin-bottom: 20px;
 }
 
-/* Estilo de etiquetas y campos */
 .label {
     display: flex;
     justify-content: space-between;
@@ -47,7 +43,6 @@
     font-size: 14px;
 }
 
-/* Botón de confirmar */
 input[type="submit"] {
     background: linear-gradient(to right, orange, #ffcc00);
     color: white;
@@ -65,7 +60,6 @@ input[type="submit"]:hover {
     background: linear-gradient(to right, #ff9900, #ffdb4d);
 }
 
-/* Enlace de navegación */
 #llevarRegistro {
     font-size: 14px;
     margin-top: 20px;

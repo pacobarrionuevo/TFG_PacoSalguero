@@ -6,8 +6,8 @@
   background-color: #e0efff;
   padding: 20px;
   border-radius: 10px;
-  max-width: 1200px; /* Limita el ancho máximo */
-  margin: 0 auto; /* Centra en la página */
+  max-width: 1200px;
+  margin: 0 auto; 
   box-sizing: border-box;
   overflow-x: hidden;
 }
@@ -15,7 +15,7 @@
 .elemento {
   width: 100%;
   box-sizing: border-box;
-  overflow-x: auto; /* Evita romper el diseño en pantallas pequeñas */
+  overflow-x: auto;
 }
 
 .tabla {

@@ -33,7 +33,6 @@
     background-color: #4d0099; 
 }
 
-/* Navegación de secciones */
 .navegacion {
     display: flex;
     flex-direction: column;

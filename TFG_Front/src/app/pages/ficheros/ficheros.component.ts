@@ -95,7 +95,7 @@ export class FicherosComponent implements OnInit {
     this.servicioService.update(servicio).subscribe({
       next: () => {
         servicio.editing = false;
-        this.cargarServicios(); // Recarga para asegurar consistencia.
+        this.cargarServicios();
       },
       error: (err) => console.error('Error al actualizar servicio:', err)
     });

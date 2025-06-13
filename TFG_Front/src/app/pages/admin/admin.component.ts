@@ -41,7 +41,7 @@ export class AdminComponent implements OnInit {
     private authService: AuthService,
     private adminService: AdminService,
     private userService: UserService,
-    public imageService: ImageService, // Público para usarlo en la plantilla.
+    public imageService: ImageService,
     private router: Router
   ) {}
 
@@ -70,7 +70,6 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // --- MÉTODOS DE EDICIÓN DE USUARIO ---
   
   // Activa el modo de edición para un usuario y guarda su estado original.
   editUser(user: User): void {
@@ -107,25 +106,21 @@ export class AdminComponent implements OnInit {
   saveUser(user: User): void {
     const updateObservables: any[] = [];
     
-    // 1. Comprueba si los datos de texto han cambiado para añadirlos a la petición.
     const originalUser = this.editUserCache[user.userId!];
     if (originalUser.userNickname !== user.userNickname || originalUser.userEmail !== user.userEmail) {
       updateObservables.push(this.adminService.updateUser(user.userId!, { userNickname: user.userNickname!, userEmail: user.userEmail! }));
     }
 
-    // 2. Comprueba si se ha seleccionado un nuevo avatar.
     const newAvatarFile = this.avatarFileCache[user.userId!];
     if (newAvatarFile) {
       updateObservables.push(this.adminService.updateUserAvatar(user.userId!, newAvatarFile));
     }
 
-    // Si no hay cambios, simplemente sale del modo de edición.
     if (updateObservables.length === 0) {
       user.editing = false;
       return;
     }
 
-    // Ejecuta todas las peticiones de actualización en paralelo.
     forkJoin(updateObservables).subscribe({
       next: (results) => {
         const avatarResult = results.find(r => r && r.filePath);
@@ -143,7 +138,8 @@ export class AdminComponent implements OnInit {
       error: (err) => {
         console.error('Error al actualizar el usuario:', err);
         alert('No se pudo actualizar el usuario.');
-        this.cancelEdit(user); // Revierte los cambios en la UI si hay un error.
+        // Revierte los cambios en la UI si hay un error.
+        this.cancelEdit(user); 
       }
     });
   }

@@ -8,6 +8,9 @@ Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º
 -   **Enlace a la presentación en Youtube:** [Presentación YT](https://youtu.be/hIyHiC3T-ik)
 -   **Memoria del TFG (PDF):** [**Ver Documento**](https://drive.google.com/file/d/12wooCRg8NMdPxc9dr7KSbG1pUhEk0_CB/view?usp=sharing)
 -   **El APK de la aplicación móvil está en el repositorio**
+-   **El PDF de la bitácora está en el repositorio**
+-   **El informe de power BI  está en el repositorio**
+
 
 ---
 

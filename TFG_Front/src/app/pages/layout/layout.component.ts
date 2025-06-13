@@ -9,7 +9,5 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css'
 })
-// Componente estructural que define el diseño principal de la aplicación (menú lateral + contenido).
-export class LayoutComponent {
 
-}
+export class LayoutComponent {}

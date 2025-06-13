@@ -55,7 +55,7 @@
 .navegacion a:hover,
 .navegacion a.activo {
     background-color: #4d0099;
-    transform: translateX(5px); /* Pequeño efecto al pasar el ratón por encima*/
+    transform: translateX(5px); 
 }
 
 .icono {

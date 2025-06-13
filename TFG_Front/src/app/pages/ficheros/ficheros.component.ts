@@ -75,7 +75,8 @@ export class FicherosComponent implements OnInit {
     this.servicioService.create(this.nuevoServicio).subscribe({
       next: (nuevo) => {
         this.servicios.push(nuevo);
-        this.nuevoServicio = { nombre: '', abreviatura: '', color: '' }; // Limpia el formulario.
+        // Limpia el formulario.
+        this.nuevoServicio = { nombre: '', abreviatura: '', color: '' }; 
       },
       error: (err) => {
         console.error('Error al crear servicio:', err);
@@ -159,8 +160,7 @@ export class FicherosComponent implements OnInit {
     }
   }
 
-  // --- Lógica relacionada con los clientes ---
-
+  // - Lógica Relacionada con Cliente
   cargarClientes() {
     this.customerService.getAll().subscribe({
       next: (data) => this.customers = data,

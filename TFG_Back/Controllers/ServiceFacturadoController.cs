@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TFG_Back.Extensions;
 using TFG_Back.Models.Database.Entidades;
 using TFG_Back.Services;
 
@@ -29,8 +30,21 @@ namespace TFG_Back.Controllers
         [HttpPost("generar-pdf")]
         public async Task<IActionResult> GenerarFacturaPDF([FromBody] IEnumerable<ServiceFacturado> servicios)
         {
+            // 1. El servicio sigue devolviendo la URL relativa, lo cual es correcto.
             var pdfRelativeUrl = await _service.GenerarFacturaPDFAsync(servicios);
-            return Ok(new { url = pdfRelativeUrl });
+
+            // 2. Comprobamos si se generó la URL.
+            if (string.IsNullOrEmpty(pdfRelativeUrl))
+            {
+                return BadRequest("No se pudo generar la factura.");
+            }
+
+            // 3. Convertimos la URL relativa en una URL absoluta usando la extensión.
+            var absoluteUrl = Request.GetAbsoluteUrl(pdfRelativeUrl);
+
+            // 4. Devolvemos la URL absoluta al frontend.
+            return Ok(new { url = absoluteUrl });
         }
+
     }
 }

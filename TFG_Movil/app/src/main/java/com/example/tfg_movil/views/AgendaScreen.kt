@@ -263,7 +263,7 @@ fun AgendaScreen(viewModel: ViewModelAgenda) {
                                 selected = ordenDescendente,
                                 onClick = { ordenDescendente = true }
                             )
-                            Text("Más recientes", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(id = R.string.Proximas), style = MaterialTheme.typography.bodySmall)
 
                             Spacer(modifier = Modifier.width(8.dp))
 
@@ -271,7 +271,7 @@ fun AgendaScreen(viewModel: ViewModelAgenda) {
                                 selected = !ordenDescendente,
                                 onClick = { ordenDescendente = false }
                             )
-                            Text("Más antiguas", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(id = R.string.Ultimas), style = MaterialTheme.typography.bodySmall)
                         }
                     }
 

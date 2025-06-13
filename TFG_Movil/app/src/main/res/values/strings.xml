@@ -56,4 +56,6 @@
     <string name="fechaHora">Fecha y Hora (yyyy-MM-dd\'T\'HH:mm)</string>
     <string name="listaEntradas">Lista de Entradas</string>
     <string name="servicio">Servicio</string>
+    <string name="Proximas">Próximas</string>
+    <string name="Ultimas">Más cercanas</string>
 </resources>

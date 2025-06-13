@@ -1,5 +1,7 @@
 package com.example.tfg_movil.model.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,12 +22,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.ui.unit.dp
+import com.example.tfg_movil.viewmodel.ViewModelAgenda
+import com.example.tfg_movil.viewmodel.ViewModelCustomer
+import com.example.tfg_movil.viewmodel.ViewModelPaymentMethod
+import com.example.tfg_movil.viewmodel.ViewModelService
+import com.example.tfg_movil.views.AgendaScreen
+import com.example.tfg_movil.views.CalendarScreen
+import com.example.tfg_movil.views.CustomerScreen
 import com.example.tfg_movil.views.Main
-import com.example.tfg_movil.views.Menu
+import com.example.tfg_movil.views.PaymentMethodScreen
+import com.example.tfg_movil.views.ServiceScreen
 
-
+// Navegación principal de la app
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavigation(navController: NavHostController, authState: AuthState, authViewModel: ViewModelAuth) {
+fun AppNavigation(navController: NavHostController, authState: AuthState, authViewModel: ViewModelAuth,
+                  serviceViewModel: ViewModelService,customerViewModel: ViewModelCustomer,
+                  paymentMethodViewModel: ViewModelPaymentMethod, agendaViewModel: ViewModelAgenda) {
+    // ViewModels inyectados
+
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -55,8 +70,20 @@ fun AppNavigation(navController: NavHostController, authState: AuthState, authVi
             composable(RutasNavegacion.Register.route) {
                 Register(authViewModel, navController)
             }
-            composable(RutasNavegacion.Menu.route) {
-                Menu(authViewModel, navController)
+            composable(RutasNavegacion.Servicios.route) {
+                ServiceScreen()
+            }
+            composable(RutasNavegacion.Customer.route) {
+                CustomerScreen(customerViewModel)
+            }
+            composable(RutasNavegacion.PaymentMethod.route) {
+                PaymentMethodScreen(paymentMethodViewModel)
+            }
+            composable(RutasNavegacion.Agenda.route) {
+                AgendaScreen(agendaViewModel)
+            }
+            composable(RutasNavegacion.Calendar.route) {
+                CalendarScreen(agendaViewModel)
             }
         }
     }

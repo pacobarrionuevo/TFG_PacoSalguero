@@ -10,10 +10,12 @@ namespace TFG_Back.Services
     public class ServiceFacturadoService
     {
         private readonly ServiceFacturadoRepository _repository;
+        private readonly IWebHostEnvironment _env;
 
-        public ServiceFacturadoService(ServiceFacturadoRepository repository)
+        public ServiceFacturadoService(ServiceFacturadoRepository repository, IWebHostEnvironment env)
         {
             _repository = repository;
+            _env = env;
         }
 
         public async Task<ICollection<ServiceFacturado>> GetAllAsync()
@@ -31,18 +33,22 @@ namespace TFG_Back.Services
         // Genera un PDF a partir de una plantilla de Word y una lista de servicios.
         public async Task<string> GenerarFacturaPDFAsync(IEnumerable<ServiceFacturado> servicios)
         {
-            // Define las rutas de la plantilla y del archivo de salida.
-            var plantillaPath = @"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturas.docx";
-            var outputPath = @$"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturasCopia{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            // 1. Ruta de la plantilla dentro de wwwroot/plantillas
+            var plantillaPath = Path.Combine(_env.WebRootPath, "plantillas", "PlantillaFacturas.docx");
 
-            // 2. Cargar la plantilla
+            // 2. Ruta de salida en una carpeta temporal del servidor
+            var fileName = $"PlantillaFacturas.pdf";
+            var outputDirectory = Path.Combine(_env.WebRootPath, "plantillas"); // Asegúrate de que existe
+            Directory.CreateDirectory(outputDirectory); // Crea si no existe
+
+            var outputPath = Path.Combine(outputDirectory, fileName);
+
+            // 3. Cargar la plantilla
             Document document = new Document();
             document.LoadFromFile(plantillaPath);
 
-            // 5. Crear el DataTable con el nombre de la región: "Factura"
+            // 4. Crear DataTable con los datos
             DataTable table = new DataTable("Factura");
-
-            // 6. Agregar columnas con los mismos nombres que los campos de la plantilla
             table.Columns.Add("centro");
             table.Columns.Add("cliente");
             table.Columns.Add("fecha");
@@ -50,28 +56,25 @@ namespace TFG_Back.Services
             table.Columns.Add("servicio");
             table.Columns.Add("observaciones");
 
-            // 7. Agregar filas a partir de la lista de servicios facturados
             foreach (var servicio in servicios)
             {
                 table.Rows.Add(
                     servicio.Centro,
                     servicio.Cliente,
-                    servicio.Fecha.ToString("dd/MM/yyyy"), // Ajusta formato si es necesario
+                    servicio.Fecha.ToString("dd/MM/yyyy"),
                     servicio.Paciente,
                     servicio.Servicio,
                     servicio.Observaciones
                 );
             }
 
-            // 8. Ejecutar la combinación de correspondencia para la tabla
+            // 5. Ejecutar combinación de correspondencia y exportar como PDF
             document.MailMerge.ExecuteWidthRegion(table);
-
-            // 9. Exportar como PDF
             document.SaveToFile(outputPath, FileFormat.PDF);
 
-            // Retornar la ruta del archivo generado
-            return outputPath;
-
+            // 6. Devolver solo el nombre para que el cliente lo descargue vía endpoint
+            return $"/plantillas/{fileName}";
         }
+
     }
 }

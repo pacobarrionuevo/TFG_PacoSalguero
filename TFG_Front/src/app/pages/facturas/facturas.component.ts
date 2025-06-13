@@ -46,37 +46,29 @@ export class FacturasComponent {
 
   // Filtra las entradas seleccionadas y las mapea al modelo ServiceFacturado.
   facturarSeleccionados(): void {
-    this.serviciosSeleccionados = this.entradas
-      .filter(e => e.seleccionado)
-      .map(e => ({
-        centro: e.centroTrabajo,
-        cliente: e.cliente,
-        fecha: e.fechaHora,
-        paciente: e.paciente,
-        servicio: e.servicio?.nombre || '(Sin nombre)',
-        observaciones: e.observaciones
-      }));
+  this.serviciosSeleccionados = this.entradas
+    .filter(e => e.seleccionado)
+    .map(e => ({
+      centro: e.centroTrabajo,
+      cliente: e.cliente,
+      fecha: e.fechaHora,
+      paciente: e.paciente,
+      servicio: e.servicio?.nombre || '(Sin nombre)',
+      observaciones: e.observaciones
+    }));
 
-    // Aquí iría la lógica para enviar `serviciosSeleccionados` al backend para generar la factura.
-    console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
+  console.log('Datos simplificados para facturar:', this.serviciosSeleccionados);
 
-    // Llamada al backend para generar PDF
-    this.facturaService.generarFacturaPDF(this.serviciosSeleccionados).subscribe({
-      next: (pdfBlob) => {
-        const blob = new Blob([pdfBlob], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'FacturaServicios.pdf';
-        a.click();
+  this.facturaService.generarFacturaPDF(this.serviciosSeleccionados).subscribe({
+    next: (response) => {
+      // Abrimos la URL devuelta en una nueva pestaña
+      window.open(response.url, '_blank');
+    },
+    error: (err) => {
+      console.error('Error al generar la factura PDF:', err);
+      alert('Ocurrió un error al generar la factura.');
+    }
+  });
+}
 
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        console.error('Error al generar la factura PDF:', err);
-        alert('Ocurrió un error al generar la factura.');
-      }
-    });
-  }
 }

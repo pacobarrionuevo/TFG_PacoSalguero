@@ -29,15 +29,8 @@ namespace TFG_Back.Controllers
         [HttpPost("generar-pdf")]
         public async Task<IActionResult> GenerarFacturaPDF([FromBody] IEnumerable<ServiceFacturado> servicios)
         {
-            var pdfPath = await _service.GenerarFacturaPDFAsync(servicios);
-
-            if (!System.IO.File.Exists(pdfPath))
-                return NotFound("El archivo no se generó correctamente.");
-
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(pdfPath);
-            var fileName = Path.GetFileName(pdfPath);
-
-            return File(fileBytes, "application/pdf", fileName);
+            var pdfRelativeUrl = await _service.GenerarFacturaPDFAsync(servicios);
+            return Ok(new { url = pdfRelativeUrl });
         }
     }
 }

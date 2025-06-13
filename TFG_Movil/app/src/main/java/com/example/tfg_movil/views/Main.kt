@@ -1,21 +1,29 @@
 package com.example.tfg_movil.views
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,8 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.tfg_movil.R
@@ -44,54 +58,100 @@ fun Main(
     navController: NavHostController,
     authViewModel: ViewModelAuth
 ) {
-    var showDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
-    val userDetails by authViewModel.userDetails.collectAsState()
 
-    LaunchedEffect(Unit) {    }
-
-    Scaffold { paddingValues ->
-        Column(
+    if (authState is AuthState.Idle) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.inversePrimary)
-                .padding(paddingValues)
-                .padding(20.dp),
-            horizontalAlignment = Alignment.Start
+                .background(MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.onPrimaryContainer)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.app_title),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.surface
-                )
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-
-            Text(
-                text = if (authState is AuthState.Authenticated) {
-                    "${stringResource(id = R.string.Welcome)} ${userDetails?.email ?: ""} !"
-                } else {
-                    stringResource(id = R.string.WelcomeNoLogin)
-                } ,
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
             )
+        }
+    } else {
+        MainContent(navController, authViewModel, authState)
+    }
+}
 
-            Spacer(modifier = Modifier.height(20.dp))
+@Composable
+fun MainContent(
+    navController: NavHostController,
+    authViewModel: ViewModelAuth,
+    authState: AuthState
+) {
+    val context = LocalContext.current
+    val isAuthenticated = authState is AuthState.Authenticated
 
-            // Hacer primero el diseño completo en el front angular y traer aquí
+    val backgroundGradient = Brush.verticalGradient(
+        listOf(
+            Color(0xFF9BB5D6),
+            Color(0xFF6B9BD8),
+            Color(0xFF4A7FB8)
+        )
+    )
 
-            Spacer(modifier = Modifier.height(20.dp))
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = backgroundGradient)
+                .padding(padding),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(0.9f),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 8.dp
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "¡Bienvenidos a Sanitarios App!",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
 
-            UserActionButton(navController, authViewModel)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 4.dp
+                        )
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.enfermeras),
+                            contentDescription = "Foto enfermeras",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    UserActionButton(navController, authViewModel)
+                }
+            }
         }
     }
 }
@@ -104,11 +164,15 @@ fun NavigationButton(text: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Text(text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
 
@@ -116,20 +180,29 @@ fun NavigationButton(text: String, onClick: () -> Unit) {
 fun UserActionButton(navController: NavHostController, authViewModel: ViewModelAuth) {
     val authState by authViewModel.authState.collectAsState()
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Button(
+        onClick = {
+            if (authState is AuthState.Authenticated) {
+                authViewModel.signOut()
+            } else {
+                navController.navigate(RutasNavegacion.Login.route)
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        shape = RoundedCornerShape(32.dp), // Más redondeado como en la imagen
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 4.dp
+        )
     ) {
-        Button(
-            onClick = {
-                if (authState is AuthState.Authenticated) {
-                    authViewModel.signOut()
-                } else {
-                    navController.navigate(RutasNavegacion.Login.route)
-                }
-            },
-            modifier = Modifier
-                .padding(16.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = if (authState is AuthState.Authenticated)
@@ -140,14 +213,15 @@ fun UserActionButton(navController: NavHostController, authViewModel: ViewModelA
                     stringResource(R.string.Logout)
                 else
                     stringResource(R.string.Login),
-                modifier = Modifier.requiredSize(80.dp)
+                modifier = Modifier.requiredSize(32.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = if (authState is AuthState.Authenticated)
                     stringResource(R.string.Logout)
                 else
-                    stringResource(R.string.Login)
+                    stringResource(R.string.Login),
+                style = MaterialTheme.typography.labelLarge
             )
         }
     }

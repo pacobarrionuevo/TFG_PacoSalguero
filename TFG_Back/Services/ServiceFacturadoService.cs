@@ -10,10 +10,12 @@ namespace TFG_Back.Services
     public class ServiceFacturadoService
     {
         private readonly ServiceFacturadoRepository _repository;
+        private readonly IWebHostEnvironment _env;
 
-        public ServiceFacturadoService(ServiceFacturadoRepository repository)
+        public ServiceFacturadoService(ServiceFacturadoRepository repository, IWebHostEnvironment env)
         {
             _repository = repository;
+            _env = env;
         }
 
         public async Task<ICollection<ServiceFacturado>> GetAllAsync()
@@ -31,50 +33,45 @@ namespace TFG_Back.Services
         // Genera un PDF a partir de una plantilla de Word y una lista de servicios.
         public async Task<string> GenerarFacturaPDFAsync(IEnumerable<ServiceFacturado> servicios)
         {
-            // Define las rutas de la plantilla y del archivo de salida.
-            var plantillaPath = @"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturas.docx";
-            var outputPath = @$"C:\Users\pacob\Desktop\PlantillaWord\PlantillaFacturasCopia{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            var plantillaPath = Path.Combine(_env.WebRootPath, "plantillas", "PlantillaFacturas.docx");
 
-            // 1. Carga el documento de plantilla de Word.
+            var fileName = $"PlantillaFacturas.pdf";
+            var outputDirectory = Path.Combine(_env.WebRootPath, "plantillas"); 
+            Directory.CreateDirectory(outputDirectory); 
+
+            var outputPath = Path.Combine(outputDirectory, fileName);
+
+            // Cargar la plantilla
             Document document = new Document();
             document.LoadFromFile(plantillaPath);
 
-            // 2. Ejecuta MailMerge para campos simples (ej. nombre de usuario).
-            string[] fieldNames = new string[] { "UserName" };
-            string[] fieldValues = new string[] { "Jose" };
-            document.MailMerge.Execute(fieldNames, fieldValues);
-
-            // 3. Crea una DataTable con el mismo nombre que la tabla en la plantilla ("Factura").
+            // Crear DataTable con los datos
             DataTable table = new DataTable("Factura");
-
-            // 4. Agrega columnas a la DataTable que coincidan con los campos de la tabla de Word.
             table.Columns.Add("centro");
             table.Columns.Add("cliente");
             table.Columns.Add("fecha");
-            table.Columns.Add("observaciones");
             table.Columns.Add("paciente");
             table.Columns.Add("servicio");
+            table.Columns.Add("observaciones");
 
-            // 5. Rellena la DataTable con los datos de los servicios.
             foreach (var servicio in servicios)
             {
                 table.Rows.Add(
                     servicio.Centro,
                     servicio.Cliente,
                     servicio.Fecha.ToString("dd/MM/yyyy"),
-                    servicio.Observaciones,
                     servicio.Paciente,
-                    servicio.Servicio
+                    servicio.Servicio,
+                    servicio.Observaciones
                 );
             }
 
-            // 6. Ejecuta el merge de la tabla (actualmente comentado).
-            // document.MailMerge.ExecuteWithDataTable(table);
+            // Exportar como PDF
+            document.MailMerge.ExecuteWidthRegion(table);
+            document.SaveToFile(outputPath, FileFormat.PDF);
 
-            // 7. Guarda el documento resultante como PDF (actualmente comentado).
-            // document.SaveToFile(outputPath, FileFormat.PDF);
-
-            return outputPath;
+            return $"/plantillas/{fileName}";
         }
+
     }
 }

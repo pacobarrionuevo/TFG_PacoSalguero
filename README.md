@@ -6,6 +6,7 @@ Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º
 -   **Enlace al anteproyecto:** [Documento de Google Docs](https://docs.google.com/document/d/1TFJnD-q_kEXWpyvHYLzhxsQBzPGWbPmFwfnIWQeBnkk/edit?usp=sharing)
 -   **Enlace a los diseños en Figma:** [SanitariosApp_Mockup en Figma](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=0-1&t=x5xSijR0pW8exEXX-1)
 -   **Enlace a la presentación en Youtube:** [Presentación YT](https://youtu.be/hIyHiC3T-ik)
+-   **Memoria del TFG (PDF):** [**Ver Documento**](https://drive.google.com/file/d/12wooCRg8NMdPxc9dr7KSbG1pUhEk0_CB/view?usp=sharing)
 -   **El APK de la aplicación móvil está en el repositorio**
 
 ---

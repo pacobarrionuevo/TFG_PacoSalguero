@@ -5,7 +5,7 @@ Trabajo de Fin de Grado de los alumnos Paco Barrionuevo y Jorge Salguero del 2º
 -   **Enlace a la aplicación web desplegada:** [**SanitariosApp en Vercel**](https://tfg-paco-salguero.vercel.app/)
 -   **Enlace al anteproyecto:** [Documento de Google Docs](https://docs.google.com/document/d/1TFJnD-q_kEXWpyvHYLzhxsQBzPGWbPmFwfnIWQeBnkk/edit?usp=sharing)
 -   **Enlace a los diseños en Figma:** [SanitariosApp_Mockup en Figma](https://www.figma.com/design/Daj4gfSJHqc1angDPg6QIY/SanitariosApp_Mockup?node-id=0-1&t=x5xSijR0pW8exEXX-1)
--   -   **El APK de la aplicación móviñ está en el repositorio**
+-   **El APK de la aplicación móviñ está en el repositorio**
 
 ---
 
